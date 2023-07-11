@@ -16,12 +16,12 @@ import java.io.Serial;
 import java.io.Serializable;
 
 public class LoginManager extends AbstractArtemisClient implements IAuthenticationArtemisClient {
-	private final String username;
-	private final String password;
-	private String token;
+	protected final String username;
+	protected final String password;
+	protected String token;
 
-	private final OkHttpClient client;
-	private User assessor;
+	protected final OkHttpClient client;
+	protected User assessor;
 
 	public LoginManager(String hostname, String username, String password) {
 		super(hostname);
@@ -61,7 +61,7 @@ public class LoginManager extends AbstractArtemisClient implements IAuthenticati
 		return this.assessor;
 	}
 
-	private User fetchAssessor() throws ArtemisClientException {
+	protected final User fetchAssessor() throws ArtemisClientException {
 		if (this.token == null) {
 			return null;
 		}
@@ -70,7 +70,7 @@ public class LoginManager extends AbstractArtemisClient implements IAuthenticati
 		return this.call(clientWithToken, request, User.class);
 	}
 
-	private String loginViaUsernameAndPassword() throws ArtemisClientException {
+	protected final String loginViaUsernameAndPassword() throws ArtemisClientException {
 		String payload = this.payload(this.getAuthenticationEntity());
 
 		Request request = new Request.Builder() //
