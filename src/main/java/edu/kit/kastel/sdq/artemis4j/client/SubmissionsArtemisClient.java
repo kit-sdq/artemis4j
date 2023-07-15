@@ -32,6 +32,7 @@ public class SubmissionsArtemisClient extends AbstractArtemisClient implements I
 				.get().build();
 
 		Submission[] submissionsArray = this.call(this.client, request, Submission[].class);
+		assert submissionsArray != null;
 		for (Submission submission : submissionsArray) {
 			submission.init(correctionRound);
 		}

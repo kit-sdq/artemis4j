@@ -55,11 +55,11 @@ public interface IAssessmentArtemisClient {
 
 	/**
 	 * Get statistics for exercise.
-	 *
-	 * @param exercise the exercise
-	 * @return the statistics
 	 */
 	ExerciseStats getStats(Exercise exercise) throws ArtemisClientException;
 
+	/**
+	 * Get the long feedback for a feedback.
+	 */
 	LongFeedbackText getLongFeedback(int resultId, Feedback feedback) throws ArtemisClientException;
 }

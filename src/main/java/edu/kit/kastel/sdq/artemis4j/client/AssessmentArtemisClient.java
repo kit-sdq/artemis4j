@@ -23,8 +23,8 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 	private static final Logger log = LoggerFactory.getLogger(AssessmentArtemisClient.class);
 
 	private static final String PROGRAMMING_SUBMISSION_WIHOUT_ASSESSMENT_PATH = "programming-submission-without-assessment";
-	private static final String PARTICIPATIONS_PATHPART = "participations";
-	private static final String MANUAL_RESULTS_PATHPART = "manual-results";
+	private static final String PARTICIPATIONS_PATH_PART = "participations";
+	private static final String MANUAL_RESULTS_PATH_PART = "manual-results";
 	private static final String CORRECTION_ROUND_QUERY_PARAM = "correction-round";
 	private static final String LOCK_QUERY_PARAM = "lock";
 	private static final String SUBMIT_QUERY_PARAM = "submit";
@@ -40,10 +40,10 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 	@Override
 	public void saveAssessment(int participationId, boolean submit, AssessmentResult assessment) throws ArtemisClientException {
 		String assessmentPayload = this.payload(assessment);
-		log.info(String.format("Saving assessment for submission %s with json: %s", assessment.id, assessmentPayload));
+		log.info("Saving assessment for submission {} with json: {}", assessment.id, assessmentPayload);
 
 		Request request = new Request.Builder() //
-				.url(this.path(PARTICIPATIONS_PATHPART, participationId, MANUAL_RESULTS_PATHPART).newBuilder()
+				.url(this.path(PARTICIPATIONS_PATH_PART, participationId, MANUAL_RESULTS_PATH_PART).newBuilder()
 						.addQueryParameter(SUBMIT_QUERY_PARAM, String.valueOf(submit)).build())
 				.put(RequestBody.create(assessmentPayload, JSON)).build();
 
@@ -58,6 +58,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 				.get().build();
 
 		LockResult result = this.call(this.client, request, LockResult.class);
+		assert result != null;
 		result.init(this);
 		return result;
 	}
@@ -74,6 +75,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 			if (!response.isSuccessful()) {
 				return Optional.empty();
 			}
+			assert response.body() != null;
 			return Optional.of(this.read(response.body().string(), LockResult.class));
 		} catch (IOException e) {
 			throw new ArtemisClientException(e.getMessage(), e);
@@ -91,6 +93,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 			if (!response.isSuccessful()) {
 				return null;
 			}
+			assert response.body() != null;
 			stats = this.read(response.body().string(), Stats.class);
 		} catch (IOException e) {
 			throw new ArtemisClientException(e.getMessage(), e);
@@ -130,6 +133,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 			if (!response.isSuccessful()) {
 				return 0;
 			}
+			assert response.body() != null;
 			Submission[] submissionsArray = this.read(response.body().string(), Submission[].class);
 			return submissionsArray.length;
 		} catch (IOException e) {

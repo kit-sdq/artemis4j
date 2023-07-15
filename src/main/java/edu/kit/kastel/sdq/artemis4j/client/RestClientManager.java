@@ -16,11 +16,11 @@ public class RestClientManager {
 	private IAssessmentArtemisClient assessmentClient;
 
 	public RestClientManager(String hostname, String username, String password) {
-		this(hostname.trim(), new LoginManager(hostname.trim(), username, password));
+		this(hostname, new LoginManager(hostname, username, password));
 	}
 
 	public RestClientManager(String hostname, LoginManager loginManager) {
-		this.hostname = Objects.requireNonNull(hostname.trim());
+		this.hostname = Objects.requireNonNull(hostname).trim();
 		this.loginManager = Objects.requireNonNull(loginManager);
 	}
 
@@ -66,5 +66,12 @@ public class RestClientManager {
 			this.assessmentClient = new AssessmentArtemisClient(this.hostname, this.loginManager.getToken());
 		}
 		return this.assessmentClient;
+	}
+
+	public void resetClients() {
+		this.submissionClient = null;
+		this.courseClient = null;
+		this.utilClient = null;
+		this.assessmentClient = null;
 	}
 }

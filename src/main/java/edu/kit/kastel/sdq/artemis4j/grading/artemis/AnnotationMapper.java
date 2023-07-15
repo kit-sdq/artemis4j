@@ -173,21 +173,21 @@ public class AnnotationMapper {
 		final String text = "File " + sampleAnnotation.getClassFilePath() + " at line " + (line + 1);
 		final String reference = "file:" + sampleAnnotation.getClassFilePath() + ".java_line:" + line;
 
-		String resultText = "";
+		StringBuilder resultText = new StringBuilder();
 		for (var annotation : annotations.getValue()) {
 			var mistakeType = annotation.getMistakeType();
 			String detailText = "[" + mistakeType.getRatingGroup().getDisplayName(null) + ":" + mistakeType.getButtonText(null) + "] ";
 			if (mistakeType.isCustomPenalty()) {
-				detailText += annotation.getCustomMessage().get() + " (" + nf.format(annotation.getCustomPenalty().get()) + "P)";
+				detailText += annotation.getCustomMessage().orElseThrow() + " (" + nf.format(annotation.getCustomPenalty().orElseThrow()) + "P)";
 			} else {
 				detailText += mistakeType.getMessage(null);
 				if (annotation.getCustomMessage().isPresent()) {
-					detailText += "\nExplanation: " + annotation.getCustomMessage().get();
+					detailText += "\nExplanation: " + annotation.getCustomMessage().orElseThrow();
 				}
 			}
-			resultText += detailText + "\n\n";
+			resultText.append(detailText).append("\n\n");
 		}
-		return new Feedback(FeedbackType.MANUAL.name(), 0D, null, null, null, text, reference, resultText.trim());
+		return new Feedback(FeedbackType.MANUAL.name(), 0D, null, null, null, text, reference, resultText.toString().trim());
 	}
 
 	private List<Feedback> createGlobalFeedbackWithDeduction(IRatingGroup ratingGroup) {
@@ -219,7 +219,7 @@ public class AnnotationMapper {
 			lines.add("\n    * \"" + mistakeType.getButtonText(null) + "\" [" + nf.format(currentPenalty) + "P]:");
 			if (mistakeType.isCustomPenalty()) {
 				for (var annotation : currentAnnotations) {
-					String penalty = nf.format(annotation.getCustomPenalty().get());
+					String penalty = nf.format(annotation.getCustomPenalty().orElseThrow());
 					lines.add("\n        * " + annotation.getClassFilePath() + " at line " + (annotation.getStartLine() + 1) + " (" + penalty + "P)");
 				}
 			} else {
@@ -239,16 +239,16 @@ public class AnnotationMapper {
 			return List.of();
 		}
 
-		String text = annotationHeadline + " (annotation " + 1 + ")";
+		StringBuilder text = new StringBuilder(annotationHeadline + " (annotation " + 1 + ")");
 
 		for (String line : lines) {
 			if (text.length() + line.length() >= FEEDBACK_DETAIL_TEXT_MAX_CHARACTERS - annotationHeadline.length() - FEEDBACK_DETAIL_SAFETY_MARGIN) {
-				feedbackTexts.add(text);
-				text = annotationHeadline + " (annotation " + (feedbackTexts.size() + 1) + ")";
+				feedbackTexts.add(text.toString());
+				text = new StringBuilder(annotationHeadline + " (annotation " + (feedbackTexts.size() + 1) + ")");
 			}
-			text += line;
+			text.append(line);
 		}
-		feedbackTexts.add(text);
+		feedbackTexts.add(text.toString());
 
 		List<Feedback> feedbacks = new LinkedList<>();
 
@@ -274,7 +274,8 @@ public class AnnotationMapper {
 
 	public PointResult calculatePointsForRatingGroup(IRatingGroup ratingGroup) {
 		// Calculate the points w.r.t. the PenaltyTypes
-		log.info("Calculate Points for RG " + ratingGroup.getDisplayName(null));
+		if (log.isInfoEnabled())
+			log.info("Calculate Points for RG {}", ratingGroup.getDisplayName(null));
 		double sum = 0;
 		Map<IMistakeType, Double> scores = new HashMap<>();
 		for (var mistakeType : ratingGroup.getMistakeTypes()) {
@@ -289,21 +290,24 @@ public class AnnotationMapper {
 
 		boolean reachedLimit = !ratingGroup.getRange().isEmpty() && ratingGroup.setToRange(sum) != sum;
 		if (reachedLimit) {
-			log.info("RG " + ratingGroup.getDisplayName(null) + " reached limit");
+			if (log.isInfoEnabled())
+				log.info("RG {} reached limit", ratingGroup.getDisplayName(null));
 			sum = ratingGroup.setToRange(sum);
 		}
 		return new PointResult(sum, reachedLimit, scores);
 	}
 
 	private Double calculatePointsForMistakeType(IMistakeType mistakeType) {
-		log.info("Calculate Points for MT " + mistakeType.getButtonText(null));
+		if (log.isInfoEnabled())
+			log.info("Calculate Points for MT {}", mistakeType.getButtonText(null));
 		var filteredAnnotations = this.annotations.stream().filter(a -> a.getMistakeType().equals(mistakeType)).toList();
 		if (filteredAnnotations.isEmpty()) {
 			return null;
 		}
 
 		var points = mistakeType.calculate(filteredAnnotations);
-		log.info("MT " + mistakeType.getButtonText(null) + " -> " + points);
+		if (log.isInfoEnabled())
+			log.info("MT {} -> {}", mistakeType.getButtonText(null), points);
 		return points;
 	}
 

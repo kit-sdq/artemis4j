@@ -17,5 +17,5 @@ public interface ICourseArtemisClient {
 	 * @return all available courses, containing exercises and available submissions
 	 * @throws ArtemisClientException if some errors occur while parsing the result.
 	 */
-	List<Course> getCoursesForAssessment() throws ArtemisClientException;
+	List<Course> getCourses() throws ArtemisClientException;
 }

@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 public class MappingLoaderArtemisClient extends AbstractArtemisClient implements ICourseArtemisClient, IMappingLoader {
 	private final ISubmissionsArtemisClient submissionClient;
@@ -32,9 +31,10 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 	}
 
 	@Override
-	public List<Course> getCoursesForAssessment() throws ArtemisClientException {
+	public List<Course> getCourses() throws ArtemisClientException {
 		Request request = new Request.Builder().url(this.path(COURSES_PATHPART)).get().build();
 		Course[] coursesArray = this.call(this.client, request, Course[].class);
+		assert coursesArray != null;
 		for (Course course : coursesArray) {
 			course.init(this);
 		}
@@ -47,7 +47,9 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 				.url(this.path(COURSES_PATHPART, course.getCourseId(), EXAMS_PATHPART, artemisExam.getExamId(), "exam-for-assessment-dashboard")).get().build();
 
 		// need to retrieve the exerciseGroups array root node to deserialize it!
-		List<ExerciseGroup> exerciseGroups = this.call(this.client, request, ExerciseGroupWrapper.class).getExerciseGroups();
+		var exerciseGroupWrapper = this.call(this.client, request, ExerciseGroupWrapper.class);
+		assert exerciseGroupWrapper != null;
+		List<ExerciseGroup> exerciseGroups = exerciseGroupWrapper.getExerciseGroups();
 
 		for (ExerciseGroup exerciseGroup : exerciseGroups) {
 			exerciseGroup.init(this, course, artemisExam);
@@ -61,6 +63,7 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 				.url(this.path(COURSES_PATHPART, course.getCourseId(), EXAMS_PATHPART)).get().build();
 
 		Exam[] examsArray = this.call(this.client, request, Exam[].class);
+		assert examsArray != null;
 		for (Exam exam : examsArray) {
 			exam.init(this, course);
 		}
@@ -73,14 +76,16 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 				.url(this.path(COURSES_PATHPART, course.getCourseId(), "with-exercises")).get().build();
 
 		// get the part of the json that we want to deserialize
-		final List<Exercise> exercises = this.call(this.client, request, ExerciseWrapper.class).getExercises();
+		var exerciseWrapper = this.call(this.client, request, ExerciseWrapper.class);
+		assert exerciseWrapper != null;
+		final List<Exercise> exercises = exerciseWrapper.getExercises();
 
 		for (Exercise exercise : exercises) {
 			exercise.init(this, course, null);
 		}
 
 		// Here we filter all programming exercises
-		return exercises.stream().filter(Exercise::isProgramming).collect(Collectors.toList());
+		return exercises.stream().filter(Exercise::isProgramming).toList();
 	}
 
 	@Override
@@ -93,7 +98,7 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 		private final List<ExerciseGroup> exerciseGroups = new ArrayList<>();
 
 		public List<ExerciseGroup> getExerciseGroups() {
-			return exerciseGroups == null ? List.of() : new ArrayList<>(exerciseGroups);
+			return new ArrayList<>(exerciseGroups);
 		}
 	}
 
@@ -102,7 +107,7 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 		private final List<Exercise> exercises = new ArrayList<>();
 
 		public List<Exercise> getExercises() {
-			return exercises == null ? List.of() : new ArrayList<>(exercises);
+			return new ArrayList<>(exercises);
 		}
 	}
 

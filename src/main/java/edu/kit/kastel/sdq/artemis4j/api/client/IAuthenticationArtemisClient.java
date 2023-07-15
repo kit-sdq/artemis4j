@@ -24,7 +24,18 @@ public interface IAuthenticationArtemisClient {
 	 */
 	User getUser();
 
+	/**
+	 * Login to Artemis. Must be called before any other authorized call.
+	 *
+	 * @throws ArtemisClientException if some errors occur while parsing the result
+	 *                                or if authentication fails.
+	 */
 	void login() throws ArtemisClientException;
 
+	/**
+	 * Checks whether the client is logged in.
+	 * 
+	 * @return true if logged in, false otherwise.
+	 */
 	boolean isLoggedIn();
 }

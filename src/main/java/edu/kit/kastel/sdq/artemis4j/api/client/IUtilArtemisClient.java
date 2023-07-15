@@ -6,6 +6,9 @@ import edu.kit.kastel.sdq.artemis4j.util.Version;
 
 import java.time.LocalDateTime;
 
+/**
+ * REST-Client to execute calls concerning utility calls.
+ */
 public interface IUtilArtemisClient {
 	/**
 	 * Returns current time of server.

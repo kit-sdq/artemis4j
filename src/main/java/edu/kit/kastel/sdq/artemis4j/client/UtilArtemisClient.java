@@ -29,6 +29,7 @@ public class UtilArtemisClient extends AbstractArtemisClient implements IUtilArt
 	public Version getVersion() throws ArtemisClientException {
 		Request request = new Request.Builder().url(this.getRootURL() + "/management/info").get().build();
 		var info = this.call(this.client, request, Info.class);
+		assert info != null;
 		return Version.fromString(info.build.version);
 	}
 

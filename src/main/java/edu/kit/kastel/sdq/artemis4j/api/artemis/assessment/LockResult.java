@@ -58,7 +58,7 @@ public class LockResult {
 			}
 
 			LongFeedbackText actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
-			feedback.setDetailText(actualFeedback.getText());
+			feedback.setDetailTextComplete(actualFeedback.getText());
 		}
 
 	}

@@ -9,6 +9,9 @@ import java.io.Serial;
 import java.io.Serializable;
 import java.util.List;
 
+/**
+ * Represents the result of an assessment.
+ */
 public class AssessmentResult implements Serializable {
 	@Serial
 	private static final long serialVersionUID = -1703764424474018461L;
@@ -34,6 +37,20 @@ public class AssessmentResult implements Serializable {
 	@JsonProperty
 	private final int testCaseCount;
 
+	/**
+	 * Creates a new assessment result.
+	 *
+	 * @param id                  the id of the assessment result
+	 * @param assessmentType      the type of the assessment
+	 * @param score               the score of the assessment
+	 * @param rated               whether the assessment is rated
+	 * @param hasFeedback         whether the assessment has feedback
+	 * @param assessor            the assessor of the assessment
+	 * @param feedbacks           the feedbacks of the assessment
+	 * @param codeIssueCount      the number of code issues
+	 * @param passedTestCaseCount the number of passed test cases
+	 * @param testCaseCount       the number of test cases
+	 */
 	public AssessmentResult(int id, String assessmentType, double score, boolean rated, boolean hasFeedback, User assessor, List<Feedback> feedbacks,
 			int codeIssueCount, int passedTestCaseCount, int testCaseCount) {
 		this.id = id;

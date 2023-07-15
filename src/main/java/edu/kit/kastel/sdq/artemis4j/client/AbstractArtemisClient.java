@@ -10,6 +10,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,14 +57,15 @@ public abstract class AbstractArtemisClient {
 				.writeTimeout(20, TimeUnit.SECONDS);
 
 		if (token != null && !token.isBlank()) {
-			builder = builder.cookieJar(new CookieJar() {
+			builder.cookieJar(new CookieJar() {
 				@Override
-				public void saveFromResponse(HttpUrl url, List<Cookie> cookies) {
+				public void saveFromResponse(@NotNull HttpUrl url, @NotNull List<Cookie> cookies) {
 					// NOP
 				}
 
+				@NotNull
 				@Override
-				public List<Cookie> loadForRequest(HttpUrl url) {
+				public List<Cookie> loadForRequest(@NotNull HttpUrl url) {
 					return List.of(new Cookie.Builder().domain(AbstractArtemisClient.this.hostname).path("/").name(COOKIE_NAME_JWT).value(token).httpOnly()
 							.secure().build());
 				}
@@ -85,11 +87,11 @@ public abstract class AbstractArtemisClient {
 	}
 
 	protected final HttpUrl path(Object... path) {
-		String requestPath = this.getApiRootURL();
+		StringBuilder requestPath = new StringBuilder(this.getApiRootURL());
 		for (Object segment : path) {
-			requestPath += "/" + segment;
+			requestPath.append("/").append(segment);
 		}
-		return HttpUrl.parse(requestPath);
+		return HttpUrl.parse(requestPath.toString());
 	}
 
 	protected final String getRootURL() {
@@ -106,7 +108,7 @@ public abstract class AbstractArtemisClient {
 			finalHostname = finalHostname.split("/", 2)[0];
 		}
 
-		log.info("Using " + finalHostname + " as hostname of artemis. Protocol is " + protocol);
+		log.info("Using {} as hostname of artemis. Protocol is {}", finalHostname, protocol);
 		return finalHostname;
 
 	}

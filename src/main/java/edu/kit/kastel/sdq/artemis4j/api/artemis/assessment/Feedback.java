@@ -43,13 +43,29 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	private String reference; // null for UNREFERENCED manual feedback and auto feedback
 	@JsonProperty("detailText")
 	private String detailText; // null for auto feedback
+	private transient String detailTextComplete = null;
 	@JsonProperty("hasLongFeedbackText")
 	private Boolean hasLongFeedbackText;
 
+	/**
+	 * Only for Jackson deserialization.
+	 */
 	public Feedback() {
 		// NOP
 	}
 
+	/**
+	 * This constructor is used for manual feedback.
+	 * 
+	 * @param type       the type of the feedback
+	 * @param credits    the credits of the feedback
+	 * @param id         the id of the feedback
+	 * @param positive   whether the feedback is positive
+	 * @param visibility the visibility of the feedback
+	 * @param text       the text of the feedback
+	 * @param reference  the reference of the feedback
+	 * @param detailText the detail text of the feedback
+	 */
 	public Feedback(String type, Double credits, Integer id, Boolean positive, String visibility, String text, String reference, String detailText) {
 		this.type = type;
 		this.credits = credits;
@@ -79,7 +95,7 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	 *         <b>null</b> for {@link FeedbackType#AUTOMATIC}
 	 */
 	public String getDetailText() {
-		return this.detailText;
+		return this.detailTextComplete == null ? this.detailText : this.detailTextComplete;
 	}
 
 	/**
@@ -196,8 +212,8 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	}
 
 	@JsonIgnore
-	public void setDetailText(String actualFeedbackText) {
-		this.detailText = actualFeedbackText;
+	public void setDetailTextComplete(String detailTextComplete) {
+		this.detailTextComplete = detailTextComplete;
 	}
 
 	public void resetLongFeedbackProperty() {
