@@ -35,4 +35,8 @@ public class JsonFileConfig implements GradingConfig {
 	private void parse() throws IOException, IllegalStateException {
 		this.exerciseConfig = oom.readValue(this.configFile, ExerciseConfig.class);
 	}
+
+  public File getConfigFile() {
+    return configFile;
+  }
 }
