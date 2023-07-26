@@ -32,12 +32,11 @@ jobs:
         with:
           concurrent_skipping: 'same_content_newer'
           skip_after_successful_duplicate: 'true'
-
   verify:
     needs: pre_job
     if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
     name: "Build and/or Deploy"
-    runs-on: ${{ inputs.runs-on }}
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3
       - name: Java with Cache
