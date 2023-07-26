@@ -15,6 +15,7 @@
     <jackson.version>2.15.2</jackson.version>
     <slf4j.version>2.0.7</slf4j.version>
     <okhttp.version>4.10.0</okhttp.version>
+    <junit.version>5.10.0-M1</junit.version>
   </properties>
 
   <dependencies>
@@ -39,9 +40,27 @@
       <version>${okhttp.version}</version>
     </dependency>
     <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-api</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.junit.jupiter</groupId>
+      <artifactId>junit-jupiter-engine</artifactId>
+      <version>${junit.version}</version>
+      <scope>test</scope>
+    </dependency>
+    <dependency>
       <groupId>org.slf4j</groupId>
       <artifactId>slf4j-api</artifactId>
       <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
     </dependency>
   </dependencies>
 
@@ -107,6 +126,11 @@
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-compiler-plugin</artifactId>
         <version>3.11.0</version>
+      </plugin>
+      <plugin>
+        <groupId>org.apache.maven.plugins</groupId>
+        <artifactId>maven-surefire-plugin</artifactId>
+        <version>3.1.2</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>

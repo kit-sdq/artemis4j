@@ -1,0 +1,54 @@
+{
+  "shortName": "E2E",
+  "positiveFeedbackAllowed": true,
+  "ratingGroups": [
+    {
+      "shortName": "functionality",
+      "displayName": "Funktionalität",
+      "additionalDisplayNames": {
+        "en": "Functionality"
+      },
+      "negativeLimit": -20,
+      "positiveLimit": null
+    }
+  ],
+  "mistakeTypes": [
+    {
+      "shortName": "custom",
+      "button": "Custom Penalty",
+      "message": "",
+      "penaltyRule": {
+        "shortName": "customPenalty"
+      },
+      "appliesTo": "functionality"
+    },
+    {
+      "shortName": "jdEmpty",
+      "button": "JavaDoc Leer",
+      "additionalButtonTexts": {
+        "en": "JavaDoc Empty"
+      },
+      "message": "JavaDoc ist leer oder nicht vorhanden",
+      "additionalMessages": {
+        "en": "JavaDoc is Empty and should not be present."
+      },
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 5
+      },
+      "appliesTo": "functionality"
+    },
+    {
+      "shortName": "jdTrivial",
+      "button": "JavaDoc Trivial",
+      "message": "JavaDoc beschreibt nur triviales und die Fehlerfälle werden nicht beachtet",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 5
+      },
+      "appliesTo": "functionality"
+    }
+  ]
+}

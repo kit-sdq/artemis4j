@@ -8,6 +8,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 import java.io.Serial;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
@@ -42,18 +43,18 @@ public class Course implements Serializable {
 
 	public List<Exam> getExams() throws ArtemisClientException {
 		if (this.exams == null) {
-			this.exams = this.client.getExamsForCourse(this);
+			this.exams = new ArrayList<>(this.client.getExamsForCourse(this));
 			this.exams.sort(Comparator.comparing(Exam::getTitle));
 		}
-		return this.exams;
+		return new ArrayList<>(this.exams);
 	}
 
 	public List<Exercise> getExercises() throws ArtemisClientException {
 		if (this.exercises == null) {
-			this.exercises = this.client.getGradingExercisesForCourse(this);
+			this.exercises = new ArrayList<>(this.client.getGradingExercisesForCourse(this));
 			this.exercises.sort(Comparator.comparing(Exercise::getShortName));
 		}
-		return this.exercises;
+		return new ArrayList<>(this.exercises);
 	}
 
 	public String getShortName() {
