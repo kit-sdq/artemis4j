@@ -16,45 +16,45 @@ import java.util.List;
  */
 public class JsonFileConfig implements GradingConfig {
 
-  private ExerciseConfig exerciseConfig;
+	private ExerciseConfig exerciseConfig;
 
-  private final File configFile;
-  private final ObjectMapper oom = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+	private final File configFile;
+	private final ObjectMapper oom = new ObjectMapper().configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
 
-  public JsonFileConfig(File configFile) {
-    this.configFile = configFile;
-  }
+	public JsonFileConfig(File configFile) {
+		this.configFile = configFile;
+	}
 
-  @Override
-  public ExerciseConfig getExerciseConfig(Exercise exercise) throws IOException, IllegalStateException {
-    if (this.exerciseConfig == null) {
-      this.parse();
-    }
-    this.exerciseConfig.initialize(exercise);
-    return this.exerciseConfig;
-  }
+	@Override
+	public ExerciseConfig getExerciseConfig(Exercise exercise) throws IOException, IllegalStateException {
+		if (this.exerciseConfig == null) {
+			this.parse();
+		}
+		this.exerciseConfig.initialize(exercise);
+		return this.exerciseConfig;
+	}
 
-  private void parse() throws IOException, IllegalStateException {
-    this.exerciseConfig = oom.readValue(this.configFile, ExerciseConfig.class);
-  }
+	private void parse() throws IOException, IllegalStateException {
+		this.exerciseConfig = oom.readValue(this.configFile, ExerciseConfig.class);
+	}
 
-  public File getConfigFile() {
-    return configFile;
-  }
+	public File getConfigFile() {
+		return configFile;
+	}
 
-  /**
-   * Get a list of all exercises that can be graded by this config
-   *
-   * @return A copy of the deserialized List of allowed exercise IDs
-   * @throws IOException if parsing the config file fails
-   */
-  public List<Integer> getAllowedExercises() throws IOException {
-    if (this.exerciseConfig == null) {
-      this.parse();
-    }
+	/**
+	 * Get a list of all exercises that can be graded by this config
+	 *
+	 * @return A copy of the deserialized List of allowed exercise IDs
+	 * @throws IOException if parsing the config file fails
+	 */
+	public List<Integer> getAllowedExercises() throws IOException {
+		if (this.exerciseConfig == null) {
+			this.parse();
+		}
 
-    return new ArrayList<>(this.exerciseConfig.getAllowedExercises());
+		return new ArrayList<>(this.exerciseConfig.getAllowedExercises());
 
-  }
+	}
 
 }
