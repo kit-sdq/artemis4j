@@ -14,6 +14,7 @@ public class RestClientManager {
 	private ICourseArtemisClient courseClient;
 	private IUtilArtemisClient utilClient;
 	private IAssessmentArtemisClient assessmentClient;
+	private IExamArtemisClient examClient;
 
 	public RestClientManager(String hostname, String username, String password) {
 		this(hostname, new LoginManager(hostname, username, password));
@@ -68,10 +69,18 @@ public class RestClientManager {
 		return this.assessmentClient;
 	}
 
+	public IExamArtemisClient getExamArtemisClient() {
+		if (this.examClient == null) {
+			this.examClient = new ExamArtemisClient(this.hostname, this.loginManager.getToken());
+		}
+		return this.examClient;
+	}
+
 	public void resetClients() {
 		this.submissionClient = null;
 		this.courseClient = null;
 		this.utilClient = null;
 		this.assessmentClient = null;
+		this.examClient = null;
 	}
 }
