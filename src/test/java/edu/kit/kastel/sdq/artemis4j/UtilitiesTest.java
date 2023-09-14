@@ -91,4 +91,23 @@ class UtilitiesTest {
 		}
 
 	}
+
+	@Test
+	void removeTAsFromCourse() throws ArtemisClientException {
+		Assertions.assertNotNull(username);
+		Assertions.assertNotNull(password);
+		Assertions.assertNotNull(courseId);
+
+		RestClientManager client = new RestClientManager(hostname, username, password);
+		client.login();
+
+		var course = client.getCourseArtemisClient().getCourses().stream().filter(c -> String.valueOf(c.getCourseId()).equals(courseId)).findFirst()
+				.orElseThrow();
+
+		var users = client.getCourseArtemisClient().getTAs(course);
+		for (var user : users) {
+			System.out.println("Removing TA " + user.getLogin() + " from course " + course.getTitle());
+			client.getCourseArtemisClient().removeTAFromCourse(course, user);
+		}
+	}
 }

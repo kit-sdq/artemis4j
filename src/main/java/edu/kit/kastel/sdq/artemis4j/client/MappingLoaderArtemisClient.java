@@ -1,19 +1,19 @@
 /* Licensed under EPL-2.0 2022-2023. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.Course;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.Exercise;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.IMappingLoader;
+import edu.kit.kastel.sdq.artemis4j.api.artemis.User;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.assessment.Submission;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.exam.Exam;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.exam.ExerciseGroup;
 import edu.kit.kastel.sdq.artemis4j.api.client.ICourseArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.api.client.ISubmissionsArtemisClient;
-
-import com.fasterxml.jackson.annotation.JsonProperty;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -111,4 +111,19 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 		}
 	}
 
+	@Override
+	public List<User> getTAs(Course course) throws ArtemisClientException {
+		Request request = new Request.Builder() //
+				.url(this.path(COURSES_PATHPART, course.getCourseId(), "tutors")).get().build();
+		User[] teachingAssistants = this.call(this.client, request, User[].class);
+		assert teachingAssistants != null;
+		return Arrays.asList(teachingAssistants);
+	}
+
+	@Override
+	public void removeTAFromCourse(Course course, User teachingAssistant) throws ArtemisClientException {
+		Request request = new Request.Builder() //
+				.url(this.path(COURSES_PATHPART, course.getCourseId(), "tutors", teachingAssistant.getLogin())).delete().build();
+		this.call(this.client, request, null);
+	}
 }

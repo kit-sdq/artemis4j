@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.artemis4j.api.client;
 
 import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.Course;
+import edu.kit.kastel.sdq.artemis4j.api.artemis.User;
 
 import java.util.List;
 
@@ -18,4 +19,17 @@ public interface ICourseArtemisClient {
 	 * @throws ArtemisClientException if some errors occur while parsing the result.
 	 */
 	List<Course> getCourses() throws ArtemisClientException;
+
+	/**
+	 * Get teaching assistants for the given course.
+	 *
+	 * @param course course to load teaching assistants.
+	 * @return teaching assistants for the given course.
+	 */
+	List<User> getTAs(Course course) throws ArtemisClientException;
+
+	/**
+	 * Remove a teaching assistant from the given course.
+	 */
+	void removeTAFromCourse(Course course, User teachingAssistant) throws ArtemisClientException;
 }
