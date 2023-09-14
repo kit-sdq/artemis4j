@@ -63,4 +63,10 @@ public class Submission implements Serializable {
 		return this.correctionRound;
 	}
 
+	public Result getLatestResult() {
+		if (results != null && results.length > 0) {
+			return results[results.length - 1];
+		}
+		return null;
+	}
 }
