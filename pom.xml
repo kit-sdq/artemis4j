@@ -14,7 +14,7 @@
     <spotless.version>2.40.0</spotless.version>
     <jackson.version>2.15.2</jackson.version>
     <slf4j.version>2.0.9</slf4j.version>
-    <okhttp.version>4.11.0</okhttp.version>
+    <okhttp.version>4.12.0</okhttp.version>
     <junit.version>5.10.0</junit.version>
   </properties>
 
