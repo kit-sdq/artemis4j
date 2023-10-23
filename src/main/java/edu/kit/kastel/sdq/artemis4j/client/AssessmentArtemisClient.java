@@ -76,7 +76,9 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 				return Optional.empty();
 			}
 			assert response.body() != null;
-			return Optional.of(this.read(response.body().string(), LockResult.class));
+			var lockResult = this.read(response.body().string(), LockResult.class);
+			lockResult.init(this);
+			return Optional.of(lockResult);
 		} catch (IOException e) {
 			throw new ArtemisClientException(e.getMessage(), e);
 		}
