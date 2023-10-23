@@ -1,11 +1,12 @@
 /* Licensed under EPL-2.0 2022-2023. */
 package edu.kit.kastel.sdq.artemis4j.api.artemis.assessment;
 
-import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
-import edu.kit.kastel.sdq.artemis4j.api.client.IAssessmentArtemisClient;
-
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
+import edu.kit.kastel.sdq.artemis4j.api.client.IAssessmentArtemisClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.util.ArrayList;
@@ -17,6 +18,8 @@ import java.util.Objects;
  * by the caller or not). It is used to calculate the assessment result.
  */
 public class LockResult {
+	private static final Logger log = LoggerFactory.getLogger(LockResult.class);
+
 	@Serial
 	private static final long serialVersionUID = -3787474578751131899L;
 
@@ -56,9 +59,13 @@ public class LockResult {
 			if (!hasLongFeedbackText) {
 				continue;
 			}
-
-			LongFeedbackText actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
-			feedback.setDetailTextComplete(actualFeedback.getText());
+			try {
+				LongFeedbackText actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
+				feedback.setDetailTextComplete(actualFeedback.getText());
+			} catch (ArtemisClientException e) {
+				// Try to ignore that the details are not available.
+				log.error("Could not get long feedback for feedback with id {} and result id {}.", feedback.getId(), resultId, e);
+			}
 		}
 
 	}
