@@ -26,6 +26,15 @@ public class Course implements Serializable {
 	@JsonProperty("instructorGroupName")
 	private String instructorGroup;
 
+	@JsonProperty
+	private int numberOfInstructors;
+	@JsonProperty
+	private int numberOfTeachingAssistants;
+	@JsonProperty
+	private int numberOfEditors;
+	@JsonProperty
+	private int numberOfStudents;
+
 	private transient List<Exercise> exercises;
 	private transient List<Exam> exams;
 	private transient IMappingLoader client;
@@ -63,6 +72,22 @@ public class Course implements Serializable {
 
 	public String getTitle() {
 		return title;
+	}
+
+	public int getNumberOfInstructors() {
+		return this.numberOfInstructors;
+	}
+
+	public int getNumberOfTeachingAssistants() {
+		return this.numberOfTeachingAssistants;
+	}
+
+	public int getNumberOfEditors() {
+		return this.numberOfEditors;
+	}
+
+	public int getNumberOfStudents() {
+		return this.numberOfStudents;
 	}
 
 	public boolean isInstructor(User assessor) {
