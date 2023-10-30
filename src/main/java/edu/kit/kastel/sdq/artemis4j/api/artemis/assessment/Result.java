@@ -18,7 +18,7 @@ public class Result implements Serializable {
 	/**
 	 * {@code null} when accessed via
 	 * {@link edu.kit.kastel.sdq.artemis4j.api.client.ISubmissionsArtemisClient#getSubmissions()
-	 * ISubmissionsArtemisClient#getSubmissions()} and
+	 * ISubmissionsArtemisClient#getSubmissions()} in combination with
 	 * {@link Submission#getLatestResult()}.
 	 */
 	@JsonProperty
