@@ -36,6 +36,10 @@ public class Submission implements Serializable {
 		return this.participation.getParticipantIdentifier();
 	}
 
+	public Participation getParticipation() {
+		return this.participation;
+	}
+
 	public String getRepositoryUrl() {
 		String studentsUrl = this.participation.getRepositoryUrl();
 		String studentId = this.participation.getParticipantIdentifier();

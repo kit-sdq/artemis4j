@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.artemis4j.api.artemis.Exercise;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.ExerciseStats;
 import edu.kit.kastel.sdq.artemis4j.api.artemis.assessment.*;
 
+import java.util.List;
 import java.util.Optional;
 
 /**
@@ -54,9 +55,14 @@ public interface IAssessmentArtemisClient {
 	void saveAssessment(int participationId, boolean submit, AssessmentResult assessment) throws ArtemisClientException;
 
 	/**
-	 * Get statistics for exercise.
+	 * Get statistics of an exercise.
 	 */
 	ExerciseStats getStats(Exercise exercise) throws ArtemisClientException;
+
+	/**
+	 * Get the feedbacks of a result.
+	 */
+	List<Feedback> getFeedbacks(Submission submission, Result result) throws ArtemisClientException;
 
 	/**
 	 * Get the long feedback for a feedback.
