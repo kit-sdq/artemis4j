@@ -14,6 +14,8 @@ public class Submission implements Serializable {
 	private int submissionId;
 	@JsonProperty
 	private String commitHash;
+	@JsonProperty
+	private boolean buildFailed;
 
 	// for constructing hasSubmittedAssessment and hasSavedAssessment
 	@JsonProperty
@@ -57,6 +59,10 @@ public class Submission implements Serializable {
 
 	public int getSubmissionId() {
 		return this.submissionId;
+	}
+
+	public boolean isBuildFailed() {
+		return this.buildFailed;
 	}
 
 	public void init(int correctionRound) {
