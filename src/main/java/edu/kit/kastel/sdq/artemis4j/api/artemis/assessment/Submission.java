@@ -57,7 +57,7 @@ public class Submission implements Serializable {
 		return this.submissionId;
 	}
 
-	public boolean hasBuildFailed() {
+	public boolean isBuildFailed() {
 		return this.buildFailed;
 	}
 
