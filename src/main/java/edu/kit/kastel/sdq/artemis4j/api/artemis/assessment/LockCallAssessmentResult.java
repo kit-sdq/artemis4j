@@ -20,6 +20,7 @@ public class LockCallAssessmentResult {
 		this.id = id;
 		if (feedbacks != null) {
 			this.feedbacks = Arrays.asList(feedbacks);
+			this.feedbacks.forEach(Feedback::init);
 		}
 	}
 

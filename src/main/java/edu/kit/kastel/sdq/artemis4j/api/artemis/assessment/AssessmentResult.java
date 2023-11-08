@@ -64,4 +64,12 @@ public class AssessmentResult implements Serializable {
 		this.passedTestCaseCount = passedTestCaseCount;
 		this.testCaseCount = testCaseCount;
 	}
+
+	public void init() {
+		if (this.feedbacks == null)
+			return;
+		for (Feedback feedback : this.feedbacks) {
+			feedback.init();
+		}
+	}
 }

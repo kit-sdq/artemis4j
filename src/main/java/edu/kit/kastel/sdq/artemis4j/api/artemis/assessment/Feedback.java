@@ -38,7 +38,7 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	@JsonProperty("visibility")
 	private String visibility; // null for all manual feedback
 	@JsonProperty("text")
-	private String text; // null for UNREFERENCED manual feedback
+	private String text; // null for UNREFERENCED manual feedback and also for test cases
 	@JsonProperty("reference")
 	private String reference; // null for UNREFERENCED manual feedback and auto feedback
 	@JsonProperty("detailText")
@@ -46,6 +46,9 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	private transient String detailTextComplete = null;
 	@JsonProperty("hasLongFeedbackText")
 	private Boolean hasLongFeedbackText;
+
+	@JsonProperty("testCase")
+	private TestCase testCase;
 
 	/**
 	 * Only for Jackson deserialization.
@@ -75,6 +78,13 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 		this.text = text;
 		this.reference = reference;
 		this.detailText = detailText;
+	}
+
+	public void init() {
+		if (this.testCase != null) {
+			this.text = this.testCase.getTestName();
+			this.testCase = null;
+		}
 	}
 
 	/**

@@ -40,4 +40,12 @@ public class Participation implements Serializable {
 	public Result[] getResults() {
 		return this.results;
 	}
+
+	public void init() {
+		if (this.results == null)
+			return;
+		for (Result result : this.results) {
+			result.init();
+		}
+	}
 }

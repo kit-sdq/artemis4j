@@ -57,6 +57,9 @@ public class Submission implements Serializable {
 
 	public void init(int correctionRound) {
 		this.correctionRound = correctionRound;
+		for (Result result : this.results) {
+			result.init();
+		}
 	}
 
 	public int getCorrectionRound() {

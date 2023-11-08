@@ -51,6 +51,7 @@ public class LockResult {
 
 	public void init(IAssessmentArtemisClient assessmentClient) throws ArtemisClientException {
 		for (Feedback feedback : this.latestFeedback) {
+			feedback.init();
 			boolean hasLongFeedbackText = feedback.hasLongFeedbackText();
 
 			// Needed for storing the information later on.
@@ -62,6 +63,7 @@ public class LockResult {
 			try {
 				LongFeedbackText actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
 				feedback.setDetailTextComplete(actualFeedback.getText());
+
 			} catch (ArtemisClientException e) {
 				// Try to ignore that the details are not available.
 				log.error("Could not get long feedback for feedback with id {} and result id {}.", feedback.getId(), resultId, e);

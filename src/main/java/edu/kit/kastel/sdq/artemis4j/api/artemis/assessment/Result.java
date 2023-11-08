@@ -27,4 +27,12 @@ public class Result implements Serializable {
 	public Result() {
 		// NOP
 	}
+
+	public void init() {
+		if (this.feedbacks == null)
+			return;
+		for (Feedback feedback : this.feedbacks) {
+			feedback.init();
+		}
+	}
 }
