@@ -14,6 +14,8 @@ public class Submission implements Serializable {
 	private int submissionId;
 	@JsonProperty
 	private String commitHash;
+	@JsonProperty
+	private boolean buildFailed;
 
 	// for constructing hasSubmittedAssessment and hasSavedAssessment
 	@JsonProperty
@@ -36,6 +38,10 @@ public class Submission implements Serializable {
 		return this.participation.getParticipantIdentifier();
 	}
 
+	public Participation getParticipation() {
+		return this.participation;
+	}
+
 	public String getRepositoryUrl() {
 		String studentsUrl = this.participation.getRepositoryUrl();
 		String studentId = this.participation.getParticipantIdentifier();
@@ -53,6 +59,10 @@ public class Submission implements Serializable {
 
 	public int getSubmissionId() {
 		return this.submissionId;
+	}
+
+	public boolean isBuildFailed() {
+		return this.buildFailed;
 	}
 
 	public void init(int correctionRound) {

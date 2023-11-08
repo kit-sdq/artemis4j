@@ -17,6 +17,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 
 public class AssessmentArtemisClient extends AbstractArtemisClient implements IAssessmentArtemisClient {
@@ -141,6 +143,19 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 		} catch (IOException e) {
 			throw new ArtemisClientException(e.getMessage(), e);
 		}
+	}
+
+	@Override
+	public List<Feedback> getFeedbacks(Submission submission, Result result) throws ArtemisClientException {
+		Request request = new Request.Builder()
+				.url(this.path(PARTICIPATIONS_PATHPART, submission.getParticipation().getParticipationId(),
+						RESULTS_PATHPART, result.id, DETAILS_PATHPART))
+				.get().build();
+
+		Feedback[] feedbacksArray = this.call(this.client, request, Feedback[].class);
+		assert feedbacksArray != null;
+
+		return Arrays.asList(feedbacksArray);
 	}
 
 	@Override
