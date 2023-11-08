@@ -66,7 +66,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 	}
 
 	@Override
-	public Optional<LockResult> startNextAssessment(Exercise exercise, int correctionRound) throws ArtemisClientException {
+	public Optional<Integer> startNextAssessment(Exercise exercise, int correctionRound) throws ArtemisClientException {
 		Request request = new Request.Builder() //
 				.url(this.path(EXERCISES_PATHPART, exercise.getExerciseId(), PROGRAMMING_SUBMISSION_WIHOUT_ASSESSMENT_PATH).newBuilder()
 						.addQueryParameter(CORRECTION_ROUND_QUERY_PARAM, String.valueOf(correctionRound))
@@ -79,8 +79,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 			}
 			assert response.body() != null;
 			var lockResult = this.read(response.body().string(), LockResult.class);
-			lockResult.init(this);
-			return Optional.of(lockResult);
+			return Optional.of(lockResult.getSubmissionId());
 		} catch (IOException e) {
 			throw new ArtemisClientException(e.getMessage(), e);
 		}
@@ -148,8 +147,7 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 	@Override
 	public List<Feedback> getFeedbacks(Submission submission, Result result) throws ArtemisClientException {
 		Request request = new Request.Builder()
-				.url(this.path(PARTICIPATIONS_PATHPART, submission.getParticipation().getParticipationId(),
-						RESULTS_PATHPART, result.id, DETAILS_PATHPART))
+				.url(this.path(PARTICIPATIONS_PATHPART, submission.getParticipation().getParticipationId(), RESULTS_PATHPART, result.id, DETAILS_PATHPART))
 				.get().build();
 
 		Feedback[] feedbacksArray = this.call(this.client, request, Feedback[].class);

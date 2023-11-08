@@ -28,16 +28,15 @@ public interface IAssessmentArtemisClient {
 
 	/**
 	 * Starts an assessment for any available submission (determined by artemis).
-	 * Acquires a lock in the process.
+	 * Acquires a lock in the process.<b>Important: The Lock Result has not loaded
+	 * the internal feedbacks correctly!</b>
 	 *
 	 * @param correctionRound relevant for exams! may be 0 or 1
-	 * @return
-	 *         <li>the data gotten back. Needed for submitting correctly.
-	 *         <li><b>null</b> if there is no submission left to correct
+	 * @return the submissionId that has been locked.
 	 * @throws ArtemisClientException if some errors occur while parsing the result
 	 *                                or if authentication fails.
 	 */
-	Optional<LockResult> startNextAssessment(Exercise exercise, int correctionRound) throws ArtemisClientException;
+	Optional<Integer> startNextAssessment(Exercise exercise, int correctionRound) throws ArtemisClientException;
 
 	/**
 	 * Submit the assessment to Artemis. Must have been started by
