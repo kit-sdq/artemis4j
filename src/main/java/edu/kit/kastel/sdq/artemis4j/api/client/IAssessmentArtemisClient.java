@@ -14,6 +14,8 @@ import java.util.Optional;
  */
 public interface IAssessmentArtemisClient {
 
+	LockResult startAssessment(int submissionId, int correctionRound) throws ArtemisClientException;
+
 	/**
 	 * Starts an assessment for the given submission. Acquires a lock in the
 	 * process.

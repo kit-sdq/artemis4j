@@ -53,16 +53,21 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 	}
 
 	@Override
-	public LockResult startAssessment(Submission submission) throws ArtemisClientException {
+	public LockResult startAssessment(int submissionId, int correctionRound) throws ArtemisClientException {
 		Request request = new Request.Builder() //
-				.url(this.path(PROGRAMMING_SUBMISSIONS_PATHPART, submission.getSubmissionId(), LOCK_QUERY_PARAM).newBuilder()
-						.addQueryParameter(CORRECTION_ROUND_QUERY_PARAM, String.valueOf(submission.getCorrectionRound())).build())
+				.url(this.path(PROGRAMMING_SUBMISSIONS_PATHPART, submissionId, LOCK_QUERY_PARAM).newBuilder()
+						.addQueryParameter(CORRECTION_ROUND_QUERY_PARAM, String.valueOf(correctionRound)).build())
 				.get().build();
 
 		LockResult result = this.call(this.client, request, LockResult.class);
 		assert result != null;
 		result.init(this);
 		return result;
+	}
+
+	@Override
+	public LockResult startAssessment(Submission submission) throws ArtemisClientException {
+		return startAssessment(submission.getSubmissionId(), submission.getCorrectionRound());
 	}
 
 	@Override
