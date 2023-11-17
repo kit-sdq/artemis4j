@@ -142,6 +142,10 @@ public abstract class AbstractArtemisClient {
 	}
 
 	protected <E> E read(String rspEntity, Class<E> clazz) throws ArtemisClientException {
+		if (clazz == String.class) {
+			// noinspection unchecked
+			return (E) rspEntity;
+		}
 		try {
 			return this.orm.readValue(rspEntity, clazz);
 		} catch (JsonProcessingException e) {

@@ -4,7 +4,7 @@
 
   <groupId>io.github.kit-sdq</groupId>
   <artifactId>artemis4j</artifactId>
-  <version>6.6.4</version>
+  <version>6.6.6</version>
 
   <properties>
     <maven.compiler.source>17</maven.compiler.source>

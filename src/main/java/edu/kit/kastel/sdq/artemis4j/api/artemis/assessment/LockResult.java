@@ -61,8 +61,8 @@ public class LockResult {
 				continue;
 			}
 			try {
-				LongFeedbackText actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
-				feedback.setDetailTextComplete(actualFeedback.getText());
+				String actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
+				feedback.setDetailTextComplete(actualFeedback);
 
 			} catch (ArtemisClientException e) {
 				// Try to ignore that the details are not available.

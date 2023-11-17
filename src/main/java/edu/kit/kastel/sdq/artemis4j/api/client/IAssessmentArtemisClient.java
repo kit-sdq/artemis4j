@@ -68,5 +68,5 @@ public interface IAssessmentArtemisClient {
 	/**
 	 * Get the long feedback for a feedback.
 	 */
-	LongFeedbackText getLongFeedback(int resultId, Feedback feedback) throws ArtemisClientException;
+	String getLongFeedback(int resultId, Feedback feedback) throws ArtemisClientException;
 }

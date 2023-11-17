@@ -162,10 +162,10 @@ public class AssessmentArtemisClient extends AbstractArtemisClient implements IA
 	}
 
 	@Override
-	public LongFeedbackText getLongFeedback(int resultId, Feedback feedback) throws ArtemisClientException {
+	public String getLongFeedback(int resultId, Feedback feedback) throws ArtemisClientException {
 		Request request = new Request.Builder()//
 				.url(this.path("results", resultId, "feedbacks", feedback.getId(), "long-feedback")).get().build();
 
-		return this.call(client, request, LongFeedbackText.class);
+		return this.call(client, request, String.class);
 	}
 }
