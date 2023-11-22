@@ -32,7 +32,7 @@ public class MappingLoaderArtemisClient extends AbstractArtemisClient implements
 
 	@Override
 	public List<Course> getCourses() throws ArtemisClientException {
-		Request request = new Request.Builder().url(this.path(COURSES_PATHPART)).get().build();
+		Request request = new Request.Builder().url(this.path(COURSES_PATHPART, "with-user-stats")).get().build();
 		Course[] coursesArray = this.call(this.client, request, Course[].class);
 		assert coursesArray != null;
 		for (Course course : coursesArray) {
