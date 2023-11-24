@@ -16,8 +16,7 @@ public class Result implements Serializable {
 	@JsonProperty
 	public Date completionDate;
 	/**
-	 * {@code null} when accessed via
-	 * {@link edu.kit.kastel.sdq.artemis4j.api.client.ISubmissionsArtemisClient#getSubmissions()
+	 * {@code null} when accessed via #getSubmissions()
 	 * ISubmissionsArtemisClient#getSubmissions()} in combination with
 	 * {@link Submission#getLatestResult()}.
 	 */

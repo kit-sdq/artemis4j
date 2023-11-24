@@ -13,7 +13,7 @@ public interface IMistakeType {
 	/**
 	 * Calculate penalty using only the given annotations.
 	 *
-	 * @return a <i>positive or negative</> value denoting the penalty or points.
+	 * @return a <i>positive or negative</i> value denoting the penalty or points.
 	 */
 	double calculate(List<IAnnotation> annotations);
 

@@ -17,10 +17,8 @@ import java.io.IOException;
 import java.util.*;
 
 /**
- * Deserialize Annotation from a Feedback of
- * <li>type: MANUAL_UNREFERENCED
- * <li>text: CLIENT_DATA
- * <li>detailText: $THE_JSON_BLOB
+ * Deserialize Annotation from a Feedback of type: MANUAL_UNREFERENCED, text:
+ * CLIENT_DATA, detailText: $THE_JSON_BLOB
  */
 public class AnnotationDeserializer {
 
