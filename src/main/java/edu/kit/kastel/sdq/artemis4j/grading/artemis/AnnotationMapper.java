@@ -306,8 +306,8 @@ public class AnnotationMapper {
 		}
 
 		var points = mistakeType.calculate(filteredAnnotations);
-		if (log.isInfoEnabled())
-			log.info("MT {} -> {}", mistakeType.getButtonText(null), points);
+		if (log.isDebugEnabled())
+			log.debug("MT {} -> {}", mistakeType.getButtonText(null), points);
 		return points;
 	}
 
