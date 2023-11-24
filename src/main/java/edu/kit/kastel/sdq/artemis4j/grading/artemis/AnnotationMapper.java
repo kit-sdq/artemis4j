@@ -274,8 +274,8 @@ public class AnnotationMapper {
 
 	public PointResult calculatePointsForRatingGroup(IRatingGroup ratingGroup) {
 		// Calculate the points w.r.t. the PenaltyTypes
-		if (log.isInfoEnabled())
-			log.info("Calculate Points for RG {}", ratingGroup.getDisplayName(null));
+		if (log.isDebugEnabled())
+			log.debug("Calculate Points for RG {}", ratingGroup.getDisplayName(null));
 		double sum = 0;
 		Map<IMistakeType, Double> scores = new HashMap<>();
 		for (var mistakeType : ratingGroup.getMistakeTypes()) {
@@ -298,8 +298,8 @@ public class AnnotationMapper {
 	}
 
 	private Double calculatePointsForMistakeType(IMistakeType mistakeType) {
-		if (log.isInfoEnabled())
-			log.info("Calculate Points for MT {}", mistakeType.getButtonText(null));
+		if (log.isDebugEnabled())
+			log.debug("Calculate Points for MT {}", mistakeType.getButtonText(null));
 		var filteredAnnotations = this.annotations.stream().filter(a -> a.getMistakeType().equals(mistakeType)).toList();
 		if (filteredAnnotations.isEmpty()) {
 			return null;
