@@ -41,7 +41,7 @@ public class AnnotationDeserializer {
 	public List<IAnnotation> deserialize(List<Feedback> feedbacks) throws IOException {
 		final List<Feedback> feedbacksWithAnnotationInformation = feedbacks.stream() //
 				.filter(Objects::nonNull) //
-				.filter(it -> FEEDBACK_TEXT.equals(it.getText())) //
+				.filter(it -> FEEDBACK_TEXT.equals(it.getCodeLocationHumanReadable())) //
 				.toList();
 
 		final List<Annotation> annotations = readAnnotations(feedbacksWithAnnotationInformation);

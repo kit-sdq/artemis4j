@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2022-2023. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
+import edu.kit.kastel.sdq.artemis4j.api.client.IFeedbackClient;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
@@ -21,7 +22,7 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
-public class AssessmentArtemisClient extends AbstractArtemisClient implements IAssessmentArtemisClient {
+public class AssessmentArtemisClient extends AbstractArtemisClient implements IAssessmentArtemisClient, IFeedbackClient {
 	private static final Logger log = LoggerFactory.getLogger(AssessmentArtemisClient.class);
 
 	private static final String PROGRAMMING_SUBMISSION_WIHOUT_ASSESSMENT_PATH = "programming-submission-without-assessment";

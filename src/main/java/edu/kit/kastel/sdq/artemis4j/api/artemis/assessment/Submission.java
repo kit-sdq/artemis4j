@@ -2,6 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j.api.artemis.assessment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.api.client.IFeedbackClient;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -65,10 +66,10 @@ public class Submission implements Serializable {
 		return this.buildFailed;
 	}
 
-	public void init(int correctionRound) {
+	public void init(IFeedbackClient client, int correctionRound) {
 		this.correctionRound = correctionRound;
 		for (Result result : this.results) {
-			result.init();
+			result.init(client);
 		}
 	}
 

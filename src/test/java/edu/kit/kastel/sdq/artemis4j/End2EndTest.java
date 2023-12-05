@@ -75,14 +75,14 @@ class End2EndTest {
 
 	private void cleanupFeedback() throws ArtemisClientException {
 		var feedbackAutomatic = this.lock.getLatestFeedback().stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC).toList();
-		final List<Feedback> tests = this.lock.getLatestFeedback().stream().filter(f -> f.getReference() == null).toList();
+		final List<Feedback> tests = this.lock.getLatestFeedback().stream().filter(f -> f.getCodeLocation() == null).toList();
 
 		int codeIssueCount = (int) this.lock.getLatestFeedback().stream().filter(Feedback::isStaticCodeAnalysis).count();
 		int passedTestCaseCount = (int) tests.stream().filter(feedback -> feedback.getPositive() != null && feedback.getPositive()).count();
 		double absoluteScore = tests.stream().mapToDouble(Feedback::getCredits).sum();
 
 		AssessmentResult assessmentResult = new AssessmentResult(this.lock.getSubmissionId(), "SEMI_AUTOMATIC",
-				absoluteScore / this.exercise.getMaxPoints() * 100D, true, true, this.restClientManager.getAuthenticationClient().getUser(), feedbackAutomatic,
+				absoluteScore / this.exercise.getMaxPoints() * 100D, true, this.restClientManager.getAuthenticationClient().getUser(), feedbackAutomatic,
 				codeIssueCount, passedTestCaseCount, tests.size());
 		this.restClientManager.getAssessmentArtemisClient().saveAssessment(this.lock.getParticipationId(), true, assessmentResult);
 	}
@@ -99,11 +99,12 @@ class End2EndTest {
 		// Check Assessments
 		this.lock = this.restClientManager.getAssessmentArtemisClient().startAssessment(this.submission);
 		List<Feedback> allFeedback = this.lock.getLatestFeedback();
-		List<Feedback> tests = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC && f.getReference() == null).toList();
+		List<Feedback> tests = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC && f.getCodeLocation() == null).toList();
 		Assertions.assertEquals(13, tests.size());
 
 		List<Feedback> clientData = allFeedback.stream()
-				.filter(f -> f.getFeedbackType() == FeedbackType.MANUAL_UNREFERENCED && Objects.equals(f.getText(), "CLIENT_DATA")).toList();
+				.filter(f -> f.getFeedbackType() == FeedbackType.MANUAL_UNREFERENCED && Objects.equals(f.getCodeLocationHumanReadable(), "CLIENT_DATA"))
+				.toList();
 		Assertions.assertEquals(1, clientData.size());
 
 		List<Feedback> manualFeedback = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.MANUAL).toList();
@@ -122,11 +123,12 @@ class End2EndTest {
 		// Check Assessments
 		this.lock = this.restClientManager.getAssessmentArtemisClient().startAssessment(this.submission);
 		List<Feedback> allFeedback = this.lock.getLatestFeedback();
-		List<Feedback> tests = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC && f.getReference() == null).toList();
+		List<Feedback> tests = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC && f.getCodeLocation() == null).toList();
 		Assertions.assertEquals(13, tests.size());
 
 		List<Feedback> clientData = allFeedback.stream()
-				.filter(f -> f.getFeedbackType() == FeedbackType.MANUAL_UNREFERENCED && Objects.equals(f.getText(), "CLIENT_DATA")).toList();
+				.filter(f -> f.getFeedbackType() == FeedbackType.MANUAL_UNREFERENCED && Objects.equals(f.getCodeLocationHumanReadable(), "CLIENT_DATA"))
+				.toList();
 		Assertions.assertEquals(1, clientData.size());
 		Assertions.assertTrue(clientData.get(0).getDetailText().contains(FEEDBACK_TEXT));
 

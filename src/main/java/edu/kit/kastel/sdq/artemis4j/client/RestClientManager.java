@@ -13,7 +13,7 @@ public class RestClientManager {
 	private ISubmissionsArtemisClient submissionClient;
 	private ICourseArtemisClient courseClient;
 	private IUtilArtemisClient utilClient;
-	private IAssessmentArtemisClient assessmentClient;
+	private AssessmentArtemisClient assessmentClient;
 	private IExamArtemisClient examClient;
 
 	public RestClientManager(String hostname, String username, String password) {
@@ -42,8 +42,13 @@ public class RestClientManager {
 	}
 
 	public ISubmissionsArtemisClient getSubmissionArtemisClient() {
+		// Initialize the assessment client first, as it is needed for the submission
+		// client
+		getAssessmentArtemisClient();
+
 		if (this.submissionClient == null) {
-			this.submissionClient = new SubmissionsArtemisClient(this.hostname, this.loginManager.getToken(), this.loginManager.getUser());
+			this.submissionClient = new SubmissionsArtemisClient(this.hostname, this.loginManager.getToken(), this.loginManager.getUser(),
+					this.assessmentClient);
 		}
 		return this.submissionClient;
 	}

@@ -2,6 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j.api.artemis.assessment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.api.client.IFeedbackClient;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -33,11 +34,11 @@ public class Result implements Serializable {
 		// NOP
 	}
 
-	public void init() {
+	public void init(IFeedbackClient feedbackClient) {
 		if (this.feedbacks == null)
 			return;
 		for (Feedback feedback : this.feedbacks) {
-			feedback.init();
+			feedback.init(feedbackClient, this.id);
 		}
 	}
 }

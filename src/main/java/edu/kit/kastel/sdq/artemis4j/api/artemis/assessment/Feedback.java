@@ -5,6 +5,10 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
+import edu.kit.kastel.sdq.artemis4j.api.client.IFeedbackClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.Serial;
 import java.io.Serializable;
@@ -27,6 +31,8 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	@Serial
 	private static final long serialVersionUID = 4531964872375020131L;
 
+	private static final Logger log = LoggerFactory.getLogger(Feedback.class);
+
 	@JsonProperty("type")
 	private String type;
 	@JsonProperty("credits")
@@ -37,10 +43,13 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	private Boolean positive; // null for all manual feedback
 	@JsonProperty("visibility")
 	private String visibility; // null for all manual feedback
+
+	// "File src/edu/kit/informatik/BubbleSort.java at line 13"
 	@JsonProperty("text")
-	private String text; // null for UNREFERENCED manual feedback and also for test cases
+	private String codeLocationHumanReadable; // null for UNREFERENCED manual feedback and also for test cases
+	// "file:src/edu/kit/informatik/BubbleSort.java_line:12"
 	@JsonProperty("reference")
-	private String reference; // null for UNREFERENCED manual feedback and auto feedback
+	private String codeLocation; // null for UNREFERENCED manual feedback and auto feedback
 	@JsonProperty("detailText")
 	private String detailText; // null for auto feedback
 	private transient String detailTextComplete = null;
@@ -59,31 +68,37 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 
 	/**
 	 * This constructor is used for manual feedback.
-	 * 
-	 * @param type       the type of the feedback
-	 * @param credits    the credits of the feedback
-	 * @param id         the id of the feedback
-	 * @param positive   whether the feedback is positive
-	 * @param visibility the visibility of the feedback
-	 * @param text       the text of the feedback
-	 * @param reference  the reference of the feedback
-	 * @param detailText the detail text of the feedback
+	 *
+	 * @param type                      the type of the feedback
+	 * @param credits                   the credits of the feedback
+	 * @param id                        the id of the feedback
+	 * @param positive                  whether the feedback is positive
+	 * @param visibility                the visibility of the feedback
+	 * @param codeLocationHumanReadable the text of the feedback
+	 * @param codeLocation              the reference of the feedback
+	 * @param detailText                the detail text of the feedback
 	 */
-	public Feedback(String type, Double credits, Integer id, Boolean positive, String visibility, String text, String reference, String detailText) {
+	public Feedback(String type, Double credits, Integer id, Boolean positive, String visibility, String codeLocationHumanReadable, String codeLocation,
+			String detailText) {
 		this.type = type;
 		this.credits = credits;
 		this.id = id;
 		this.positive = positive;
 		this.visibility = visibility;
-		this.text = text;
-		this.reference = reference;
+		this.codeLocationHumanReadable = codeLocationHumanReadable;
+		this.codeLocation = codeLocation;
 		this.detailText = detailText;
 	}
 
-	public void init() {
-		if (this.testCase != null) {
-			this.text = this.testCase.getTestName();
-			this.testCase = null;
+	public void init(IFeedbackClient feedbackClient, int resultId) {
+		// Init Long FeedbackTexts
+		if (this.hasLongFeedbackText == null || !this.hasLongFeedbackText) {
+			return;
+		}
+		try {
+			this.detailTextComplete = feedbackClient.getLongFeedback(resultId, this);
+		} catch (ArtemisClientException e) {
+			log.error("Could not get long feedback for feedback with id {} and result id {}.", this.getId(), resultId, e);
 		}
 	}
 
@@ -101,7 +116,8 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 
 	/**
 	 * @return detail text shown in the Artemis GUI on viewing the assessment: Comes
-	 *         after {@link #getText()}, if that is not <b>null</b>.<br/>
+	 *         after {@link #getCodeLocationHumanReadable()}, if that is not
+	 *         <b>null</b>.<br/>
 	 *         <b>null</b> for {@link FeedbackType#AUTOMATIC}
 	 */
 	public String getDetailText() {
@@ -142,16 +158,16 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	 *         {@link FeedbackType#MANUAL_UNREFERENCED}</li>
 	 *         </ul>
 	 */
-	public String getReference() {
-		return this.reference;
+	public String getCodeLocation() {
+		return this.codeLocation;
 	}
 
 	/**
 	 * @return text shown in the Artemis GUI on viewing the assessment.<br/>
 	 *         <b>null</b> for {@link FeedbackType#MANUAL_UNREFERENCED}
 	 */
-	public String getText() {
-		return this.text;
+	public String getCodeLocationHumanReadable() {
+		return this.codeLocationHumanReadable;
 	}
 
 	public String getType() {
@@ -182,20 +198,21 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 			return this.isMandatoryTest() ? -1 : 1;
 		}
 
-		String thisName = this.getText() == null ? "" : this.getText();
-		String otherName = o.getText() == null ? "" : o.getText();
+		String thisName = this.getCodeLocationHumanReadable() == null ? "" : this.getCodeLocationHumanReadable();
+		String otherName = o.getCodeLocationHumanReadable() == null ? "" : o.getCodeLocationHumanReadable();
 		return thisName.compareToIgnoreCase(otherName);
 	}
 
 	@JsonIgnore
 	private boolean isMandatoryTest() {
 		// Only by naming convention so far, since Artemis has no "mandatory" tests.
-		return this.text != null && this.text.toLowerCase().contains("mandatory");
+		return this.codeLocationHumanReadable != null && this.codeLocationHumanReadable.toLowerCase().contains("mandatory");
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.credits, this.detailText, this.id, this.positive, this.reference, this.text, this.type, this.visibility);
+		return Objects.hash(this.credits, this.detailText, this.id, this.positive, this.codeLocation, this.codeLocationHumanReadable, this.type,
+				this.visibility);
 	}
 
 	@Override
@@ -208,25 +225,13 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 		}
 		Feedback other = (Feedback) obj;
 		return Objects.equals(this.credits, other.credits) && Objects.equals(this.detailText, other.detailText) && Objects.equals(this.id, other.id)
-				&& Objects.equals(this.positive, other.positive) && Objects.equals(this.reference, other.reference) && Objects.equals(this.text, other.text)
-				&& Objects.equals(this.type, other.type) && Objects.equals(this.visibility, other.visibility);
+				&& Objects.equals(this.positive, other.positive) && Objects.equals(this.codeLocation, other.codeLocation)
+				&& Objects.equals(this.codeLocationHumanReadable, other.codeLocationHumanReadable) && Objects.equals(this.type, other.type)
+				&& Objects.equals(this.visibility, other.visibility);
 	}
 
 	@JsonIgnore
 	public boolean isStaticCodeAnalysis() {
-		return this.text != null && this.text.startsWith("SCAFeedbackIdentifier");
-	}
-
-	public boolean hasLongFeedbackText() {
-		return this.hasLongFeedbackText != null && this.hasLongFeedbackText;
-	}
-
-	@JsonIgnore
-	public void setDetailTextComplete(String detailTextComplete) {
-		this.detailTextComplete = detailTextComplete;
-	}
-
-	public void resetLongFeedbackProperty() {
-		this.hasLongFeedbackText = null;
+		return this.codeLocationHumanReadable != null && this.codeLocationHumanReadable.startsWith("SCAFeedbackIdentifier");
 	}
 }

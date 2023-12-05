@@ -25,8 +25,6 @@ public class AssessmentResult implements Serializable {
 	@JsonProperty
 	private final boolean rated;
 	@JsonProperty
-	private final boolean hasFeedback;
-	@JsonProperty
 	private final User assessor;
 	@JsonProperty
 	private final List<Feedback> feedbacks;
@@ -44,32 +42,22 @@ public class AssessmentResult implements Serializable {
 	 * @param assessmentType      the type of the assessment
 	 * @param score               the score of the assessment
 	 * @param rated               whether the assessment is rated
-	 * @param hasFeedback         whether the assessment has feedback
 	 * @param assessor            the assessor of the assessment
 	 * @param feedbacks           the feedbacks of the assessment
 	 * @param codeIssueCount      the number of code issues
 	 * @param passedTestCaseCount the number of passed test cases
 	 * @param testCaseCount       the number of test cases
 	 */
-	public AssessmentResult(int id, String assessmentType, double score, boolean rated, boolean hasFeedback, User assessor, List<Feedback> feedbacks,
-			int codeIssueCount, int passedTestCaseCount, int testCaseCount) {
+	public AssessmentResult(int id, String assessmentType, double score, boolean rated, User assessor, List<Feedback> feedbacks, int codeIssueCount,
+			int passedTestCaseCount, int testCaseCount) {
 		this.id = id;
 		this.assessmentType = assessmentType;
 		this.score = score;
 		this.rated = rated;
-		this.hasFeedback = hasFeedback;
 		this.assessor = assessor;
 		this.feedbacks = feedbacks;
 		this.codeIssueCount = codeIssueCount;
 		this.passedTestCaseCount = passedTestCaseCount;
 		this.testCaseCount = testCaseCount;
-	}
-
-	public void init() {
-		if (this.feedbacks == null)
-			return;
-		for (Feedback feedback : this.feedbacks) {
-			feedback.init();
-		}
 	}
 }

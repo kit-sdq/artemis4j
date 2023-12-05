@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2022-2023. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
+import edu.kit.kastel.sdq.artemis4j.api.client.IFeedbackClient;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
@@ -15,11 +16,13 @@ import java.util.List;
 public class SubmissionsArtemisClient extends AbstractArtemisClient implements ISubmissionsArtemisClient {
 	private final OkHttpClient client;
 	private final User assessor;
+	private final IFeedbackClient feedbackClient;
 
-	public SubmissionsArtemisClient(final String hostname, String token, User assessor) {
+	public SubmissionsArtemisClient(final String hostname, String token, User assessor, IFeedbackClient feedbackClient) {
 		super(hostname);
 		this.client = this.createClient(token);
 		this.assessor = assessor;
+		this.feedbackClient = feedbackClient;
 	}
 
 	@Override
@@ -34,7 +37,7 @@ public class SubmissionsArtemisClient extends AbstractArtemisClient implements I
 		Submission[] submissionsArray = this.call(this.client, request, Submission[].class);
 		assert submissionsArray != null;
 		for (Submission submission : submissionsArray) {
-			submission.init(correctionRound);
+			submission.init(feedbackClient, correctionRound);
 		}
 
 		return Arrays.asList(submissionsArray);

@@ -146,14 +146,14 @@ public class AnnotationMapper {
 		final double relativeScore = this.calculateRelativeScore(absoluteScore);
 
 		final List<Feedback> initialFeedback = getFilteredPreexistentFeedbacks();
-		final List<Feedback> tests = initialFeedback.stream().filter(f -> f.getReference() == null).toList();
+		final List<Feedback> tests = initialFeedback.stream().filter(f -> f.getCodeLocation() == null).toList();
 
 		int codeIssueCount = (int) initialFeedback.stream().filter(Feedback::isStaticCodeAnalysis).count();
 		int passedTestCaseCount = (int) tests.stream() //
 				.filter(feedback -> feedback.getPositive() != null && feedback.getPositive()).count();
 
 		return new AssessmentResult(this.submission.getSubmissionId(), "SEMI_AUTOMATIC", //
-				relativeScore, true, true, this.assessor, allFeedbacks, //
+				relativeScore, true, this.assessor, allFeedbacks, //
 				codeIssueCount, passedTestCaseCount, tests.size() //
 		);
 	}

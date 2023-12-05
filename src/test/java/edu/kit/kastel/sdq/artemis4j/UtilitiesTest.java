@@ -79,10 +79,10 @@ class UtilitiesTest {
 				if (mandatoryFailed) {
 					System.out.println("Student " + submission.getParticipantIdentifier() + " failed mandatory tests");
 					var assessment = client.getAssessmentArtemisClient().startAssessment(submission);
-					final List<Feedback> tests = assessment.getLatestFeedback().stream().filter(f -> f.getReference() == null).toList();
+					final List<Feedback> tests = assessment.getLatestFeedback().stream().filter(f -> f.getCodeLocation() == null).toList();
 					int codeIssueCount = (int) assessment.getLatestFeedback().stream().filter(Feedback::isStaticCodeAnalysis).count();
 					int passedTestCaseCount = (int) tests.stream().filter(feedback -> feedback.getPositive() != null && feedback.getPositive()).count();
-					AssessmentResult assessmentResult = new AssessmentResult(assessment.getSubmissionId(), "SEMI_AUTOMATIC", 0, true, true,
+					AssessmentResult assessmentResult = new AssessmentResult(assessment.getSubmissionId(), "SEMI_AUTOMATIC", 0, true,
 							client.getAuthenticationClient().getUser(), assessment.getLatestFeedback(), codeIssueCount, passedTestCaseCount, tests.size());
 					client.getAssessmentArtemisClient().saveAssessment(assessment.getParticipationId(), true, assessmentResult);
 				}

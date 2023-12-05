@@ -4,7 +4,7 @@ package edu.kit.kastel.sdq.artemis4j.api.artemis.assessment;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
-import edu.kit.kastel.sdq.artemis4j.api.client.IAssessmentArtemisClient;
+import edu.kit.kastel.sdq.artemis4j.api.client.IFeedbackClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -49,27 +49,10 @@ public class LockResult {
 		}
 	}
 
-	public void init(IAssessmentArtemisClient assessmentClient) throws ArtemisClientException {
+	public void init(IFeedbackClient feedbackClient) throws ArtemisClientException {
 		for (Feedback feedback : this.latestFeedback) {
-			feedback.init();
-			boolean hasLongFeedbackText = feedback.hasLongFeedbackText();
-
-			// Needed for storing the information later on.
-			feedback.resetLongFeedbackProperty();
-
-			if (!hasLongFeedbackText) {
-				continue;
-			}
-			try {
-				String actualFeedback = assessmentClient.getLongFeedback(resultId, feedback);
-				feedback.setDetailTextComplete(actualFeedback);
-
-			} catch (ArtemisClientException e) {
-				// Try to ignore that the details are not available.
-				log.error("Could not get long feedback for feedback with id {} and result id {}.", feedback.getId(), resultId, e);
-			}
+			feedback.init(feedbackClient, resultId);
 		}
-
 	}
 
 	/**
