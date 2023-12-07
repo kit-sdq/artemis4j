@@ -203,12 +203,6 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 		return thisName.compareToIgnoreCase(otherName);
 	}
 
-	@JsonIgnore
-	private boolean isMandatoryTest() {
-		// Only by naming convention so far, since Artemis has no "mandatory" tests.
-		return this.codeLocationHumanReadable != null && this.codeLocationHumanReadable.toLowerCase().contains("mandatory");
-	}
-
 	@Override
 	public int hashCode() {
 		return Objects.hash(this.credits, this.detailText, this.id, this.positive, this.codeLocation, this.codeLocationHumanReadable, this.type,
@@ -233,5 +227,21 @@ public class Feedback implements Comparable<Feedback>, Serializable {
 	@JsonIgnore
 	public boolean isStaticCodeAnalysis() {
 		return this.codeLocationHumanReadable != null && this.codeLocationHumanReadable.startsWith("SCAFeedbackIdentifier");
+	}
+
+	@JsonIgnore
+	public boolean isMandatoryTest() {
+		// Only by naming convention so far, since Artemis has no "mandatory" tests.
+		return isTest() && getTestName().toLowerCase().contains("mandatory");
+	}
+
+	@JsonIgnore
+	public boolean isTest() {
+		return this.testCase != null;
+	}
+
+	@JsonIgnore
+	public String getTestName() {
+		return this.testCase == null ? "Unknown Test" : this.testCase.getTestName();
 	}
 }
