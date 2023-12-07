@@ -74,6 +74,11 @@ public class RestClientManager {
 		return this.assessmentClient;
 	}
 
+	public IFeedbackClient getFeedbackClient() {
+		this.getAssessmentArtemisClient();
+		return this.assessmentClient;
+	}
+
 	public IExamArtemisClient getExamArtemisClient() {
 		if (this.examClient == null) {
 			this.examClient = new ExamArtemisClient(this.hostname, this.loginManager.getToken());
