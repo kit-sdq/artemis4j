@@ -32,6 +32,11 @@ public class StackingPenaltyRule extends PenaltyRule {
 	}
 
 	@Override
+	public boolean limitReached(List<IAnnotation> annotations) {
+		return maxUses != null && annotations.size() >= maxUses;
+	}
+
+	@Override
 	public String getDisplayName() {
 		return DISPLAY_NAME;
 	}

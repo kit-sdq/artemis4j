@@ -35,6 +35,11 @@ public class ThresholdPenaltyRule extends PenaltyRule {
 	}
 
 	@Override
+	public boolean limitReached(List<IAnnotation> annotations) {
+		return annotations.size() >= this.threshold;
+	}
+
+	@Override
 	public String getDisplayName() {
 		return DISPLAY_NAME;
 	}

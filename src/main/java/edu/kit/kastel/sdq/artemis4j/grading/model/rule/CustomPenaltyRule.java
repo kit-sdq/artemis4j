@@ -25,6 +25,11 @@ public class CustomPenaltyRule extends PenaltyRule {
 	}
 
 	@Override
+	public boolean limitReached(List<IAnnotation> annotations) {
+		return false;
+	}
+
+	@Override
 	public String getDisplayName() {
 		return DISPLAY_NAME;
 	}

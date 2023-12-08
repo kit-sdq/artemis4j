@@ -18,6 +18,14 @@ public interface IMistakeType {
 	double calculate(List<IAnnotation> annotations);
 
 	/**
+	 * @param annotations the annotations on which the calculation is based.
+	 * @return whether the maximum penalty or points limit of annotations for this
+	 *         mistake type has been reached.
+	 */
+
+	boolean limitReached(List<IAnnotation> annotations);
+
+	/**
 	 * @return what should be used as unique id.
 	 */
 	String getIdentifier();

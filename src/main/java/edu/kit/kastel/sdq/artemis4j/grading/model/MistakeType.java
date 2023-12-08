@@ -56,6 +56,12 @@ public class MistakeType implements IMistakeType {
 		return this.getPenaltyRule().calculate(annotations);
 	}
 
+	@Override
+	public boolean limitReached(List<IAnnotation> annotations) {
+		assert annotations.stream().allMatch(a -> this.equals(a.getMistakeType()));
+		return this.getPenaltyRule().limitReached(annotations);
+	}
+
 	/**
 	 * @return to which rating group this applies.
 	 */
