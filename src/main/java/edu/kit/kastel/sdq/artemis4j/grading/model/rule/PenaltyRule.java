@@ -22,6 +22,11 @@ public abstract class PenaltyRule {
 	 */
 	public abstract double calculate(List<IAnnotation> annotations);
 
+	/**
+	 * @return true if the maximum limit is reached, false otherwise.
+	 */
+	public abstract boolean limitReached(List<IAnnotation> annotations);
+
 	public abstract String getDisplayName();
 
 	public abstract String getShortName();
