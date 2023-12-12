@@ -26,6 +26,11 @@ public class SubmissionsArtemisClient extends AbstractArtemisClient implements I
 	}
 
 	@Override
+	public List<Submission> getSubmissions(Exercise exercise, int correctionRound) throws ArtemisClientException {
+		return this.getSubmissions(exercise, correctionRound, !exercise.getCourse().isInstructor(this.assessor));
+	}
+
+	@Override
 	public List<Submission> getSubmissions(Exercise exercise, int correctionRound, boolean filterAssessedByTutor) throws ArtemisClientException {
 		Request request = new Request.Builder() //
 				.url(this.path(EXERCISES_PATHPART, exercise.getExerciseId(), PROGRAMMING_SUBMISSIONS_PATHPART).newBuilder()

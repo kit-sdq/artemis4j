@@ -36,9 +36,7 @@ public interface ISubmissionsArtemisClient {
 	 * @return submissions for the given exercise and correction round.
 	 * @throws ArtemisClientException if some errors occur while parsing the result.
 	 */
-	default List<Submission> getSubmissions(Exercise exercise, int correctionRound) throws ArtemisClientException {
-		return this.getSubmissions(exercise, correctionRound, false);
-	}
+	List<Submission> getSubmissions(Exercise exercise, int correctionRound) throws ArtemisClientException;
 
 	/**
 	 * Get all submissions for the given exercise and correction round.
