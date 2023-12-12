@@ -32,15 +32,23 @@ public interface ISubmissionsArtemisClient {
 
 	/**
 	 * Get all submissions for the given exercise and correction round.
-	 * 
+	 *
 	 * @return submissions for the given exercise and correction round.
 	 * @throws ArtemisClientException if some errors occur while parsing the result.
 	 */
 	List<Submission> getSubmissions(Exercise exercise, int correctionRound) throws ArtemisClientException;
 
 	/**
+	 * Get all submissions for the given exercise and correction round.
+	 *
+	 * @return submissions for the given exercise and correction round.
+	 * @throws ArtemisClientException if some errors occur while parsing the result.
+	 */
+	List<Submission> getSubmissions(Exercise exercise, int correctionRound, boolean filterAssessedByTutor) throws ArtemisClientException;
+
+	/**
 	 * Get submission with submissionId for the given exercise.
-	 * 
+	 *
 	 * @param exercise     exercise to load submission.
 	 * @param submissionId of submission to be returned
 	 * @return submission with submissionId.
