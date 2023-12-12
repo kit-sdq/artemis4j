@@ -17,20 +17,21 @@ public class SubmissionsArtemisClient extends AbstractArtemisClient implements I
 	private final OkHttpClient client;
 	private final User assessor;
 	private final IFeedbackClient feedbackClient;
+	private final boolean filterAssessedByTutor;
 
 	public SubmissionsArtemisClient(final String hostname, String token, User assessor, IFeedbackClient feedbackClient) {
 		super(hostname);
 		this.client = this.createClient(token);
 		this.assessor = assessor;
 		this.feedbackClient = feedbackClient;
+		this.filterAssessedByTutor = false;
 	}
 
 	@Override
 	public List<Submission> getSubmissions(Exercise exercise, int correctionRound) throws ArtemisClientException {
-		boolean isInstructor = exercise.getCourse().isInstructor(this.assessor);
 		Request request = new Request.Builder() //
 				.url(this.path(EXERCISES_PATHPART, exercise.getExerciseId(), PROGRAMMING_SUBMISSIONS_PATHPART).newBuilder()
-						.addQueryParameter("assessedByTutor", String.valueOf(!isInstructor))
+						.addQueryParameter("assessedByTutor", String.valueOf(filterAssessedByTutor))
 						.addQueryParameter("correction-round", String.valueOf(correctionRound)).build())
 				.get().build();
 
