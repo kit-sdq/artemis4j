@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2022-2023. */
+/* Licensed under EPL-2.0 2022-2024. */
 package edu.kit.kastel.sdq.artemis4j.api.artemis.assessment;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -68,6 +68,11 @@ public class Submission implements Serializable {
 
 	public void init(IFeedbackClient client, int correctionRound) {
 		this.correctionRound = correctionRound;
+
+		if (this.results == null) {
+			this.results = new Result[0];
+		}
+
 		for (Result result : this.results) {
 			result.init(client);
 		}
