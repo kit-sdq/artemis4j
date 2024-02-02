@@ -44,18 +44,7 @@ public class Submission implements Serializable {
 	}
 
 	public String getRepositoryUrl() {
-		String studentsUrl = this.participation.getRepositoryUrl();
-		String studentId = this.participation.getParticipantIdentifier();
-
-		int startIndexOfUID = studentsUrl.indexOf(studentId);
-		int endIndexOfUID = studentsUrl.indexOf("@");
-
-		assert startIndexOfUID < endIndexOfUID && startIndexOfUID >= 0;
-
-		String newUrl = "";
-		newUrl += studentsUrl.substring(0, startIndexOfUID);
-		newUrl += studentsUrl.substring(endIndexOfUID + 1);
-		return newUrl;
+		return this.participation.getRepositoryUrl();
 	}
 
 	public int getSubmissionId() {

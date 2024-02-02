@@ -17,7 +17,7 @@ public class Participation implements Serializable {
 	private String participantIdentifier;
 	@JsonProperty
 	private String participantName;
-	@JsonProperty
+	@JsonProperty("userIndependentRepositoryUri")
 	private String repositoryUrl;
 	@JsonProperty
 	private Result[] results;

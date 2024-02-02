@@ -22,7 +22,7 @@ public class Exercise implements Serializable {
 	private String title;
 	@JsonProperty
 	private String shortName;
-	@JsonProperty
+	@JsonProperty("testRepositoryUri")
 	private String testRepositoryUrl;
 	@JsonProperty
 	private Boolean secondCorrectionEnabled;
