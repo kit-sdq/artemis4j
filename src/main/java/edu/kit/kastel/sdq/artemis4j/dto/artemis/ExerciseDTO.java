@@ -31,15 +31,6 @@ public record ExerciseDTO(
         return Arrays.stream(exercises.exercises()).filter(e -> e.exerciseType().equals("PROGRAMMING")).toList();
     }
 
-    public static Optional<SubmissionDTO> lockNextSubmission(ArtemisClient client, int exerciseId, int correctionRound) throws ArtemisNetworkException {
-        // Artemis returns an empty string if there is no new submission to lock
-        return ArtemisRequest.get()
-                .path(List.of("exercises", exerciseId, "programming-submission-without-assessment"))
-                .param("lock", false)
-                .param("correction-round", correctionRound)
-                .executeAndDecodeMaybe(client, SubmissionDTO.class);
-    }
-
     private record ExerciseWrapperDTO(ExerciseDTO[] exercises) {
     }
 }

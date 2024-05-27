@@ -1,6 +1,11 @@
 package edu.kit.kastel.sdq.artemis4j.dto.artemis;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.new_client.ArtemisClient;
+import edu.kit.kastel.sdq.artemis4j.new_client.ArtemisNetworkException;
+import edu.kit.kastel.sdq.artemis4j.new_client.ArtemisRequest;
+
+import java.util.List;
 
 /**
  * Corresponds to an annotation as part of an assessment
@@ -34,14 +39,20 @@ public record FeedbackDTO(
     public static int DETAIL_TEXT_MAX_CHARACTERS = 5000;
 
     public static FeedbackDTO newManual(double credits, String text, String reference, String detailText) {
-        return new FeedbackDTO(FeedbackType.MANUAL, null, credits, null, null, text, reference, detailText, false, null);
+        return new FeedbackDTO(FeedbackType.MANUAL, null, credits, null, null, text, reference, detailText, null, null);
     }
 
     public static FeedbackDTO newVisibleManualUnreferenced(double credits, String text, String detailText) {
-        return new FeedbackDTO(FeedbackType.MANUAL_UNREFERENCED, null, credits, null, null, null, null, detailText, false, null);
+        return new FeedbackDTO(FeedbackType.MANUAL_UNREFERENCED, null, credits, null, null, text, null, detailText, null, null);
     }
 
     public static FeedbackDTO newInvisibleManualUnreferenced(double credits, String text, String detailText) {
-        return new FeedbackDTO(FeedbackType.MANUAL_UNREFERENCED, null, credits, null, "NEVER", null, null, detailText, false, null);
+        return new FeedbackDTO(FeedbackType.MANUAL_UNREFERENCED, null, credits, null, "NEVER", text, null, detailText, null, null);
+    }
+
+    public static String fetchLongFeedback(ArtemisClient client, long resultId, long feedbackId) throws ArtemisNetworkException {
+        return ArtemisRequest.get()
+                .path(List.of("results", resultId, "feedbacks", feedbackId, "long-feedback"))
+                .executeAndDecode(client, String.class);
     }
 }

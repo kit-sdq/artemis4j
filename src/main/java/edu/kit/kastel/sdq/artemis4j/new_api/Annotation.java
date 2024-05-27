@@ -20,7 +20,7 @@ public final class Annotation {
     public Annotation(AnnotationDTO dto, MistakeType mistakeType) {
         this.uuid = dto.uuid();
         this.type = mistakeType;
-        this.filePath = dto.classFilePath() + ".java";
+        this.filePath = dto.classFilePath();
         this.startLine = dto.startLine();
         this.endLine = dto.endLine();
         this.customMessage = dto.customMessageForJSON();
@@ -55,7 +55,7 @@ public final class Annotation {
         return filePath;
     }
 
-    public String getArtemisFilePath() {
+    public String getFilePathWithoutType() {
         return this.filePath.replace(".java", "");
     }
 

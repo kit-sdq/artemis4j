@@ -57,20 +57,38 @@ public class Exercise extends ArtemisClientHolder {
                 .toList();
     }
 
-    public Submission fetchSubmissionById(long submissionId) throws ArtemisNetworkException {
-        return new Submission(SubmissionDTO.fetch(this.getClient(), submissionId), this);
-    }
-
     public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException {
         // This line already locks the submission, but doesn't tell us what the relevant ResultDTO is
-        Optional<SubmissionDTO> dto = ExerciseDTO.lockNextSubmission(this.getClient(), this.getId(), correctionRound);
+        var dto = SubmissionDTO.lockNextSubmission(this.getClient(), this.getId(), correctionRound);
         if (dto.isEmpty()) {
             return Optional.empty();
         }
 
-        Submission submission = new Submission(dto.get(), this);
-
         // Second lock call to get the ResultDTO
-        return submission.tryLock(correctionRound, gradingConfig);
+        var lockResult = this.tryLockSubmission(dto.get().id(), correctionRound, gradingConfig);
+        return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
+    }
+
+    public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException {
+        var locked = SubmissionDTO.lock(this.getClient(), submissionId, correctionRound);
+
+        if (locked.id() != submissionId) {
+            throw new IllegalStateException("Locking returned a different submission than requested??");
+        }
+
+        // We should have exactly one result because we specified a correction round
+        if (locked.results().length != 1) {
+            throw new IllegalStateException("Locking returned %d results, expected 1".formatted(locked.results().length));
+        }
+        var result = locked.results()[0];
+
+        // Locking was successful if we are the assessor
+        // The webui of Artemis does the same check
+        if (result.assessor() == null || result.assessor().id() != this.getClient().getAssessor().getId()) {
+            return Optional.empty();
+        }
+
+        var submission = new Submission(locked, this);
+        return Optional.of(new Assessment(result, gradingConfig, submission));
     }
 }

@@ -9,6 +9,8 @@ import edu.kit.kastel.sdq.artemis4j.new_api.penalty.MistakeType;
 import edu.kit.kastel.sdq.artemis4j.new_client.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.new_client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.new_client.MismatchedGradingConfigException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -17,6 +19,7 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 public class MetaFeedbackMapper {
+    private static final Logger log = LoggerFactory.getLogger(MetaFeedbackMapper.class);
     private static final String METAJSON_TEXT = "CLIENT_DATA";
 
     private MetaFeedbackMapper() {
@@ -28,10 +31,12 @@ public class MetaFeedbackMapper {
 
         var annotations = new ArrayList<Annotation>();
         for (var feedback : allFeedbacks) {
-            if (feedback.type() == FeedbackType.MANUAL_UNREFERENCED && feedback.text().equals(METAJSON_TEXT)) {
+            if (feedback.type() == FeedbackType.MANUAL_UNREFERENCED && METAJSON_TEXT.equals(feedback.text())) {
                 annotations.addAll(unpackAnnotationsFromMetaFeedback(feedback, mistakeTypeMap));
+                log.info("Found meta feedback with {} annotations", annotations.size());
             }
         }
+
         return annotations;
     }
 
@@ -42,6 +47,7 @@ public class MetaFeedbackMapper {
 
             if (text.length() < FeedbackDTO.DETAIL_TEXT_MAX_CHARACTERS) {
                 // The text fits in a single feedback
+                log.info("Created meta feedback with {} characters", text.length());
                 return List.of(FeedbackDTO.newInvisibleManualUnreferenced(0.0, METAJSON_TEXT, text));
             }
 

@@ -29,9 +29,10 @@ import java.util.stream.Collectors;
 public class Assessment extends ArtemisClientHolder {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Assessment.class);
 
-    private static final FormatString MANUAL_FEEDBACK = new FormatString(new MessageFormat("{0}:{1}] {2}"));
+    private static final FormatString MANUAL_FEEDBACK = new FormatString(new MessageFormat("[{0}:{1}] {2}"));
+    private static final FormatString MANUAL_FEEDBACK_CUSTOM = new FormatString(new MessageFormat("[{0}:{1}] {2}\nExplanation: {3}"));
     private static final FormatString GLOBAL_FEEDBACK_HEADER = new FormatString(new MessageFormat("{0} [{1,number,##.###} (Range: {2,number,##.###} -- {3,number,##.###}) points]"));
-    private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER = new FormatString(new MessageFormat("    * \"{0}\" [{1,number,##.###}P]:]"));
+    private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER = new FormatString(new MessageFormat("    * \"{0}\" [{1,number,##.###}P]:"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION = new FormatString(new MessageFormat("        * {0} at line {1,number}"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY = new FormatString(new MessageFormat("        * {0} at line {1,number} ({0,number,##.###}P)"));
     private static final FormatString GLOBAL_FEEDBACK_LIMIT_OVERRUN = new FormatString(new MessageFormat("    * Note: The sum of penalties hit the limits for this rating group."));
@@ -65,6 +66,10 @@ public class Assessment extends ArtemisClientHolder {
 
     public void addAnnotation(Annotation annotation) {
         this.annotations.add(annotation);
+    }
+
+    public void clearAnnotations() {
+        this.annotations.clear();
     }
 
     public void saveOrSubmit(boolean submit, Locale artemisLocale) throws AnnotationMappingException, ArtemisNetworkException {
@@ -150,20 +155,32 @@ public class Assessment extends ArtemisClientHolder {
         // These feedbacks deduct points
         feedbacks.addAll(this.config.ratingGroups().stream().flatMap(r -> createGlobalFeedback(r, locale).stream()).toList());
 
+        log.info("Created {} manual feedbacks for artemis", feedbacks.stream().filter(f -> f.type() == FeedbackType.MANUAL).count());
+        log.info("Created {} manual-unreferenced feedbacks for artemis", feedbacks.stream().filter(f -> f.type() == FeedbackType.MANUAL_UNREFERENCED).count());
+
         return feedbacks;
     }
 
     private FeedbackDTO createInlineFeedback(Map.Entry<Integer, List<Annotation>> annotations, Locale locale) {
         var sampleAnnotation = annotations.getValue().getFirst();
 
-        // Lines are indexed at 0
-        String text = "File " + sampleAnnotation.getArtemisFilePath() + " at line " + sampleAnnotation.getDisplayLine();
-        String reference = "file:" + sampleAnnotation.getArtemisFilePath() + ".java_line:" + sampleAnnotation.getStartLine();
+        String text = "File " + sampleAnnotation.getFilePathWithoutType() + " at line " + sampleAnnotation.getDisplayLine();
+        String reference = "file:" + sampleAnnotation.getFilePath() + "_line:" + sampleAnnotation.getStartLine();
         String detailText = annotations.getValue().stream()
-                .map(a -> MANUAL_FEEDBACK.format(
-                        a.getMistakeType().getMessage(),
-                        a.getMistakeType().getButtonText(),
-                        a.formatMessageForArtemis()).translateTo(locale))
+                .map(a -> {
+                    if (a.getCustomMessage().isPresent()) {
+                        return MANUAL_FEEDBACK_CUSTOM.format(
+                                a.getMistakeType().getRatingGroup().getDisplayName(),
+                                a.getMistakeType().getButtonText(),
+                                a.formatMessageForArtemis(),
+                                a.getCustomMessage().orElseThrow()).translateTo(locale);
+                    } else {
+                        return MANUAL_FEEDBACK.format(
+                                a.getMistakeType().getRatingGroup().getDisplayName(),
+                                a.getMistakeType().getButtonText(),
+                                a.formatMessageForArtemis()).translateTo(locale);
+                    }
+                })
                 .collect(Collectors.joining("\n\n")).trim();
         return FeedbackDTO.newManual(0.0, text, reference, detailText);
     }

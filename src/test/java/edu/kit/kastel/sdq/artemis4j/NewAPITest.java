@@ -31,14 +31,17 @@ public class NewAPITest {
         var exercise = course.getExercises().get(0);
         System.out.println(exercise.getTitle());
 
-        var submission = exercise.fetchSubmissionById(523);
-        var assessment = submission.tryLock(0, gradingConfig).orElseThrow();
+        var assessment = exercise.tryLockSubmission(523, 0, gradingConfig).orElseThrow();
+        assessment.clearAnnotations();
 
         var mistakeType = gradingConfig.getMistakeTypeById("hardcodedLogic").get();
-        assessment.addAnnotation(new Annotation(mistakeType, "src/edu/kit/kastel/StringUtility.java", 12, 12, null, null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
+        for (int i = 0; i < 5; i++) {
+            String customMessage = "aaa" + "h".repeat(1000);
+            assessment.addAnnotation(new Annotation(mistakeType, "src/edu/kit/kastel/StringUtility.java", 12, 12, customMessage, null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
+        }
 
         try {
-            assessment.saveOrSubmit(true, Locale.ENGLISH);
+            assessment.saveOrSubmit(true, Locale.GERMANY);
         } catch (Exception ex) {
             assessment.cancel();
             throw ex;
