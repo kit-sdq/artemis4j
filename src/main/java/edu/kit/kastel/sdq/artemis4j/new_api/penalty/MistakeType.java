@@ -12,13 +12,20 @@ public final class MistakeType {
     private final RatingGroup ratingGroup;
     private final FormatString message;
     private final FormatString buttonTexts;
+    private final MistakeReportingState reporting;
 
-    MistakeType(MistakeTypeDTO dto, RatingGroup ratingGroup) {
+    MistakeType(MistakeTypeDTO dto, boolean shouldScore, RatingGroup ratingGroup) {
         this.id = dto.shortName();
         this.rule = dto.penaltyRule();
         this.ratingGroup = ratingGroup;
         this.message = new FormatString(dto.message(), dto.additionalMessages());
         this.buttonTexts = new FormatString(dto.button(), dto.additionalButtonTexts());
+
+        if (shouldScore) {
+            this.reporting = MistakeReportingState.REPORT_AND_SCORE;
+        } else {
+            this.reporting = MistakeReportingState.REPORT;
+        }
 
         // Add ourselves to the rating group
         ratingGroup.addMistakeType(this);
@@ -42,6 +49,10 @@ public final class MistakeType {
 
     public TranslatableString getButtonText() {
         return buttonTexts.format();
+    }
+
+    public boolean shouldScore() {
+        return this.reporting.shouldScore();
     }
 
     @Override

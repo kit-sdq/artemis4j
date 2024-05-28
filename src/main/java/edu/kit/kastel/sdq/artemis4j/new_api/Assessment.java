@@ -94,7 +94,7 @@ public class Assessment extends ArtemisClientHolder {
     }
 
     public double calculateTotalPointsIncludingTests() {
-        var points = this.config.ratingGroups().stream()
+        var points = this.config.getRatingGroups().stream()
                 .map(this::calculatePointsForRatingGroup)
                 .mapToDouble(Points::score)
                 .sum();
@@ -154,7 +154,7 @@ public class Assessment extends ArtemisClientHolder {
 
         // We have on (or more if they are too long) global feedback per rating group
         // These feedbacks deduct points
-        feedbacks.addAll(this.config.ratingGroups().stream().flatMap(r -> createGlobalFeedback(r, locale).stream()).toList());
+        feedbacks.addAll(this.config.getRatingGroups().stream().flatMap(r -> createGlobalFeedback(r, locale).stream()).toList());
 
         log.info("Created {} manual feedbacks for artemis", feedbacks.stream().filter(f -> f.type() == FeedbackType.MANUAL).count());
         log.info("Created {} manual-unreferenced feedbacks for artemis", feedbacks.stream().filter(f -> f.type() == FeedbackType.MANUAL_UNREFERENCED).count());
@@ -232,7 +232,7 @@ public class Assessment extends ArtemisClientHolder {
         }
 
         // Add a remark if we hit the limits
-        if (points.limitOverrun()) {
+        if (points.capped()) {
             lines.add(GLOBAL_FEEDBACK_LIMIT_OVERRUN.format());
         }
 

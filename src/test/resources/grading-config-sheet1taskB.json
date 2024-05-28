@@ -1,6 +1,6 @@
 {
 	"shortName": "config-final-tasks.json",
-	"allowedExercises": [245],
+	"allowedExercises": [42],
 	"ratingGroups": [
 		{
 			"shortName": "task",
@@ -53,8 +53,8 @@
 				"threshold": 1
 			},
 			"appliesTo": "comment",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Example Solution"
 			},
@@ -72,8 +72,8 @@
 				"threshold": 1
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[1-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j",
 			"additionalButtonTexts": {
 				"en": "Difficult Code"
 			},
@@ -91,8 +91,8 @@
 				"threshold": 1
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[1-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j",
 			"additionalButtonTexts": {
 				"en": "Uniform language"
 			},
@@ -110,8 +110,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "JavaDoc trivial"
 			},
@@ -129,8 +129,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Bad identifiers"
 			},
@@ -148,8 +148,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Comments"
 			},
@@ -167,8 +167,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "static method"
 			},
@@ -186,8 +186,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Visibility (e.g. records)"
 			},
@@ -205,8 +205,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "getterSetter for Lists"
 			},
@@ -224,8 +224,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Code Copies Inheritance"
 			},
@@ -243,8 +243,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Code Copies Auxiliary method"
 			},
@@ -262,8 +262,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Enum/inheritance"
 			},
@@ -281,8 +281,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "IO/UI"
 			},
@@ -300,8 +300,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Object"
 			},
@@ -319,8 +319,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Operations instead of Domain"
 			},
@@ -338,8 +338,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Final"
 			},
@@ -357,8 +357,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Logic hard coded"
 			},
@@ -376,8 +376,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "String references"
 			},
@@ -395,8 +395,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "static attribute"
 			},
@@ -414,8 +414,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "assert if"
 			},
@@ -433,8 +433,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Exceptions control flow"
 			},
@@ -452,8 +452,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "try/catch blocks"
 			},
@@ -471,8 +471,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "JavaAPI"
 			},
@@ -490,8 +490,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Incorrect loop type"
 			},
@@ -509,8 +509,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Enum/Sets"
 			},
@@ -528,8 +528,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Interface"
 			},
@@ -547,8 +547,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "unnecessary complexity (small)"
 			},
@@ -566,8 +566,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "unnecessary complexity (large)"
 			},
@@ -585,8 +585,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "parseInt"
 			},
@@ -604,8 +604,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Error message"
 			},
@@ -623,8 +623,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Packages"
 			},
@@ -642,8 +642,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Utility"
 			},
@@ -661,8 +661,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "RawType"
 			},
@@ -680,8 +680,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Cast"
 			},
@@ -699,8 +699,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Scanner"
 			},
@@ -718,8 +718,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Meaningless constants"
 			},
@@ -737,8 +737,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Empty constructor"
 			},
@@ -756,8 +756,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Empty block"
 			},
@@ -775,8 +775,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Unused element"
 			},
@@ -794,8 +794,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Class of constants"
 			},
@@ -813,8 +813,8 @@
 				"penalty": 0.5
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[2-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[3-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "System dependent line break"
 			},
@@ -832,8 +832,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Utility vs. OO"
 			},
@@ -851,8 +851,8 @@
 				"penalty": 2.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[1-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[2-5].*",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Only main method"
 			},
@@ -870,8 +870,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Multiple concerns"
 			},
@@ -889,8 +889,8 @@
 				"penalty": 1.0
 			},
 			"appliesTo": "modelling",
-			"enabledForExercises": "[Ss]heet[3-5].*",
-			"enabledPenaltyForExercises": "[Ss]heet[4-5].*",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
 			"additionalButtonTexts": {
 				"en": "Refused Inheritance"
 			},

@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.Optional;
 
 public record ExerciseDTO(
-        @JsonProperty int id,
+        @JsonProperty long id,
         @JsonProperty String title,
         @JsonProperty String shortName,
         @JsonProperty String testRepositoryUri,

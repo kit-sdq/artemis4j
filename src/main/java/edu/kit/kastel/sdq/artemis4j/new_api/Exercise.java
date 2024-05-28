@@ -1,6 +1,7 @@
 package edu.kit.kastel.sdq.artemis4j.new_api;
 
 import edu.kit.kastel.sdq.artemis4j.new_api.penalty.GradingConfig;
+import edu.kit.kastel.sdq.artemis4j.new_api.penalty.InvalidGradingConfigException;
 import edu.kit.kastel.sdq.artemis4j.new_client.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.new_client.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.dto.artemis.ExerciseDTO;
@@ -22,11 +23,11 @@ public class Exercise extends ArtemisClientHolder {
         this.course = course;
     }
 
-    public int getId() {
+    public long getId() {
         return this.dto.id();
     }
 
-    public String getTestRespositoryUrl() {
+    public String getTestRepositoryUrl() {
         return this.dto.testRepositoryUri();
     }
 
@@ -46,6 +47,10 @@ public class Exercise extends ArtemisClientHolder {
         return this.dto.title();
     }
 
+    public String getShortName() {
+        return this.dto.shortName();
+    }
+
     public Course getCourse() {
         return this.course;
     }
@@ -57,7 +62,9 @@ public class Exercise extends ArtemisClientHolder {
                 .toList();
     }
 
-    public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException {
+    public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, InvalidGradingConfigException {
+        this.assertGradingConfigValid(gradingConfig);
+
         // This line already locks the submission, but doesn't tell us what the relevant ResultDTO is
         var dto = SubmissionDTO.lockNextSubmission(this.getClient(), this.getId(), correctionRound);
         if (dto.isEmpty()) {
@@ -69,7 +76,9 @@ public class Exercise extends ArtemisClientHolder {
         return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
     }
 
-    public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException {
+    public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, InvalidGradingConfigException {
+        this.assertGradingConfigValid(gradingConfig);
+
         var locked = SubmissionDTO.lock(this.getClient(), submissionId, correctionRound);
 
         if (locked.id() != submissionId) {
@@ -90,5 +99,11 @@ public class Exercise extends ArtemisClientHolder {
 
         var submission = new Submission(locked, this);
         return Optional.of(new Assessment(result, gradingConfig, submission));
+    }
+
+    private void assertGradingConfigValid(GradingConfig gradingConfig) {
+        if (!gradingConfig.isValidForExercise(this)) {
+            throw new IllegalArgumentException("Grading config is not valid for this exercise");
+        }
     }
 }

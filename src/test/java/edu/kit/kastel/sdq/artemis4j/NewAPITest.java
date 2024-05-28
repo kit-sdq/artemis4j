@@ -19,8 +19,6 @@ public class NewAPITest {
 
     @Test
     void testLogin() throws ArtemisClientException, IOException {
-        var gradingConfig = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/grading-config-sheet1taskB.json")));
-
         var artemis = new ArtemisInstance(ARTEMIS_URL);
         var client = ArtemisClient.fromUsernamePassword(artemis, ARTEMIS_USERNAME, ARTEMIS_PASSWORD);
         System.out.println("User is " + client.getAssessor().getLogin());
@@ -31,10 +29,15 @@ public class NewAPITest {
         var exercise = course.getExercises().get(0);
         System.out.println(exercise.getTitle());
 
+        var gradingConfig = GradingConfig.readFromString(
+                Files.readString(Path.of("src/test/resources/grading-config-sheet1taskB.json")),
+                exercise
+        );
+
         var assessment = exercise.tryLockSubmission(523, 0, gradingConfig).orElseThrow();
         assessment.clearAnnotations();
 
-        assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("hardcodedLogic").get(), "src/edu/kit/kastel/StringUtility.java", 12, 13, "custom", null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
+        assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("complexCode").get(), "src/edu/kit/kastel/StringUtility.java", 12, 13, "custom", null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
         assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("custom").get(), "src/edu/kit/kastel/StringUtility.java", 40, 40, "custom", -1.0, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
 
         for (int i = 0; i < 5; i++) {

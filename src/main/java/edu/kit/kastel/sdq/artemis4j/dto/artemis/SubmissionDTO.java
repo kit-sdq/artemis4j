@@ -19,7 +19,7 @@ public record SubmissionDTO(
         @JsonProperty UserDTO user
 ) {
 
-    public static List<SubmissionDTO> fetchAll(ArtemisClient client, int exerciseId, int correctionRound, boolean filterAssessedByTutor) throws ArtemisNetworkException {
+    public static List<SubmissionDTO> fetchAll(ArtemisClient client, long exerciseId, int correctionRound, boolean filterAssessedByTutor) throws ArtemisNetworkException {
         var submissions = ArtemisRequest.get()
                 .path(List.of("exercises", exerciseId, "programming-submissions"))
                 .param("assessedByTutor", filterAssessedByTutor)
@@ -41,7 +41,7 @@ public record SubmissionDTO(
                 .fetchLongFeedback(client);
     }
 
-    public static Optional<SubmissionDTO> lockNextSubmission(ArtemisClient client, int exerciseId, int correctionRound) throws ArtemisNetworkException {
+    public static Optional<SubmissionDTO> lockNextSubmission(ArtemisClient client, long exerciseId, int correctionRound) throws ArtemisNetworkException {
         // Artemis returns an empty string if there is no new submission to lock
         var submission = ArtemisRequest.get()
                 .path(List.of("exercises", exerciseId, "programming-submission-without-assessment"))
