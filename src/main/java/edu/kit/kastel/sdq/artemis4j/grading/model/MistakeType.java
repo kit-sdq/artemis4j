@@ -115,7 +115,7 @@ public class MistakeType implements IMistakeType {
 		if (isEnabledPenalty()) {
 			return this.penaltyRule;
 		}
-		// Create penalty with zero points deduction
+		// Create score with zero points deduction
 		return new ThresholdPenaltyRule(1, 0);
 	}
 

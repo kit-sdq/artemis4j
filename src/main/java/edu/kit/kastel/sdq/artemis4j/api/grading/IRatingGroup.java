@@ -7,7 +7,7 @@ import java.util.List;
 
 /**
  * {@link IMistakeType}s belong to a {@link IRatingGroup}. Rating Groups may
- * introduce penalty limits for calculation, capping the maximum penalty that
+ * introduce score limits for calculation, capping the maximum score that
  * all {@link IMistakeType}s belonging to one {@link IRatingGroup} can reach in
  * sum.
  */
@@ -29,7 +29,7 @@ public interface IRatingGroup {
 	List<IMistakeType> getMistakeTypes();
 
 	/**
-	 * @return the minimum or maximum penalty that all {@link IMistakeType}
+	 * @return the minimum or maximum score that all {@link IMistakeType}
 	 *         belonging to one {@link IRatingGroup} can reach in sum
 	 */
 	double setToRange(double points);

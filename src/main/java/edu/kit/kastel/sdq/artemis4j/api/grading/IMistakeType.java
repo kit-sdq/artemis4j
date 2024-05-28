@@ -11,15 +11,15 @@ import java.util.List;
 public interface IMistakeType {
 
 	/**
-	 * Calculate penalty using only the given annotations.
+	 * Calculate score using only the given annotations.
 	 *
-	 * @return a <i>positive or negative</i> value denoting the penalty or points.
+	 * @return a <i>positive or negative</i> value denoting the score or points.
 	 */
 	double calculate(List<IAnnotation> annotations);
 
 	/**
 	 * @param annotations the annotations on which the calculation is based.
-	 * @return whether the maximum penalty or points limit of annotations for this
+	 * @return whether the maximum score or points limit of annotations for this
 	 *         mistake type has been reached.
 	 */
 
@@ -59,7 +59,7 @@ public interface IMistakeType {
 	String getTooltip(String languageKey, List<IAnnotation> annotations);
 
 	/**
-	 * Indicates whether this is a custom penalty.
+	 * Indicates whether this is a custom score.
 	 *
 	 * @return indicator for custom penalties
 	 */

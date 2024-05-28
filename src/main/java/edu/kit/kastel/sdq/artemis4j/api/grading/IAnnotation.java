@@ -9,8 +9,8 @@ import java.util.UUID;
  * An annotation is one specific occurrence of a IMistakeType. There might be
  * multiple Annotations.<br>
  * <p>
- * Note that penalty calculation is done collectively:
- * {@link IMistakeType#calculate(List)}} You may define a custom penalty which
+ * Note that score calculation is done collectively:
+ * {@link IMistakeType#calculate(List)}} You may define a custom score which
  * might be used by some MistakeType (more precise: by its PenaltyRule). Also,
  * you may define a custom message.
  */

@@ -21,7 +21,7 @@ public class ThresholdPenaltyRule extends PenaltyRule {
 
 	public ThresholdPenaltyRule(JsonNode penaltyRuleNode) {
 		this.threshold = penaltyRuleNode.get("threshold").asInt();
-		this.penalty = penaltyRuleNode.get("penalty").asDouble();
+		this.penalty = penaltyRuleNode.get("score").asDouble();
 	}
 
 	public ThresholdPenaltyRule(int threshold, double penalty) {
@@ -60,7 +60,7 @@ public class ThresholdPenaltyRule extends PenaltyRule {
 
 	@Override
 	public String toString() {
-		return "ThresholdPenaltyRule [threshold=" + this.threshold + ", penalty=" + this.penalty + "]";
+		return "ThresholdPenaltyRule [threshold=" + this.threshold + ", score=" + this.penalty + "]";
 	}
 
 	@Override

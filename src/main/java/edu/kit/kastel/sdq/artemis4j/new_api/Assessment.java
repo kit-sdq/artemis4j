@@ -30,11 +30,12 @@ public class Assessment extends ArtemisClientHolder {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Assessment.class);
 
     private static final FormatString MANUAL_FEEDBACK = new FormatString(new MessageFormat("[{0}:{1}] {2}"));
-    private static final FormatString MANUAL_FEEDBACK_CUSTOM = new FormatString(new MessageFormat("[{0}:{1}] {2}\nExplanation: {3}"));
+    private static final FormatString MANUAL_FEEDBACK_CUSTOM_EXP = new FormatString(new MessageFormat("[{0}:{1}] {2}\nExplanation: {3}"));
+    private static final FormatString MANUAL_FEEDBACK_CUSTOM_PENALTY = new FormatString(new MessageFormat("[{0}:{1}] {2} ({3,number,##.###}P)"));
     private static final FormatString GLOBAL_FEEDBACK_HEADER = new FormatString(new MessageFormat("{0} [{1,number,##.###} (Range: {2,number,##.###} -- {3,number,##.###}) points]"));
-    private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER = new FormatString(new MessageFormat("    * \"{0}\" [{1,number,##.###}P]:"));
+    private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER = new FormatString(new MessageFormat("    * {0} [{1,number,##.###}P]:"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION = new FormatString(new MessageFormat("        * {0} at line {1,number}"));
-    private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY = new FormatString(new MessageFormat("        * {0} at line {1,number} ({0,number,##.###}P)"));
+    private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY = new FormatString(new MessageFormat("        * {0} at line {1,number} ({2,number,##.###}P)"));
     private static final FormatString GLOBAL_FEEDBACK_LIMIT_OVERRUN = new FormatString(new MessageFormat("    * Note: The sum of penalties hit the limits for this rating group."));
 
     private final List<Annotation> annotations;
@@ -95,7 +96,7 @@ public class Assessment extends ArtemisClientHolder {
     public double calculateTotalPointsIncludingTests() {
         var points = this.config.ratingGroups().stream()
                 .map(this::calculatePointsForRatingGroup)
-                .mapToDouble(Points::penalty)
+                .mapToDouble(Points::score)
                 .sum();
         points += this.testResults.stream().mapToDouble(TestResult::getPoints).sum();
         return Math.clamp(points, 0.0, this.getMaxPoints());
@@ -110,7 +111,7 @@ public class Assessment extends ArtemisClientHolder {
         if (annotationsWithType.isEmpty()) {
             return Optional.empty();
         }
-        return Optional.of(mistakeType.getRule().calculatePenalty(annotationsWithType));
+        return Optional.of(mistakeType.getRule().calculatePoints(annotationsWithType));
     }
 
     public Points calculatePointsForRatingGroup(RatingGroup ratingGroup) {
@@ -119,7 +120,7 @@ public class Assessment extends ArtemisClientHolder {
                 .collect(Collectors.groupingBy(Annotation::getMistakeType))
                 .entrySet()
                 .stream()
-                .mapToDouble(e -> e.getKey().getRule().calculatePenalty(e.getValue()).penalty())
+                .mapToDouble(e -> e.getKey().getRule().calculatePoints(e.getValue()).score())
                 .sum();
         if (points > ratingGroup.getMaxPenalty()) {
             return new Points(ratingGroup.getMaxPenalty(), true);
@@ -168,17 +169,23 @@ public class Assessment extends ArtemisClientHolder {
         String reference = "file:" + sampleAnnotation.getFilePath() + "_line:" + sampleAnnotation.getStartLine();
         String detailText = annotations.getValue().stream()
                 .map(a -> {
-                    if (a.getCustomMessage().isPresent()) {
-                        return MANUAL_FEEDBACK_CUSTOM.format(
+                    if (a.getMistakeType().getRule().isCustomPenalty()) {
+                        return MANUAL_FEEDBACK_CUSTOM_PENALTY.format(
                                 a.getMistakeType().getRatingGroup().getDisplayName(),
                                 a.getMistakeType().getButtonText(),
-                                a.formatMessageForArtemis(),
-                                a.getCustomMessage().orElseThrow()).translateTo(locale);
+                                a.getCustomMessage().orElseThrow(),
+                                a.getCustomPenalty().orElseThrow()).translateTo(locale);
+                    } else if (a.getCustomMessage().isPresent()) {
+                        return MANUAL_FEEDBACK_CUSTOM_EXP.format(
+                                a.getMistakeType().getRatingGroup().getDisplayName(),
+                                a.getMistakeType().getButtonText(),
+                                a.getMistakeType().getMessage(),
+                                a.getCustomMessage().get()).translateTo(locale);
                     } else {
                         return MANUAL_FEEDBACK.format(
                                 a.getMistakeType().getRatingGroup().getDisplayName(),
                                 a.getMistakeType().getButtonText(),
-                                a.formatMessageForArtemis()).translateTo(locale);
+                                a.getMistakeType().getMessage()).translateTo(locale);
                     }
                 })
                 .collect(Collectors.joining("\n\n")).trim();
@@ -198,16 +205,16 @@ public class Assessment extends ArtemisClientHolder {
         // Header:
         // Methodik [-1 (Range: -4 -- 0) points]
         // The header is reused for every sub-feedback
-        var header = GLOBAL_FEEDBACK_HEADER.format(ratingGroup.getDisplayName(), points.penalty(), ratingGroup.getMinPenalty(), ratingGroup.getMaxPenalty());
+        var header = GLOBAL_FEEDBACK_HEADER.format(ratingGroup.getDisplayName(), points.score(), ratingGroup.getMinPenalty(), ratingGroup.getMaxPenalty());
 
         // First collect only the lines so that we can later split the feedback by lines
         List<TranslatableString> lines = new ArrayList<>();
         for (var mistakeType : ratingGroup.getMistakeTypes()) {
-            var score = this.calculatePointsForMistakeType(mistakeType);
-            if (score.isPresent()) {
-                lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(mistakeType.getButtonText(), score.get().penalty()));
+            var mistakePoints = this.calculatePointsForMistakeType(mistakeType);
+            if (mistakePoints.isPresent()) {
+                lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(mistakeType.getButtonText(), mistakePoints.get().score()));
                 for (var annotation : this.getAnnotations(mistakeType)) {
-                    // For custom annotations, we have '* <file> at line <line> (<penalty>P)'
+                    // For custom annotations, we have '* <file> at line <line> (<score>P)'
                     // Otherwise, it's just '* <file> at line <line>'
                     // Lines are zero-indexed
                     if (annotation.getCustomPenalty().isPresent()) {
@@ -232,7 +239,7 @@ public class Assessment extends ArtemisClientHolder {
         // Possibly split into multiple feedbacks
         List<String> feedbackTexts = FeedbackSplitter.splitLines(lines, header, locale);
         if (feedbackTexts.size() == 1) {
-            return List.of(FeedbackDTO.newVisibleManualUnreferenced(0.0, null, feedbackTexts.getFirst()));
+            return List.of(FeedbackDTO.newVisibleManualUnreferenced(points.score(), null, feedbackTexts.getFirst()));
         } else {
             // We have more than one feedback to create
             // To make it easier for students, each feedback gets a running index (annotation 1/2, annotation 2/2)
@@ -240,7 +247,7 @@ public class Assessment extends ArtemisClientHolder {
             List<FeedbackDTO> feedbacks = new ArrayList<>();
             for (int i = 0; i < feedbackTexts.size(); i++) {
                 // Only the first feedback deducts points
-                feedbacks.add(FeedbackDTO.newVisibleManualUnreferenced(i == 0 ? points.penalty() : 0.0, null, feedbackTexts.get(i)));
+                feedbacks.add(FeedbackDTO.newVisibleManualUnreferenced(i == 0 ? points.score() : 0.0, null, feedbackTexts.get(i)));
             }
             return feedbacks;
         }

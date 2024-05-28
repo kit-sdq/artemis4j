@@ -83,10 +83,6 @@ public final class Annotation {
         return source;
     }
 
-    public TranslatableString formatMessageForArtemis() {
-        return type.getRule().formatMessageForArtemis(this);
-    }
-
     public AnnotationDTO toDTO() {
         return new AnnotationDTO(uuid, type.getId(), startLine, endLine, filePath, customMessage, customPenalty);
     }

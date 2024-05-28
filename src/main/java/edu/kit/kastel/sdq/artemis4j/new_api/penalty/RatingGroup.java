@@ -1,7 +1,5 @@
 package edu.kit.kastel.sdq.artemis4j.new_api.penalty;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 

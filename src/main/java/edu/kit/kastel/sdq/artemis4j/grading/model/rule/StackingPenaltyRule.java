@@ -18,7 +18,7 @@ public class StackingPenaltyRule extends PenaltyRule {
 	private Integer maxUses = null; // null => no limit
 
 	public StackingPenaltyRule(JsonNode penaltyRuleNode) {
-		this.penalty = penaltyRuleNode.get("penalty").asDouble();
+		this.penalty = penaltyRuleNode.get("score").asDouble();
 
 		if (penaltyRuleNode.hasNonNull("maxUses")) {
 			maxUses = penaltyRuleNode.get("maxUses").asInt();
@@ -57,7 +57,7 @@ public class StackingPenaltyRule extends PenaltyRule {
 
 	@Override
 	public String toString() {
-		String string = "StackingPenaltyRule [penalty=" + this.penalty + " per annotation";
+		String string = "StackingPenaltyRule [score=" + this.penalty + " per annotation";
 		string += maxUses != null ? " capped to " + maxUses + " annotations" : "";
 		string += "]";
 		return string;

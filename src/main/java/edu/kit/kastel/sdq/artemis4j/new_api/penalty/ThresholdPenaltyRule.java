@@ -20,9 +20,9 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
     }
 
     @Override
-    public Points calculatePenalty(List<Annotation> annotations) {
-        if (annotations.size() >= threshold) {
-            return new Points(penalty, annotations.size() > threshold);
+    public Points calculatePoints(List<Annotation> annotations) {
+        if (annotations.size() >= this.threshold) {
+            return new Points(-this.penalty, annotations.size() > this.threshold);
         }
         return new Points(0.0, false);
     }

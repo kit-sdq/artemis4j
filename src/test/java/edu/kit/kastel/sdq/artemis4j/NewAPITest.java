@@ -34,10 +34,11 @@ public class NewAPITest {
         var assessment = exercise.tryLockSubmission(523, 0, gradingConfig).orElseThrow();
         assessment.clearAnnotations();
 
-        var mistakeType = gradingConfig.getMistakeTypeById("hardcodedLogic").get();
+        assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("hardcodedLogic").get(), "src/edu/kit/kastel/StringUtility.java", 12, 13, "custom", null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
+        assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("custom").get(), "src/edu/kit/kastel/StringUtility.java", 40, 40, "custom", -1.0, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
+
         for (int i = 0; i < 5; i++) {
-            String customMessage = "aaa" + "h".repeat(1000);
-            assessment.addAnnotation(new Annotation(mistakeType, "src/edu/kit/kastel/StringUtility.java", 12, 12, customMessage, null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
+            assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("unnecessaryComplex").get(), "src/edu/kit/kastel/StringUtility.java", 13, 13, null, null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
         }
 
         try {

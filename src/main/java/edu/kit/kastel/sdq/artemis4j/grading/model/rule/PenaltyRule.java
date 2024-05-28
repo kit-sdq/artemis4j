@@ -15,10 +15,10 @@ import java.util.List;
 public abstract class PenaltyRule {
 
 	/**
-	 * Calculate the penalty these Annotations add to the result.
+	 * Calculate the score these Annotations add to the result.
 	 *
 	 * @param annotations the annotations on which the calculation is based.
-	 * @return a reducing penalty
+	 * @return a reducing score
 	 */
 	public abstract double calculate(List<IAnnotation> annotations);
 

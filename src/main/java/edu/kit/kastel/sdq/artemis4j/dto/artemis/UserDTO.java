@@ -13,7 +13,8 @@ public record UserDTO(
         @JsonProperty String firstName,
         @JsonProperty String lastName,
         @JsonProperty String email,
-        @JsonProperty String langKey
+        @JsonProperty String langKey,
+        @JsonProperty String vcsAccessToken
 ) {
 
     public static UserDTO getAssessingUser(ArtemisClient client) throws ArtemisNetworkException {
