@@ -30,6 +30,7 @@ import org.slf4j.LoggerFactory;
 import java.io.IOException;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -42,6 +43,7 @@ public class ArtemisClient {
 
     private final ArtemisInstance artemis;
     private final String jwtToken;
+    private final String password;
     private final OkHttpClient client;
 
     private final LazyNetworkValue<User> assessor;
@@ -71,15 +73,31 @@ public class ArtemisClient {
             throw new ArtemisNetworkException(ex);
         }
 
-        return new ArtemisClient(artemis, jwtToken);
+        return new ArtemisClient(artemis, jwtToken, password);
     }
 
-    public ArtemisClient(ArtemisInstance artemis, String jwtToken) throws ArtemisNetworkException {
-        this.artemis = artemis;
-        this.jwtToken = jwtToken;
+    /**
+     * Creates a new ArtemisClient
+     * @param artemis The artemis instance to which to connect to
+     * @param jwtToken The token to be used for requests
+     * @param password (optional) an Artemis password. May be null if not used (e.g. for auth via Shibboleth).
+     * @throws ArtemisNetworkException
+     */
+    public ArtemisClient(ArtemisInstance artemis, String jwtToken, String password) throws ArtemisNetworkException {
+        this.artemis = Objects.requireNonNull(artemis);
+        this.jwtToken = Objects.requireNonNull(jwtToken);
+        this.password = password;
         this.client = buildHttpClient(artemis, jwtToken);
         this.assessor = new LazyNetworkValue<>(() -> new User(UserDTO.getAssessingUser(this)));
         this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this).stream().map(dto -> new Course(dto, this)).toList());
+    }
+
+    public String getJWTToken() {
+        return this.jwtToken;
+    }
+
+    public Optional<String> getPassword() {
+        return Optional.ofNullable(this.password);
     }
 
     public ArtemisInstance getInstance() {

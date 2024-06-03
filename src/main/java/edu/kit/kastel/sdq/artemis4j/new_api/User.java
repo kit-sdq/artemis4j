@@ -2,6 +2,8 @@ package edu.kit.kastel.sdq.artemis4j.new_api;
 
 import edu.kit.kastel.sdq.artemis4j.dto.artemis.UserDTO;
 
+import java.util.Optional;
+
 public class User {
     private final UserDTO dto;
 
@@ -19,6 +21,10 @@ public class User {
 
     public String getLangKey() {
         return this.dto.langKey();
+    }
+
+    public Optional<String> getGitToken() {
+        return Optional.ofNullable(this.dto.vcsAccessToken());
     }
 
     protected UserDTO toDTO() {

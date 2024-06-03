@@ -10,7 +10,7 @@ public class LazyNetworkValue<T> {
     }
 
     public T get() throws ArtemisNetworkException {
-        // First unsynchronized check
+        // First un-synchronized check
         if (this.value == null) {
             synchronized (this) {
                 // Second synchronized check to avoid double initialization

@@ -53,6 +53,10 @@ public class Assessment extends ArtemisClientHolder {
         this.testResults = Arrays.stream(result.feedbacks()).filter(f -> f.type() == FeedbackType.AUTOMATIC).map(TestResult::new).toList();
     }
 
+    public Submission getSubmission() {
+        return submission;
+    }
+
     public List<Annotation> getAnnotations() {
         return Collections.unmodifiableList(this.annotations);
     }

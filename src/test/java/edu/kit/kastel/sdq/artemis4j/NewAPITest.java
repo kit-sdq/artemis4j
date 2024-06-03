@@ -10,7 +10,9 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Comparator;
 import java.util.Locale;
+import java.io.File;
 
 public class NewAPITest {
     private static final String ARTEMIS_URL = "artemis-test.sdq.kastel.kit.edu";
@@ -36,6 +38,18 @@ public class NewAPITest {
 
         var assessment = exercise.tryLockSubmission(523, 0, gradingConfig).orElseThrow();
         assessment.clearAnnotations();
+
+        var submissionPath = Path.of("test_content");
+        if (!Files.exists(submissionPath)) {
+            Files.createDirectories(submissionPath);
+        }
+        assessment.getSubmission().cloneInto(submissionPath, null);
+        try (var dirStream = Files.walk(submissionPath)) {
+            dirStream
+                    .map(Path::toFile)
+                    .sorted(Comparator.reverseOrder())
+                    .forEach(File::delete);
+        }
 
         assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("complexCode").get(), "src/edu/kit/kastel/StringUtility.java", 12, 13, "custom", null, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
         assessment.addAnnotation(new Annotation(gradingConfig.getMistakeTypeById("custom").get(), "src/edu/kit/kastel/StringUtility.java", 40, 40, "custom", -1.0, Annotation.AnnotationSource.MANUAL_FIRST_ROUND));
