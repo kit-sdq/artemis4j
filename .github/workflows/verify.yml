@@ -38,13 +38,12 @@ jobs:
     name: "Build and/or Deploy"
     runs-on: ubuntu-latest
     steps:
-      - uses: joshlong/java-version-export-github-action@v28
-        id: jve
+      - uses: actions/checkout@v4
       - name: Java with Cache
         uses: actions/setup-java@v4
         with:
+          java-version: 21
           distribution: 'temurin'
-          java-version: ${{ env.JAVA_MAJOR_VERSION }}
           cache: 'maven'
 
       - name: Maven Verify
