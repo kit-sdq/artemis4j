@@ -44,7 +44,7 @@ jobs:
         uses: actions/setup-java@v4
         with:
           distribution: 'temurin'
-          java-version: ${{ steps.jve.outputs.java_major_version }}
+          java-version: ${{ env.JAVA_MAJOR_VERSION }}
           cache: 'maven'
 
       - name: Maven Verify
