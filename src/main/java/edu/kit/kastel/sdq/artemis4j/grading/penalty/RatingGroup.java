@@ -18,6 +18,10 @@ public final class RatingGroup {
     private final List<MistakeType> mistakeTypes;
 
     /* package-private */ RatingGroup(RatingGroupDTO dto) {
+        if (dto.negativeLimit() > dto.positiveLimit()) {
+            throw new IllegalArgumentException("Invalid penalty range for rating group: %fP -- %fP".formatted(dto.negativeLimit(), dto.positiveLimit()));
+        }
+
         this.id = dto.shortName();
         this.displayName = new FormatString(dto.displayName(), dto.additionalDisplayNames());
         this.minPenalty = dto.negativeLimit();
@@ -43,6 +47,10 @@ public final class RatingGroup {
 
     public double getMaxPenalty() {
         return maxPenalty;
+    }
+
+    public boolean isScoringGroup() {
+        return minPenalty != 0 || maxPenalty != 0;
     }
 
     /**

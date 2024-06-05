@@ -35,8 +35,9 @@ public class Assessment extends ArtemisConnectionHolder {
     private static final FormatString MANUAL_FEEDBACK = new FormatString(new MessageFormat("[{0}:{1}] {2}"));
     private static final FormatString MANUAL_FEEDBACK_CUSTOM_EXP = new FormatString(new MessageFormat("[{0}:{1}] {2}\nExplanation: {3}"));
     private static final FormatString MANUAL_FEEDBACK_CUSTOM_PENALTY = new FormatString(new MessageFormat("[{0}:{1}] {2} ({3,number,##.###}P)"));
-    private static final FormatString GLOBAL_FEEDBACK_HEADER = new FormatString(new MessageFormat("{0} [{1,number,##.###} (Range: {2,number,##.###} -- {3,number,##.###}) points]"));
+    private static final FormatString GLOBAL_FEEDBACK_HEADER = new FormatString(new MessageFormat("{0} [{1,number,##.###}P (Range: {2,number,##.###}P -- {3,number,##.###}P)]"));
     private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER = new FormatString(new MessageFormat("    * {0} [{1,number,##.###}P]:"));
+    private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING = new FormatString(new MessageFormat("    * {0}:"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION = new FormatString(new MessageFormat("        * {0} at line {1,number}"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY = new FormatString(new MessageFormat("        * {0} at line {1,number} ({2,number,##.###}P)"));
     private static final FormatString GLOBAL_FEEDBACK_LIMIT_OVERRUN = new FormatString(new MessageFormat("    * Note: The sum of penalties hit the limits for this rating group."));
@@ -344,12 +345,21 @@ public class Assessment extends ArtemisConnectionHolder {
         for (var mistakeType : ratingGroup.getMistakeTypes()) {
             var mistakePoints = this.calculatePointsForMistakeType(mistakeType);
             if (mistakePoints.isPresent()) {
-                lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(mistakeType.getButtonText(), mistakePoints.get().score()));
+
+                // Header per mistake type
+                if (ratingGroup.isScoringGroup()) {
+                    lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(mistakeType.getButtonText(), mistakePoints.get().score()));
+                } else {
+                    // We don't want to display points if the rating group does not score
+                    lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING.format(mistakeType.getButtonText()));
+                }
+
+                // Individual annotations
                 for (var annotation : this.getAnnotations(mistakeType)) {
                     // For custom annotations, we have '* <file> at line <line> (<score>P)'
                     // Otherwise, it's just '* <file> at line <line>'
                     // Lines are zero-indexed
-                    if (annotation.getCustomScore().isPresent()) {
+                    if (annotation.getCustomScore().isPresent() && ratingGroup.isScoringGroup() ) {
                         lines.add(GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY.format(annotation.getFilePath(), annotation.getDisplayLine(), annotation.getCustomScore().get()));
                     } else {
                         lines.add(GLOBAL_FEEDBACK_ANNOTATION.format(annotation.getFilePath(), annotation.getDisplayLine()));
@@ -364,7 +374,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         // Add a remark if we hit the limits
-        if (points.capped()) {
+        if (points.capped() && ratingGroup.isScoringGroup()) {
             lines.add(GLOBAL_FEEDBACK_LIMIT_OVERRUN.format());
         }
 
