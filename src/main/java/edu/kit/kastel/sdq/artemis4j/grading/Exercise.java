@@ -4,7 +4,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.InvalidGradingConfigException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
-import edu.kit.kastel.sdq.artemis4j.client.ExerciseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.SubmissionDTO;
 
 import java.time.ZonedDateTime;
@@ -15,11 +15,11 @@ import java.util.Optional;
  * An exercise, containing many submissions.
  */
 public class Exercise extends ArtemisConnectionHolder {
-    private final ExerciseDTO dto;
+    private final ProgrammingExerciseDTO dto;
 
     private final Course course;
 
-    public Exercise(ExerciseDTO dto, Course course) {
+    public Exercise(ProgrammingExerciseDTO dto, Course course) {
         super(course);
 
         this.dto = dto;

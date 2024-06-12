@@ -7,7 +7,7 @@ import java.time.ZonedDateTime;
 import java.util.Arrays;
 import java.util.List;
 
-public record ExerciseDTO(
+public record ProgrammingExerciseDTO(
         @JsonProperty long id,
         @JsonProperty String title,
         @JsonProperty String shortName,
@@ -20,7 +20,7 @@ public record ExerciseDTO(
         @JsonProperty ZonedDateTime startDate
 ) {
 
-    public static List<ExerciseDTO> fetchAll(ArtemisClient client, int courseId) throws ArtemisNetworkException {
+    public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, int courseId) throws ArtemisNetworkException {
         var exercises = ArtemisRequest.get()
                 .path(List.of("courses", courseId, "with-exercises"))
                 .executeAndDecode(client, ExerciseWrapperDTO.class);
@@ -28,6 +28,6 @@ public record ExerciseDTO(
         return Arrays.stream(exercises.exercises()).filter(e -> e.exerciseType().equals("PROGRAMMING")).toList();
     }
 
-    private record ExerciseWrapperDTO(ExerciseDTO[] exercises) {
+    private record ExerciseWrapperDTO(ProgrammingExerciseDTO[] exercises) {
     }
 }

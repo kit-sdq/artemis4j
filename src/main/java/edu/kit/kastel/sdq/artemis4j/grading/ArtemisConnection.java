@@ -6,8 +6,6 @@ import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 import java.util.List;
 
