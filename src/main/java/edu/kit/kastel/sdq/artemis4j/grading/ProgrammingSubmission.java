@@ -1,7 +1,7 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
-import edu.kit.kastel.sdq.artemis4j.client.SubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
@@ -13,16 +13,18 @@ import java.nio.file.Path;
  * A student's programming submission. A submission essentially consists of the URL of a student's Git repository, along with a commit hash.
  * We do not model the separate 'participation' entity in Artemis.
  */
-public class Submission extends ArtemisConnectionHolder {
-    private final SubmissionDTO dto;
+public class ProgrammingSubmission extends ArtemisConnectionHolder {
+    private final ProgrammingSubmissionDTO dto;
 
-    private final Exercise exercise;
+    private final int correctionRound;
+    private final ProgrammingExercise exercise;
 
-    public Submission(SubmissionDTO dto, Exercise exercise) {
+    public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise, int correctionRound) {
         super(exercise);
 
         this.dto = dto;
         this.exercise = exercise;
+        this.correctionRound = correctionRound;
     }
 
     public long getId() {
@@ -31,6 +33,10 @@ public class Submission extends ArtemisConnectionHolder {
 
     public long getParticipationId() {
         return this.dto.participation().id();
+    }
+
+    public String getParticipantIdentifier() {
+        return this.dto.participation().participantIdentifier();
     }
 
     public String getRepositoryUrl() {
@@ -45,8 +51,12 @@ public class Submission extends ArtemisConnectionHolder {
         return this.dto.buildFailed();
     }
 
-    public Exercise getExercise() {
+    public ProgrammingExercise getExercise() {
         return exercise;
+    }
+
+    public int getCorrectionRound() {
+        return this.correctionRound;
     }
 
     /**

@@ -2,20 +2,21 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 public class ExamExerciseGroup extends ArtemisConnectionHolder {
     private final ExerciseGroupDTO dto;
     private final Exam exam;
 
-    private final List<Exercise> exercises;
+    private final List<ProgrammingExercise> exercises;
 
     public ExamExerciseGroup(ExerciseGroupDTO dto, Exam exam) {
         super(exam);
         this.dto = dto;
         this.exam = exam;
         this.exercises = dto.exercises().stream()
-                .map(exerciseDto -> new Exercise(exerciseDto, exam.getCourse()))
+                .map(exerciseDto -> new ProgrammingExercise(exerciseDto, exam.getCourse()))
                 .toList();
     }
 
@@ -31,7 +32,7 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
         return this.dto.title();
     }
 
-    public List<Exercise> getExercises() {
-        return this.exercises;
+    public List<ProgrammingExercise> getProgrammingExercises() {
+        return new ArrayList<>(this.exercises);
     }
 }

@@ -10,7 +10,7 @@ public record CourseDTO(
         @JsonProperty int id,
         @JsonProperty String title,
         @JsonProperty String shortName,
-        @JsonProperty String instructorGroup,
+        @JsonProperty("instructorGroupName") String instructorGroup,
         @JsonProperty int numberOfInstructors,
         @JsonProperty int numberOfTeachingAssistants,
         @JsonProperty int numberOfEditors,
