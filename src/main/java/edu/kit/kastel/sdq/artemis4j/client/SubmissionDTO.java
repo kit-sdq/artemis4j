@@ -13,8 +13,7 @@ public record SubmissionDTO(
         @JsonProperty String commitHash,
         @JsonProperty boolean buildFailed,
         @JsonProperty ResultDTO[] results,
-        @JsonProperty ZonedDateTime submissionDate,
-        @JsonProperty UserDTO user
+        @JsonProperty ZonedDateTime submissionDate
 ) {
 
     public static List<SubmissionDTO> fetchAll(ArtemisClient client, long exerciseId, int correctionRound, boolean filterAssessedByTutor) throws ArtemisNetworkException {

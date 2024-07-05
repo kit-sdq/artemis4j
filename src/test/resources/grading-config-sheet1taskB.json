@@ -41,7 +41,8 @@
 			"appliesTo": "comment",
 			"additionalButtonTexts": {
 				"en": "Custom Comment"
-			}
+			},
+			"autograderProblemTypes": ["AVOID_LABELS"]
 		},
 		{
 			"shortName": "checkSolution",

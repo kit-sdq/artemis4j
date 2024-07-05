@@ -44,4 +44,14 @@ public class Course extends ArtemisConnectionHolder {
     public List<Exercise> getExercises() throws ArtemisNetworkException {
         return this.exercises.get();
     }
+
+    /**
+     * Gets all exams of this course. The result is fetched lazily and then cached.
+     *
+     * @return
+     * @throws ArtemisNetworkException
+     */
+    public List<Exam> getExams() throws ArtemisNetworkException {
+        return this.exams.get();
+    }
 }

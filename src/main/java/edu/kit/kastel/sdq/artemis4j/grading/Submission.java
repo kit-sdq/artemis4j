@@ -8,6 +8,8 @@ import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Objects;
+import java.util.Optional;
 
 /**
  * A student's programming submission. A submission essentially consists of the URL of a student's Git repository, along with a commit hash.
@@ -15,6 +17,7 @@ import java.nio.file.Path;
  */
 public class Submission extends ArtemisConnectionHolder {
     private final SubmissionDTO dto;
+    private final User student;
 
     private final Exercise exercise;
 
@@ -23,6 +26,14 @@ public class Submission extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercise = exercise;
+
+        // The student is only present for instructors
+        var student = dto.participation().student();
+        if (student != null) {
+            this.student = new User(student);
+        } else {
+            this.student = null;
+        }
     }
 
     public long getId() {
@@ -45,34 +56,41 @@ public class Submission extends ArtemisConnectionHolder {
         return this.dto.buildFailed();
     }
 
+    /**
+     * The student can only be retrieved by instructors.
+     * @return
+     */
+    public Optional<User> getStudent() {
+        return Optional.ofNullable(this.student);
+    }
+
     public Exercise getExercise() {
         return exercise;
     }
 
     /**
      * Clones the submission, including the test repository, into the given path, and checks out the submitted commit.
-     * @param target The path to clone into
+     *
+     * @param target        The path to clone into
      * @param tokenOverride (optional) The git password to use for cloning
      * @return The path to the actual submission within the target location
      * @throws ArtemisClientException
      */
-    public Path cloneInto(Path target, String tokenOverride) throws ArtemisClientException {
-        // Clone the test repository
-        this.cloneRepositoryInto(this.getExercise().getTestRepositoryUrl(), target, tokenOverride);
+    public ClonedSubmission cloneInto(Path target, String tokenOverride) throws ArtemisClientException {
+        return ClonedSubmission.cloneSubmission(this, target, tokenOverride);
+    }
 
-        // Clone the student's submission into a subfolder
-        Path assignmentPath = target.resolve("assignment");
-        this.cloneRepositoryInto(this.getRepositoryUrl(), assignmentPath, tokenOverride);
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Submission that = (Submission) o;
+        return this.getId() == that.getId();
+    }
 
-        // Check out the submitted commit
-        try (var repo = Git.open(assignmentPath.toFile())){
-            repo.checkout()
-                    .setName(this.getCommitHash())
-                    .call();
-        } catch (GitAPIException | IOException e) {
-            throw new ArtemisClientException("Failed to check out the submitted commit", e);
-        }
-        return assignmentPath;
+    @Override
+    public int hashCode() {
+        return Objects.hashCode(this.getId());
     }
 
     private void cloneRepositoryInto(String repositoryURL, Path target, String tokenOverride) throws ArtemisClientException {

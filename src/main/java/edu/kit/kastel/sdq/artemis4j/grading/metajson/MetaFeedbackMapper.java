@@ -26,7 +26,7 @@ public class MetaFeedbackMapper {
     }
 
     public static List<Annotation> parseMetaFeedbacks(FeedbackDTO[] allFeedbacks, GradingConfig config) throws AnnotationMappingException {
-        var mistakeTypeMap = config.mistakeTypes().stream().collect(Collectors.toMap(MistakeType::getId, Function.identity()));
+        var mistakeTypeMap = config.getMistakeTypes().stream().collect(Collectors.toMap(MistakeType::getId, Function.identity()));
 
         var annotations = new ArrayList<Annotation>();
         for (var feedback : allFeedbacks) {

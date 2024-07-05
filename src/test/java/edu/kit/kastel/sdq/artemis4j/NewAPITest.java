@@ -2,6 +2,8 @@ package edu.kit.kastel.sdq.artemis4j;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
+import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderFailedException;
+import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderRunner;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import org.junit.jupiter.api.Test;
 
@@ -56,14 +58,16 @@ public class NewAPITest {
         // Let's clone the test repository & submission into a temporary directory
         // The test repo will be cloned into test_content, and within that a folder 'assignment' will be created,
         // into which the student's submission will be cloned
-        // The cloneInto() method returns the path to the assignment folder
         // Git authentication will be using the Artemis password, since no token is provided
         // This works for Artemis' new LocalVC, but not necessarily for GitLab (can't test that right now)
         var submissionPath = Path.of("test_content");
-        try {
-            var studentCodePath = assessment.getSubmission().cloneInto(submissionPath, null);
-        } finally {
-            deleteDirectory(submissionPath);
+        try (var clonedSubmission = assessment.getSubmission().cloneInto(submissionPath, null)){
+            var autograderResult = AutograderRunner.runAutograder(assessment, clonedSubmission, Locale.GERMANY, 0, status -> {
+                System.out.println("Status: " + status);
+            });
+            System.out.println("Autograder made " + autograderResult.annotationsMade() + " annotations");
+        } catch (AutograderFailedException e) {
+            System.err.println("Autograder failed: " + e.getMessage());
         }
 
         // Add a non-custom annotation with a custom message
@@ -99,15 +103,6 @@ public class NewAPITest {
             // This is just required for the test, in practice you wouldn't want to delete the assessment
             assessment.cancel();
             throw ex;
-        }
-    }
-
-    private static void deleteDirectory(Path path) throws IOException {
-        try (var dirStream = Files.walk(path)) {
-            dirStream
-                    .map(Path::toFile)
-                    .sorted(Comparator.reverseOrder())
-                    .forEach(File::delete);
         }
     }
 }

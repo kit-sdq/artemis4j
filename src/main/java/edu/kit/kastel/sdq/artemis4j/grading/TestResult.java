@@ -16,6 +16,10 @@ public class TestResult {
         this.dto = dto;
     }
 
+    public String getTestName() {
+        return this.dto.testCase().testName();
+    }
+
     public double getPoints() {
         return this.dto.credits();
     }

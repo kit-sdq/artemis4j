@@ -4,6 +4,8 @@ import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.client.SubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderRunner;
+import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderStats;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
@@ -134,6 +136,11 @@ public class Assessment extends ArtemisConnectionHolder {
         this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source));
     }
 
+    public void addAutograderAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String explanation) {
+        var customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
+        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, explanation, customScore, Annotation.AnnotationSource.AUTOGRADER));
+    }
+
     /**
      * Removes an annotation from the assessment. If the annotation is not present, nothing happens.
      *
@@ -261,6 +268,14 @@ public class Assessment extends ArtemisConnectionHolder {
         } else {
             return new Points(points, false);
         }
+    }
+
+    public GradingConfig getConfig() {
+        return config;
+    }
+
+    public int getCorrectionRound() {
+        return correctionRound;
     }
 
     private List<FeedbackDTO> packAssessmentForArtemis(Locale locale) throws AnnotationMappingException {

@@ -46,14 +46,14 @@ public final class GradingConfig {
                     ));
 
             var config = new GradingConfig(configDTO.shortName(), ratingGroups, exercise.getId());
-            log.info("Parsed grading config for exercise '{}' and found {} mistake types", config.getShortName(), config.mistakeTypes().size());
+            log.info("Parsed grading config for exercise '{}' and found {} mistake types", config.getShortName(), config.getMistakeTypes().size());
             return config;
         } catch (JsonProcessingException e) {
             throw new InvalidGradingConfigException(e);
         }
     }
 
-    public List<MistakeType> mistakeTypes() {
+    public List<MistakeType> getMistakeTypes() {
         return this.streamMistakeTypes().toList();
     }
 

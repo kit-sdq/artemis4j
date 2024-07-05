@@ -95,6 +95,33 @@
       <artifactId>org.eclipse.jgit</artifactId>
       <version>6.9.0.202403050737-r</version>
     </dependency>
+
+    <!-- Autograder -->
+    <dependency>
+      <groupId>de.firemage.autograder</groupId>
+      <artifactId>autograder-core</artifactId>
+      <version>0.5.41</version>
+    </dependency>
+    <dependency>
+      <groupId>de.firemage.autograder</groupId>
+      <artifactId>autograder-extra</artifactId>
+      <version>0.5.41</version>
+    </dependency>
+
+    <!-- Logging -->
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-api</artifactId>
+      <version>${slf4j.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>org.slf4j</groupId>
+      <artifactId>slf4j-simple</artifactId>
+      <version>${slf4j.version}</version>
+      <scope>test</scope>
+    </dependency>
+
+    <!-- Test dependencies -->
     <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-api</artifactId>
@@ -105,17 +132,6 @@
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter-engine</artifactId>
       <version>${junit.version}</version>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-api</artifactId>
-      <version>${slf4j.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.slf4j</groupId>
-      <artifactId>slf4j-simple</artifactId>
-      <version>${slf4j.version}</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
