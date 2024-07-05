@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 import java.time.ZonedDateTime;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -23,11 +24,11 @@ public record ResultDTO(
         @JsonProperty Boolean successful,
         @JsonProperty double score,
         @JsonProperty Boolean rated,
-        @JsonProperty FeedbackDTO[] feedbacks,
+        @JsonProperty List<FeedbackDTO> feedbacks,
         @JsonProperty UserDTO assessor
         ) {
 
-    public static ResultDTO forAssessmentSubmission(long submissionId, double score, FeedbackDTO[] feedbacks, UserDTO assessor) {
+    public static ResultDTO forAssessmentSubmission(long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
         return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor);
     }
 
@@ -42,6 +43,6 @@ public record ResultDTO(
 
         assert feedbacks != null;
 
-        return new ResultDTO(this.id(), this.completionDate(), this.successful, this.score, this.rated, feedbacks, this.assessor);
+        return new ResultDTO(this.id(), this.completionDate(), this.successful, this.score, this.rated, Arrays.asList(feedbacks), this.assessor);
     }
 }

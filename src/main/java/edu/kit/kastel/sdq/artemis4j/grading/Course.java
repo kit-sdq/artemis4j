@@ -44,7 +44,7 @@ public class Course extends ArtemisConnectionHolder {
      * @return true if the user is an instructor, false otherwise
      */
     public boolean isInstructor(User user) {
-        return user != null && user.getGroups().contains(this.dto.instructorGroup());
+        return user != null && user.getGroups().contains(this.dto.instructorGroupName());
     }
 
     public int getId() {

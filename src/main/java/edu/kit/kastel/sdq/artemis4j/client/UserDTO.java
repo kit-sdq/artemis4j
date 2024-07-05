@@ -11,7 +11,7 @@ public record UserDTO(
         @JsonProperty String firstName,
         @JsonProperty String lastName,
         @JsonProperty String email,
-        @JsonProperty("activated") boolean isActivated,
+        @JsonProperty boolean activated,
         @JsonProperty String langKey,
         @JsonProperty String lastNotificationRead,
         @JsonProperty String name,

@@ -140,10 +140,10 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             throw new IllegalStateException("Locking returned a submission %d without results".formatted(submissionId));
         }
 
-        if (locked.results().length != 1) {
-            throw new IllegalStateException("Locking returned %d results, expected 1".formatted(locked.results().length));
+        if (locked.results().size() != 1) {
+            throw new IllegalStateException("Locking returned %d results, expected 1".formatted(locked.results().size()));
         }
-        var result = locked.results()[0];
+        var result = locked.results().getFirst();
 
         // Locking was successful if we are the assessor
         // The webui of Artemis does the same check

@@ -14,7 +14,7 @@ public record ProgrammingSubmissionDTO(
         @JsonProperty ParticipationDTO participation,
         @JsonProperty String commitHash,
         @JsonProperty boolean buildFailed,
-        @JsonProperty ResultDTO[] results,
+        @JsonProperty List<ResultDTO> results,
         @JsonProperty ZonedDateTime submissionDate
 ) {
 
@@ -75,11 +75,11 @@ public record ProgrammingSubmissionDTO(
         ProgrammingSubmissionDTO submission = this.fetchFeedbacks(client);
 
         for (var result : submission.results()) {
-            for (int i = 0; i < result.feedbacks().length; i++) {
-                var feedback = result.feedbacks()[i];
+            for (int i = 0; i < result.feedbacks().size(); i++) {
+                var feedback = result.feedbacks().get(i);
                 if (feedback.hasLongFeedbackText()) {
                     String detailText = FeedbackDTO.fetchLongFeedback(client, result.id(), feedback.id());
-                    result.feedbacks()[i] = new FeedbackDTO(
+                    result.feedbacks().set(i, new FeedbackDTO(
                             feedback.type(),
                             feedback.id(),
                             feedback.credits(),
@@ -89,7 +89,7 @@ public record ProgrammingSubmissionDTO(
                             feedback.reference(),
                             detailText,
                             true,
-                            feedback.testCase());
+                            feedback.testCase()));
                 }
             }
         }
@@ -98,9 +98,9 @@ public record ProgrammingSubmissionDTO(
     }
 
     private ProgrammingSubmissionDTO fetchFeedbacks(ArtemisClient client) throws ArtemisNetworkException {
-        ResultDTO[] results = Arrays.copyOf(this.results(), this.results().length);
-        for (int i = 0; i < results.length; i++) {
-            results[i] = results[i].fetchFeedbacks(client, this);
+        List<ResultDTO> results = new ArrayList<>(this.results().size());
+        for (var result : this.results()) {
+            results.add(result.fetchFeedbacks(client, this));
         }
 
         return new ProgrammingSubmissionDTO(this.id(), this.participation(), this.commitHash(), this.buildFailed(), results, this.submissionDate());

@@ -58,7 +58,7 @@ public class Assessment extends ArtemisConnectionHolder {
 
         // Unpack the result
         this.annotations = MetaFeedbackMapper.parseMetaFeedbacks(result.feedbacks(), config);
-        this.testResults = Arrays.stream(result.feedbacks()).filter(f -> f.type() == FeedbackType.AUTOMATIC).map(TestResult::new).toList();
+        this.testResults = result.feedbacks().stream().filter(f -> f.type() == FeedbackType.AUTOMATIC).map(TestResult::new).toList();
     }
 
     /**
@@ -162,10 +162,10 @@ public class Assessment extends ArtemisConnectionHolder {
         var feedbacks = this.packAssessmentForArtemis(locale);
         var absoluteScore = this.calculateTotalPoints();
         var relativeScore = absoluteScore / this.getMaxPoints() * 100.0;
-        var result = ResultDTO.forAssessmentSubmission(this.programmingSubmission.getId(), relativeScore, feedbacks.toArray(FeedbackDTO[]::new), this.getConnection().getAssessor().toDTO());
+        var result = ResultDTO.forAssessmentSubmission(this.programmingSubmission.getId(), relativeScore, feedbacks, this.getConnection().getAssessor().toDTO());
 
         // Sanity check
-        var feedbackPoints = Arrays.stream(result.feedbacks()).mapToDouble(FeedbackDTO::credits).sum();
+        var feedbackPoints = result.feedbacks().stream().mapToDouble(FeedbackDTO::credits).sum();
         if (absoluteScore != feedbackPoints) {
             throw new IllegalStateException("Feedback points do not match the calculated points. Calculated " + absoluteScore + " but feedbacks sum up to " + feedbackPoints + " points.");
         }
