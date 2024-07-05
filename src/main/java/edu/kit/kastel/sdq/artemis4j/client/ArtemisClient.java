@@ -41,6 +41,10 @@ public class ArtemisClient {
     private final OkHttpClient client;
 
     public static ArtemisClient fromUsernamePassword(ArtemisInstance artemis, String username, String password) throws ArtemisNetworkException {
+        if (username == null || password == null) {
+            throw new IllegalArgumentException("Username and password must not be null");
+        }
+
         // The client is just used for login
         var client = new OkHttpClient();
 
