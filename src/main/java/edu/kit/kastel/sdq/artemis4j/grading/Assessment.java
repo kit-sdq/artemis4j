@@ -3,7 +3,7 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
-import edu.kit.kastel.sdq.artemis4j.client.SubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderRunner;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderStats;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
@@ -46,13 +46,13 @@ public class Assessment extends ArtemisConnectionHolder {
 
     private final List<Annotation> annotations;
     private final List<TestResult> testResults;
-    private final Submission submission;
+    private final ProgrammingSubmission programmingSubmission;
     private final GradingConfig config;
     private final int correctionRound;
 
-    public Assessment(ResultDTO result, GradingConfig config, Submission submission, int correctionRound) throws AnnotationMappingException {
-        super(submission);
-        this.submission = submission;
+    public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound) throws AnnotationMappingException {
+        super(programmingSubmission);
+        this.programmingSubmission = programmingSubmission;
         this.config = config;
         this.correctionRound = correctionRound;
 
@@ -66,8 +66,8 @@ public class Assessment extends ArtemisConnectionHolder {
      *
      * @return
      */
-    public Submission getSubmission() {
-        return submission;
+    public ProgrammingSubmission getSubmission() {
+        return programmingSubmission;
     }
 
     /**
@@ -157,21 +157,12 @@ public class Assessment extends ArtemisConnectionHolder {
         this.annotations.clear();
     }
 
-    /**
-     * Saves and maybe submits the assessment to Artemis. A submitted assessment can still be changed if you have its ID,
-     * but it will be marked as assessed. This also frees the lock on the submission.
-     *
-     * @param submit        If false, save the assessment. If true, also submit it.
-     * @param artemisLocale The locale to use for the feedback messages (button texts, mistake descriptions, ...)
-     * @throws AnnotationMappingException
-     * @throws ArtemisNetworkException
-     */
-    public void saveOrSubmit(boolean submit, Locale artemisLocale) throws AnnotationMappingException, ArtemisNetworkException {
+    private void internalSaveOrSubmit(boolean shouldSubmit, Locale locale) throws AnnotationMappingException, ArtemisNetworkException {
         log.info("Packing assessment for artemis");
-        var feedbacks = this.packAssessmentForArtemis(artemisLocale);
+        var feedbacks = this.packAssessmentForArtemis(locale);
         var absoluteScore = this.calculateTotalPoints();
         var relativeScore = absoluteScore / this.getMaxPoints() * 100.0;
-        var result = ResultDTO.forAssessmentSubmission(this.submission.getId(), relativeScore, feedbacks.toArray(FeedbackDTO[]::new), this.getConnection().getAssessor().toDTO());
+        var result = ResultDTO.forAssessmentSubmission(this.programmingSubmission.getId(), relativeScore, feedbacks.toArray(FeedbackDTO[]::new), this.getConnection().getAssessor().toDTO());
 
         // Sanity check
         var feedbackPoints = Arrays.stream(result.feedbacks()).mapToDouble(FeedbackDTO::credits).sum();
@@ -179,7 +170,28 @@ public class Assessment extends ArtemisConnectionHolder {
             throw new IllegalStateException("Feedback points do not match the calculated points. Calculated " + absoluteScore + " but feedbacks sum up to " + feedbackPoints + " points.");
         }
 
-        SubmissionDTO.saveAssessment(this.getConnection().getClient(), this.submission.getParticipationId(), submit, result);
+        ProgrammingSubmissionDTO.saveAssessment(this.getConnection().getClient(), this.programmingSubmission.getParticipationId(), shouldSubmit, result);
+    }
+
+    /**
+     * Saves the assessment to Artemis. This does not free the lock on the submission.
+     *
+     * @throws AnnotationMappingException
+     * @throws ArtemisNetworkException
+     */
+    public void save(Locale locale) throws AnnotationMappingException, ArtemisNetworkException {
+        this.internalSaveOrSubmit(false, locale);
+    }
+
+    /**
+     * Saves and submits the assessment. A submitted assessment can still be changed if you have its ID,
+     * but it will be marked as assessed. This also frees the lock on the submission.
+     *
+     * @throws AnnotationMappingException
+     * @throws ArtemisNetworkException
+     */
+    public void submit(Locale locale) throws AnnotationMappingException, ArtemisNetworkException {
+        this.internalSaveOrSubmit(true, locale);
     }
 
     /**
@@ -188,7 +200,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * @throws ArtemisNetworkException
      */
     public void cancel() throws ArtemisNetworkException {
-        SubmissionDTO.cancelAssessment(this.getConnection().getClient(), this.submission.getId());
+        ProgrammingSubmissionDTO.cancelAssessment(this.getConnection().getClient(), this.programmingSubmission.getId());
     }
 
     /**
@@ -230,7 +242,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * @return
      */
     public double getMaxPoints() {
-        return this.submission.getExercise().getMaxPoints();
+        return this.programmingSubmission.getExercise().getMaxPoints();
     }
 
     /**
@@ -278,6 +290,10 @@ public class Assessment extends ArtemisConnectionHolder {
         return correctionRound;
     }
 
+    public List<TestResult> getTestResults() {
+        return new ArrayList<>(this.testResults);
+    }
+
     private List<FeedbackDTO> packAssessmentForArtemis(Locale locale) throws AnnotationMappingException {
         // We need all automatic feedback
         List<FeedbackDTO> feedbacks = new ArrayList<>(this.testResults.stream().map(TestResult::getDto).toList());
@@ -295,13 +311,13 @@ public class Assessment extends ArtemisConnectionHolder {
                 .entrySet()
                 .stream()
                 .flatMap(e -> e.getValue().entrySet().stream())
-                .map(e -> createInlineFeedback(e, locale))
+                .map(e -> createInlineFeedback(e))
                 .toList()
         );
 
         // We have on (or more if they are too long) global feedback per rating group
         // These feedbacks deduct points
-        feedbacks.addAll(this.config.getRatingGroups().stream().flatMap(r -> createGlobalFeedback(r, locale).stream()).toList());
+        feedbacks.addAll(this.config.getRatingGroups().stream().flatMap(r -> this.createGlobalFeedback(r).stream()).toList());
 
         log.info("Created {} manual feedbacks for artemis", feedbacks.stream().filter(f -> f.type() == FeedbackType.MANUAL).count());
         log.info("Created {} manual-unreferenced feedbacks for artemis", feedbacks.stream().filter(f -> f.type() == FeedbackType.MANUAL_UNREFERENCED).count());
@@ -309,7 +325,7 @@ public class Assessment extends ArtemisConnectionHolder {
         return feedbacks;
     }
 
-    private FeedbackDTO createInlineFeedback(Map.Entry<Integer, List<Annotation>> annotations, Locale locale) {
+    private FeedbackDTO createInlineFeedback(Map.Entry<Integer, List<Annotation>> annotations) {
         var sampleAnnotation = annotations.getValue().getFirst();
 
         String text = "File " + sampleAnnotation.getFilePathWithoutType() + " at line " + sampleAnnotation.getDisplayLine();
@@ -321,18 +337,18 @@ public class Assessment extends ArtemisConnectionHolder {
                                 a.getMistakeType().getRatingGroup().getDisplayName(),
                                 a.getMistakeType().getButtonText(),
                                 a.getCustomMessage().orElseThrow(),
-                                a.getCustomScore().orElseThrow()).translateTo(locale);
+                                a.getCustomScore().orElseThrow()).translateTo(this.getConnection().getLocale());
                     } else if (a.getCustomMessage().isPresent() && !a.getCustomMessage().get().isBlank()) {
                         return MANUAL_FEEDBACK_CUSTOM_EXP.format(
                                 a.getMistakeType().getRatingGroup().getDisplayName(),
                                 a.getMistakeType().getButtonText(),
                                 a.getMistakeType().getMessage(),
-                                a.getCustomMessage().get()).translateTo(locale);
+                                a.getCustomMessage().get()).translateTo(this.getConnection().getLocale());
                     } else {
                         return MANUAL_FEEDBACK.format(
                                 a.getMistakeType().getRatingGroup().getDisplayName(),
                                 a.getMistakeType().getButtonText(),
-                                a.getMistakeType().getMessage()).translateTo(locale);
+                                a.getMistakeType().getMessage()).translateTo(this.getConnection().getLocale());
                     }
                 })
                 .collect(Collectors.joining("\n\n")).trim();
@@ -344,10 +360,9 @@ public class Assessment extends ArtemisConnectionHolder {
      * The feedback deducts points, and lists all annotations that are part of the rating group.
      *
      * @param ratingGroup
-     * @param locale
      * @return
      */
-    private List<FeedbackDTO> createGlobalFeedback(RatingGroup ratingGroup, Locale locale) {
+    private List<FeedbackDTO> createGlobalFeedback(RatingGroup ratingGroup) {
         var points = this.calculatePointsForRatingGroup(ratingGroup);
 
         // Header:
@@ -394,7 +409,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         // Possibly split into multiple feedbacks
-        List<String> feedbackTexts = FeedbackSplitter.splitLines(lines, header, locale);
+        List<String> feedbackTexts = FeedbackSplitter.splitLines(lines, header, this.getConnection().getLocale());
         if (feedbackTexts.size() == 1) {
             return List.of(FeedbackDTO.newVisibleManualUnreferenced(points.score(), null, feedbackTexts.getFirst()));
         } else {

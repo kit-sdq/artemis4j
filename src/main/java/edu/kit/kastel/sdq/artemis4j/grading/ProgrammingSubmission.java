@@ -1,12 +1,11 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
-import edu.kit.kastel.sdq.artemis4j.client.SubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
-import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
@@ -15,13 +14,14 @@ import java.util.Optional;
  * A student's programming submission. A submission essentially consists of the URL of a student's Git repository, along with a commit hash.
  * We do not model the separate 'participation' entity in Artemis.
  */
-public class Submission extends ArtemisConnectionHolder {
-    private final SubmissionDTO dto;
+public class ProgrammingSubmission extends ArtemisConnectionHolder {
+    private final ProgrammingSubmissionDTO dto;
+
+    private final int correctionRound;
     private final User student;
+    private final ProgrammingExercise exercise;
 
-    private final Exercise exercise;
-
-    public Submission(SubmissionDTO dto, Exercise exercise) {
+    public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise, int correctionRound) {
         super(exercise);
 
         this.dto = dto;
@@ -34,6 +34,8 @@ public class Submission extends ArtemisConnectionHolder {
         } else {
             this.student = null;
         }
+
+        this.correctionRound = correctionRound;
     }
 
     public long getId() {
@@ -42,6 +44,10 @@ public class Submission extends ArtemisConnectionHolder {
 
     public long getParticipationId() {
         return this.dto.participation().id();
+    }
+
+    public String getParticipantIdentifier() {
+        return this.dto.participation().participantIdentifier();
     }
 
     public String getRepositoryUrl() {
@@ -64,8 +70,12 @@ public class Submission extends ArtemisConnectionHolder {
         return Optional.ofNullable(this.student);
     }
 
-    public Exercise getExercise() {
+    public ProgrammingExercise getExercise() {
         return exercise;
+    }
+
+    public int getCorrectionRound() {
+        return this.correctionRound;
     }
 
     /**
@@ -76,15 +86,15 @@ public class Submission extends ArtemisConnectionHolder {
      * @return The path to the actual submission within the target location
      * @throws ArtemisClientException
      */
-    public ClonedSubmission cloneInto(Path target, String tokenOverride) throws ArtemisClientException {
-        return ClonedSubmission.cloneSubmission(this, target, tokenOverride);
+    public ClonedProgrammingSubmission cloneInto(Path target, String tokenOverride) throws ArtemisClientException {
+        return ClonedProgrammingSubmission.cloneSubmission(this, target, tokenOverride);
     }
 
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
-        Submission that = (Submission) o;
+        ProgrammingSubmission that = (ProgrammingSubmission) o;
         return this.getId() == that.getId();
     }
 

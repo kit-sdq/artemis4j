@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -20,11 +21,30 @@ public class Course extends ArtemisConnectionHolder {
         super(connection);
 
         this.dto = dto;
-        this.exercises = new LazyNetworkValue<>(() -> ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id())
+        this.exercises = new LazyNetworkValue<>(() -> {
+            List<Exercise> result = new ArrayList<>();
+
+            result.addAll(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id())
                 .stream()
-                .map(exerciseDTO -> new Exercise(exerciseDTO, this))
+                .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this))
                 .toList());
+
+            // TODO: add text exercises
+
+            return result;
+
+        });
         this.exams = new LazyNetworkValue<>(() -> ExamDTO.fetchAll(connection.getClient(), dto.id()).stream().map(examDTO -> new Exam(examDTO, this)).toList());
+    }
+
+    /**
+     * Checks if the given user is an instructor of this course.
+     *
+     * @param user the user to check
+     * @return true if the user is an instructor, false otherwise
+     */
+    public boolean isInstructor(User user) {
+        return user != null && user.getGroups().contains(this.dto.instructorGroup());
     }
 
     public int getId() {
@@ -36,13 +56,17 @@ public class Course extends ArtemisConnectionHolder {
     }
 
     /**
-     * Gets all exercises of this course. The result is fetched lazily and then cached.
+     * Gets all programming exercises of this course. The result is fetched lazily and then cached.
      *
      * @return
      * @throws ArtemisNetworkException
      */
-    public List<Exercise> getExercises() throws ArtemisNetworkException {
-        return this.exercises.get();
+    public List<ProgrammingExercise> getProgrammingExercises() throws ArtemisNetworkException {
+        return this.exercises.get()
+            .stream()
+            .filter(ProgrammingExercise.class::isInstance)
+            .map(ProgrammingExercise.class::cast)
+            .toList();
     }
 
     /**

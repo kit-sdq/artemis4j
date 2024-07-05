@@ -20,8 +20,8 @@ public class TranslatableString {
         // Translate all sub-strings
         var translatedArgs = new Object[this.args.length];
         for (int i = 0; i < this.args.length; i++) {
-            if (this.args[i] instanceof TranslatableString) {
-                translatedArgs[i] = ((TranslatableString) this.args[i]).translateTo(locale);
+            if (this.args[i] instanceof TranslatableString translatableString) {
+                translatedArgs[i] = translatableString.translateTo(locale);
             } else {
                 translatedArgs[i] = this.args[i];
             }

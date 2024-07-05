@@ -11,12 +11,12 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Comparator;
 
-public class ClonedSubmission implements AutoCloseable {
-    private final Submission submission;
+public class ClonedProgrammingSubmission implements AutoCloseable {
+    private final ProgrammingSubmission submission;
     private final Path testsPath;
     private final Path submissionPath;
 
-    /* package-private */ static ClonedSubmission cloneSubmission(Submission submission, Path target, String tokenOverride) throws ArtemisClientException {
+    /* package-private */ static ClonedProgrammingSubmission cloneSubmission(ProgrammingSubmission submission, Path target, String tokenOverride) throws ArtemisClientException {
         var connection = submission.getConnection();
 
         // Clone the test repository
@@ -35,16 +35,16 @@ public class ClonedSubmission implements AutoCloseable {
             throw new ArtemisClientException("Failed to check out the submitted commit", e);
         }
 
-        return new ClonedSubmission(submission, target, submissionPath);
+        return new ClonedProgrammingSubmission(submission, target, submissionPath);
     }
 
-    private ClonedSubmission(Submission submission, Path testsPath, Path submissionPath) {
+    private ClonedProgrammingSubmission(ProgrammingSubmission submission, Path testsPath, Path submissionPath) {
         this.submission = submission;
         this.testsPath = testsPath;
         this.submissionPath = submissionPath;
     }
 
-    public Submission getSubmission() {
+    public ProgrammingSubmission getSubmission() {
         return submission;
     }
 

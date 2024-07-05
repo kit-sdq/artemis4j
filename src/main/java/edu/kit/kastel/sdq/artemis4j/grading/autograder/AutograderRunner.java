@@ -9,7 +9,7 @@ import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
-import edu.kit.kastel.sdq.artemis4j.grading.ClonedSubmission;
+import edu.kit.kastel.sdq.artemis4j.grading.ClonedProgrammingSubmission;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -23,7 +23,7 @@ public final class AutograderRunner {
     private AutograderRunner() {
     }
 
-    public static AutograderStats runAutograder(Assessment assessment, ClonedSubmission submission, Locale locale, int threads, Consumer<String> statusConsumer) throws AutograderFailedException {
+    public static AutograderStats runAutograder(Assessment assessment, ClonedProgrammingSubmission submission, Locale locale, int threads, Consumer<String> statusConsumer) throws AutograderFailedException {
         if (!assessment.getSubmission().equals(submission.getSubmission())) {
             throw new IllegalArgumentException("The assessment and submission do not match");
         }

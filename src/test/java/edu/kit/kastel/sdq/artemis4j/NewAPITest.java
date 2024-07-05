@@ -10,9 +10,7 @@ import org.junit.jupiter.api.Test;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.Comparator;
 import java.util.Locale;
-import java.io.File;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -38,7 +36,7 @@ public class NewAPITest {
         System.out.println(course.getTitle());
 
         // Get the first exercise (not the exercise with id 0!) in the course
-        var exercise = course.getExercises().getFirst();
+        var exercise = course.getProgrammingExercises().getFirst();
         System.out.println(exercise.getTitle());
 
         // For grading, we need the grading config
@@ -97,7 +95,7 @@ public class NewAPITest {
         try {
             // Save & submit the assessment, and translate all messages to German
             // This includes (non-custom) annotation messages, the headers of the feedbacks in Artemis, ...
-            assessment.saveOrSubmit(true, Locale.GERMANY);
+            assessment.submit(Locale.GERMANY);
         } catch (Exception ex) {
             // Cancel the assessment if anything goes wrong, so that it is not locked indefinitely
             // This is just required for the test, in practice you wouldn't want to delete the assessment

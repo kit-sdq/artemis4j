@@ -6,10 +6,11 @@ import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 
-/* package-private*/ class FeedbackSplitter {
+/* package-private*/ final class FeedbackSplitter {
     private static final String LINE_SEPARATOR = "\n";
     private static final int SAFETY_MARGIN = 50;
     private static final FormatString HEADER_FEEDBACK_ID = new FormatString(new MessageFormat(" (feedback {0,number}/{1,number})"));
@@ -18,7 +19,7 @@ import java.util.Locale;
 
     }
 
-    public static List<String> splitLines(List<TranslatableString> lines, TranslatableString header, Locale locale) {
+    static List<String> splitLines(Collection<? extends TranslatableString> lines, TranslatableString header, Locale locale) {
         var translatedLines = lines.stream().map(line -> line.translateTo(locale) + LINE_SEPARATOR).toList();
         var translatedHeader = header.translateTo(locale); // Not adding the line sep here because may need to add the feedback id to the line
 
