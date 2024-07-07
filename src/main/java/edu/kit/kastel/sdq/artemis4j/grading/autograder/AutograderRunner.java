@@ -1,3 +1,4 @@
+/* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading.autograder;
 
 import de.firemage.autograder.core.CheckConfiguration;
@@ -20,53 +21,41 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public final class AutograderRunner {
-    private AutograderRunner() {
-    }
+	private AutograderRunner() {
+	}
 
-    public static AutograderStats runAutograder(Assessment assessment, ClonedProgrammingSubmission submission, Locale locale, int threads, Consumer<String> statusConsumer) throws AutograderFailedException {
-        if (!assessment.getSubmission().equals(submission.getSubmission())) {
-            throw new IllegalArgumentException("The assessment and submission do not match");
-        }
+	public static AutograderStats runAutograder(Assessment assessment, ClonedProgrammingSubmission submission, Locale locale, int threads,
+			Consumer<String> statusConsumer) throws AutograderFailedException {
+		if (!assessment.getSubmission().equals(submission.getSubmission())) {
+			throw new IllegalArgumentException("The assessment and submission do not match");
+		}
 
-        var problemTypesMap = assessment
-                .getConfig()
-                .getMistakeTypes()
-                .stream()
-                .filter(m -> m.getAutograderProblemTypes() != null)
-                .flatMap(m -> m.getAutograderProblemTypes().stream().map(p -> Map.entry(p, m)))
-                .distinct()
-                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        var checkConfiguration = CheckConfiguration.fromProblemTypes(new ArrayList<>(problemTypesMap.keySet()));
+		var problemTypesMap = assessment.getConfig().getMistakeTypes().stream().filter(m -> m.getAutograderProblemTypes() != null)
+				.flatMap(m -> m.getAutograderProblemTypes().stream().map(p -> Map.entry(p, m))).distinct()
+				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		var checkConfiguration = CheckConfiguration.fromProblemTypes(new ArrayList<>(problemTypesMap.keySet()));
 
-        try (TempLocation tempLocation = TempLocation.of(".autograder-tmp")) {
-            Linter autograder = Linter.builder(locale)
-                    .threads(threads)
-                    .tempLocation(tempLocation)
-                    .maxProblemsPerCheck(100)
-                    .build();
+		try (TempLocation tempLocation = TempLocation.of(".autograder-tmp")) {
+			Linter autograder = Linter.builder(locale).threads(threads).tempLocation(tempLocation).maxProblemsPerCheck(100).build();
 
-            Consumer<LinterStatus> statusConsumerWrapper = status -> statusConsumer.accept(autograder.translateMessage(status.getMessage()));
+			Consumer<LinterStatus> statusConsumerWrapper = status -> statusConsumer.accept(autograder.translateMessage(status.getMessage()));
 
-            List<Problem> problems;
-            try (UploadedFile uploadedFile = UploadedFile.build(submission.getSubmissionSourcePath(), JavaVersion.JAVA_17, tempLocation, statusConsumerWrapper, null)) {
-                problems = autograder.checkFile(uploadedFile, checkConfiguration, statusConsumerWrapper);
-            }
+			List<Problem> problems;
+			try (UploadedFile uploadedFile = UploadedFile.build(submission.getSubmissionSourcePath(), JavaVersion.JAVA_17, tempLocation, statusConsumerWrapper,
+					null)) {
+				problems = autograder.checkFile(uploadedFile, checkConfiguration, statusConsumerWrapper);
+			}
 
-            for (var problem : problems) {
-                var mistakeType = problemTypesMap.get(problem.getProblemType());
-                var position = problem.getPosition();
-                assessment.addAutograderAnnotation(
-                        mistakeType,
-                        position.file().toString(),
-                        position.startLine(),
-                        position.endLine(),
-                        autograder.translateMessage(problem.getExplanation())
-                );
-            }
+			for (var problem : problems) {
+				var mistakeType = problemTypesMap.get(problem.getProblemType());
+				var position = problem.getPosition();
+				assessment.addAutograderAnnotation(mistakeType, position.file().toString(), position.startLine(), position.endLine(),
+						autograder.translateMessage(problem.getExplanation()));
+			}
 
-            return new AutograderStats(problems.size());
-        } catch (IOException | LinterException e) {
-            throw new AutograderFailedException(e);
-        }
-    }
+			return new AutograderStats(problems.size());
+		} catch (IOException | LinterException e) {
+			throw new AutograderFailedException(e);
+		}
+	}
 }
