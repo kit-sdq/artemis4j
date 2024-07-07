@@ -57,6 +57,7 @@
     <slf4j.version>2.0.13</slf4j.version>
     <okhttp.version>4.12.0</okhttp.version>
     <junit.version>5.10.2</junit.version>
+    <autograder.version>0.5.41</autograder.version>
   </properties>
 
   <dependencies>
@@ -100,12 +101,12 @@
     <dependency>
       <groupId>de.firemage.autograder</groupId>
       <artifactId>autograder-core</artifactId>
-      <version>0.5.41</version>
+      <version>${autograder.version}</version>
     </dependency>
     <dependency>
       <groupId>de.firemage.autograder</groupId>
       <artifactId>autograder-extra</artifactId>
-      <version>0.5.41</version>
+      <version>${autograder.version}</version>
     </dependency>
 
     <!-- Logging -->

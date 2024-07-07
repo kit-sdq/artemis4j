@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 public class ExamExerciseGroup extends ArtemisConnectionHolder {
@@ -32,7 +33,7 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
         return this.dto.title();
     }
 
-    public List<ProgrammingExercise> getProgrammingExercises() {
-        return new ArrayList<>(this.exercises);
+    public List< ProgrammingExercise> getProgrammingExercises() {
+        return this.exercises;
     }
 }

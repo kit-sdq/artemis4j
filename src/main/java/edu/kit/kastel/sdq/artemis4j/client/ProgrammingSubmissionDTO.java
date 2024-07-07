@@ -70,7 +70,7 @@ public record ProgrammingSubmissionDTO(
                 .execute(client);
     }
 
-    public ProgrammingSubmissionDTO fetchLongFeedback(ArtemisClient client) throws ArtemisNetworkException {
+    private ProgrammingSubmissionDTO fetchLongFeedback(ArtemisClient client) throws ArtemisNetworkException {
         // this ensures that the feedbacks are present in the results (not always the case)
         ProgrammingSubmissionDTO submission = this.fetchFeedbacks(client);
 

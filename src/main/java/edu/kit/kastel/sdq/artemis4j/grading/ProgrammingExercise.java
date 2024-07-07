@@ -101,9 +101,8 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * @return An empty optional if no submission was available to lock, otherwise the assessment
      * @throws AnnotationMappingException
      * @throws ArtemisNetworkException
-     * @throws InvalidGradingConfigException
      */
-    public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, InvalidGradingConfigException {
+    public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException {
         this.assertGradingConfigValid(gradingConfig);
 
         // This line already locks the submission, but doesn't tell us what the relevant ResultDTO is
@@ -113,8 +112,14 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         }
 
         // Second lock call to get the ResultDTO
-        var lockResult = this.tryLockSubmission(dto.get().id(), correctionRound, gradingConfig);
-        return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
+        try {
+            var lockResult = this.tryLockSubmission(dto.get().id(), correctionRound, gradingConfig);
+            return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
+        } catch (MoreRecentSubmission ex) {
+            // The student has submitted a new submission between our two lock calls
+            // We assume that this doesn't happen to make downstream error handling simpler
+            throw new IllegalStateException("A new submission has been created between successive locking calls", ex);
+        }
     }
 
     /**
@@ -127,13 +132,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * @throws ArtemisNetworkException
      * @throws InvalidGradingConfigException
      */
-    public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, InvalidGradingConfigException {
+    public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
         this.assertGradingConfigValid(gradingConfig);
 
         var locked = ProgrammingSubmissionDTO.lock(this.getConnection().getClient(), submissionId, correctionRound);
 
         if (locked.id() != submissionId) {
-            throw new IllegalStateException("Locking returned a different submission than requested??");
+            // Artemis automatically returns the most recent submission associated with the same participation
+            // as the requested submission
+            throw new MoreRecentSubmission(submissionId, locked.id(), locked.participation().id());
         }
 
         if (locked.results() == null) {
@@ -155,7 +162,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
     }
 
-    public Optional<Assessment> tryLockSubmission(ProgrammingSubmission submission, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, InvalidGradingConfigException {
+    public Optional<Assessment> tryLockSubmission(ProgrammingSubmission submission, GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
         return this.tryLockSubmission(submission.getId(), submission.getCorrectionRound(), gradingConfig);
     }
 

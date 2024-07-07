@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2023. */
 package edu.kit.kastel.sdq.artemis4j;
 
+import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
@@ -107,7 +108,7 @@ class End2EndTest {
         Assertions.assertEquals(13, tests.size());
 
         Assertions.assertEquals(1, this.assessment.getAnnotations().size());
-        Assertions.assertEquals(Annotation.AnnotationSource.MANUAL_FIRST_ROUND, this.assessment.getAnnotations().getFirst().getSource());
+        Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, this.assessment.getAnnotations().getFirst().getSource());
     }
 
     /*

@@ -18,7 +18,6 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
-import org.jetbrains.annotations.NotNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -178,13 +177,12 @@ public class ArtemisClient {
 
         builder.cookieJar(new CookieJar() {
             @Override
-            public void saveFromResponse(@NotNull HttpUrl httpUrl, @NotNull List<Cookie> list) {
+            public void saveFromResponse(HttpUrl httpUrl, List<Cookie> list) {
                 // NOP
             }
 
-            @NotNull
             @Override
-            public List<Cookie> loadForRequest(@NotNull HttpUrl httpUrl) {
+            public List<Cookie> loadForRequest(HttpUrl httpUrl) {
                 return List.of(new Cookie.Builder()
                         .domain(artemis.getDomain())
                         .path("/")

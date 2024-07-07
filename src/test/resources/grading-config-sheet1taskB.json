@@ -549,7 +549,7 @@
 			},
 			"appliesTo": "modelling",
 			"enabledForExercises": "artemis4j",
-			"enabledPenaltyForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j",
 			"additionalButtonTexts": {
 				"en": "unnecessary complexity (small)"
 			},

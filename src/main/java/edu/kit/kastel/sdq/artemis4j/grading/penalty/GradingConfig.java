@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Function;
@@ -44,7 +45,7 @@ public final class GradingConfig {
                     continue;
                 }*/
 
-                new MistakeType(
+                MistakeType.createAndAddToGroup(
                     dto,
                     StringUtil.matchMaybe(exercise.getShortName(), dto.enabledPenaltyForExercises()),
                     ratingGroupsById.get(dto.appliesTo())
@@ -73,8 +74,8 @@ public final class GradingConfig {
         return shortName;
     }
 
-    public List<RatingGroup> getRatingGroups() {
-        return ratingGroups;
+    public List< RatingGroup> getRatingGroups() {
+        return Collections.unmodifiableList(ratingGroups);
     }
 
     public boolean isValidForExercise(ProgrammingExercise exercise) {

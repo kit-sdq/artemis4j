@@ -1,5 +1,6 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 
@@ -29,14 +30,10 @@ public final class Annotation {
         this.endLine = dto.endLine();
         this.customMessage = dto.customMessageForJSON();
         this.customScore = dto.customPenaltyForJSON();
-        this.source = AnnotationSource.MANUAL_FIRST_ROUND; // TODO
+        this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
     }
 
     /* package-private */ Annotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, Double customScore, AnnotationSource source) {
-        if (!filePath.endsWith(".java")) {
-            throw new IllegalArgumentException("File path must end with .java");
-        }
-
         // Validate custom penalty and message
         if (mistakeType.isCustomAnnotation()) {
             if (customScore == null) {
@@ -102,7 +99,7 @@ public final class Annotation {
     }
 
     public AnnotationDTO toDTO() {
-        return new AnnotationDTO(uuid, type.getId(), startLine, endLine, filePath, customMessage, customScore);
+        return new AnnotationDTO(uuid, type.getId(), startLine, endLine, filePath, customMessage, customScore, source);
     }
 
     @Override
@@ -120,11 +117,5 @@ public final class Annotation {
 
     private static String generateUUID() {
         return UUID.randomUUID().toString();
-    }
-
-    public enum AnnotationSource {
-        AUTOGRADER,
-        MANUAL_FIRST_ROUND,
-        MANUAL_SECOND_ROUND
     }
 }

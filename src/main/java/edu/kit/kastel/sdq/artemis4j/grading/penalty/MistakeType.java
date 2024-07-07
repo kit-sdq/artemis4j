@@ -4,6 +4,7 @@ import de.firemage.autograder.core.ProblemType;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -17,22 +18,29 @@ public final class MistakeType {
     private final MistakeReportingState reporting;
     private final List<ProblemType> autograderProblemTypes;
 
-    MistakeType(MistakeTypeDTO dto, boolean shouldScore, RatingGroup ratingGroup) {
+    static void createAndAddToGroup(MistakeTypeDTO dto, boolean shouldScore, RatingGroup ratingGroup) {
+        var mistakeType = new MistakeType(dto, shouldScore, ratingGroup);
+        ratingGroup.addMistakeType(mistakeType);
+    }
+
+    private MistakeType(MistakeTypeDTO dto, boolean shouldScore, RatingGroup ratingGroup) {
         this.id = dto.shortName();
         this.rule = dto.penaltyRule();
         this.ratingGroup = ratingGroup;
         this.message = new FormatString(dto.message(), dto.additionalMessages());
         this.buttonTexts = new FormatString(dto.button(), dto.additionalButtonTexts());
-        this.autograderProblemTypes = dto.autograderProblemTypes();
+
+        if (dto.autograderProblemTypes() != null) {
+            this.autograderProblemTypes = dto.autograderProblemTypes();
+        } else {
+            this.autograderProblemTypes = List.of();
+        }
 
         if (shouldScore) {
             this.reporting = MistakeReportingState.REPORT_AND_SCORE;
         } else {
             this.reporting = MistakeReportingState.REPORT;
         }
-
-        // Add ourselves to the rating group
-        ratingGroup.addMistakeType(this);
     }
 
     public String getId() {
@@ -64,7 +72,7 @@ public final class MistakeType {
     }
 
     public List<ProblemType> getAutograderProblemTypes() {
-        return autograderProblemTypes;
+        return Collections.unmodifiableList(autograderProblemTypes);
     }
 
     @Override

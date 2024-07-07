@@ -7,16 +7,16 @@ import java.util.List;
 
 /**
  * Corresponds to an annotation as part of an assessment
- * @param type
+ * @param type type of the feedback
  * @param id null for manual feedback
- * @param credits
+ * @param credits credits given to the student, may be negative
  * @param positive null for manual feedback
  * @param visibility null for manual feedback
  * @param text null for unreferenced manual & automatic feedback, of form "File src/edu/kit/informatik/BubbleSort.java at line 13"
  * @param reference null for unreferenced manual & automatic feedback, of form "file:src/edu/kit/informatik/BubbleSort.java_line:12"
  * @param detailText null for automatic feedback
- * @param hasLongFeedbackText
- * @param testCase
+ * @param hasLongFeedbackText whether long feedback needs to be fetched for the detailText
+ * @param testCase the associated test case, null for non-automatic feedback
  */
 public record FeedbackDTO(
         @JsonProperty FeedbackType type,
