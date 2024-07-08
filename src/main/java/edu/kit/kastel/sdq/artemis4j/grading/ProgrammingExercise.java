@@ -63,7 +63,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 		return this.course;
 	}
 
-	private boolean hasSecondCorrectionRound() {
+	public boolean hasSecondCorrectionRound() {
 		return this.dto.secondCorrectionEnabled() != null && this.dto.secondCorrectionEnabled();
 	}
 
@@ -82,6 +82,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 				.map(dto -> new ProgrammingSubmission(dto, this, correctionRound)).toList();
 	}
 
+	public List<ProgrammingSubmission> fetchSubmissions(int correctionRound) throws ArtemisNetworkException {
+		return this.fetchSubmissions(correctionRound, !this.getCourse().isInstructor(this.getConnection().getAssessor()));
+	}
+
+	/**
+	 * Fetches all submissions from correction round 1 and 2 (if enabled).
+	 * @return
+	 * @throws ArtemisNetworkException
+	 */
 	public List<ProgrammingSubmission> fetchSubmissions() throws ArtemisNetworkException {
 		List<ProgrammingSubmission> submissions = new ArrayList<>(this.fetchSubmissions(0));
 		if (this.hasSecondCorrectionRound()) {
@@ -89,10 +98,6 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 		}
 
 		return submissions;
-	}
-
-	public List<ProgrammingSubmission> fetchSubmissions(int correctionRound) throws ArtemisNetworkException {
-		return this.fetchSubmissions(correctionRound, !this.getCourse().isInstructor(this.getConnection().getAssessor()));
 	}
 
 	/**

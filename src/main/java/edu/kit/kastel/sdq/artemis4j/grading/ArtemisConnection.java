@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
@@ -30,7 +31,7 @@ public final class ArtemisConnection {
 		return new ArtemisConnection(new ArtemisClient(instance, token, null));
 	}
 
-	private ArtemisConnection(ArtemisClient client) {
+	public ArtemisConnection(ArtemisClient client) {
 		this.client = client;
 		this.assessor = new LazyNetworkValue<>(() -> new User(UserDTO.getAssessingUser(this.client)));
 		this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this.client).stream().map(dto -> new Course(dto, this)).toList());
@@ -54,5 +55,9 @@ public final class ArtemisConnection {
 
 	public List<Course> getCourses() throws ArtemisNetworkException {
 		return Collections.unmodifiableList(courses.get());
+	}
+
+	public Course getCourseById(int id) throws ArtemisNetworkException {
+		return courses.get().stream().filter(c -> c.getId() == id).findAny().orElseThrow(() -> new IllegalArgumentException("No course with id " + id + " found"));
 	}
 }

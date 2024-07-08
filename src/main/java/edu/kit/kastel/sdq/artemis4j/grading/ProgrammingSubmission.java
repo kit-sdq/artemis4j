@@ -64,6 +64,15 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 		return this.dto.buildFailed();
 	}
 
+	public Optional<Boolean> hasMandatoryTestFailed() {
+		var latestResult = this.dto.results().getLast();
+		if (latestResult != null) {
+			return Optional.of(latestResult.score() == 0.0);
+		} else {
+			return Optional.empty();
+		}
+	}
+
 	/**
 	 * The student can only be retrieved by instructors.
 	 *
