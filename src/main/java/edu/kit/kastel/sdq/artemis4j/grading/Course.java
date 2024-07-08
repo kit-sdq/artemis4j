@@ -22,17 +22,8 @@ public class Course extends ArtemisConnectionHolder {
 		super(connection);
 
 		this.dto = dto;
-		this.exercises = new LazyNetworkValue<>(() -> {
-			List<Exercise> result = new ArrayList<>();
-
-			result.addAll(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
-					.map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this)).toList());
-
-			// TODO: add text exercises
-
-			return result;
-
-		});
+		this.exercises = new LazyNetworkValue<>(() -> new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
+				.map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this)).toList()));
 		this.exams = new LazyNetworkValue<>(() -> ExamDTO.fetchAll(connection.getClient(), dto.id()).stream().map(examDTO -> new Exam(examDTO, this)).toList());
 	}
 

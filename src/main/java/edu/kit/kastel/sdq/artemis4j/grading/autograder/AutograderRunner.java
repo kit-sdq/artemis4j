@@ -30,13 +30,12 @@ public final class AutograderRunner {
 			throw new IllegalArgumentException("The assessment and submission do not match");
 		}
 
-		var problemTypesMap = assessment.getConfig().getMistakeTypes().stream().filter(m -> m.getAutograderProblemTypes() != null)
-				.flatMap(m -> m.getAutograderProblemTypes().stream().map(p -> Map.entry(p, m))).distinct()
-				.collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+		var problemTypesMap = assessment.getConfig().getMistakeTypes().stream().flatMap(m -> m.getAutograderProblemTypes().stream().map(p -> Map.entry(p, m)))
+				.distinct().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		var checkConfiguration = CheckConfiguration.fromProblemTypes(new ArrayList<>(problemTypesMap.keySet()));
 
 		try (TempLocation tempLocation = TempLocation.of(".autograder-tmp")) {
-			Linter autograder = Linter.builder(locale).threads(threads).tempLocation(tempLocation).maxProblemsPerCheck(100).build();
+			Linter autograder = Linter.builder(locale).threads(threads).tempLocation(tempLocation).maxProblemsPerCheck(-1).build();
 
 			Consumer<LinterStatus> statusConsumerWrapper = status -> statusConsumer.accept(autograder.translateMessage(status.getMessage()));
 
