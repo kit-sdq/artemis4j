@@ -7,24 +7,21 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import java.util.Arrays;
 import java.util.List;
 
-public record CourseDTO(@JsonProperty int id, @JsonProperty String title, @JsonProperty String shortName,
-                        @JsonProperty String instructorGroupName,
-                        @JsonProperty int numberOfInstructors, @JsonProperty int numberOfTeachingAssistants,
-                        @JsonProperty int numberOfEditors,
-                        @JsonProperty int numberOfStudents) {
+public record CourseDTO(@JsonProperty int id, @JsonProperty String title, @JsonProperty String shortName, @JsonProperty String instructorGroupName,
+		@JsonProperty int numberOfInstructors, @JsonProperty int numberOfTeachingAssistants, @JsonProperty int numberOfEditors,
+		@JsonProperty int numberOfStudents) {
 
-    public static List<CourseDTO> fetchAll(ArtemisClient client) throws ArtemisNetworkException {
-        var courses = ArtemisRequest.get().path(List.of("courses", "with-user-stats")).executeAndDecode(client,
-                CourseDTO[].class);
-        return Arrays.asList(courses);
-    }
+	public static List<CourseDTO> fetchAll(ArtemisClient client) throws ArtemisNetworkException {
+		var courses = ArtemisRequest.get().path(List.of("courses", "with-user-stats")).executeAndDecode(client, CourseDTO[].class);
+		return Arrays.asList(courses);
+	}
 
-    public static List<UserDTO> fetchAllTutors(ArtemisClient client, long courseId) throws ArtemisNetworkException {
-        var tutors = ArtemisRequest.get().path(List.of("courses", courseId, "tutors")).executeAndDecode(client, UserDTO[].class);
-        return Arrays.asList(tutors);
-    }
+	public static List<UserDTO> fetchAllTutors(ArtemisClient client, long courseId) throws ArtemisNetworkException {
+		var tutors = ArtemisRequest.get().path(List.of("courses", courseId, "tutors")).executeAndDecode(client, UserDTO[].class);
+		return Arrays.asList(tutors);
+	}
 
-    public static void removeTutor(ArtemisClient client, int courseId, String tutorLogin) throws ArtemisNetworkException {
-        ArtemisRequest.delete().path(List.of("courses", courseId, "tutors", tutorLogin)).execute(client);
-    }
+	public static void removeTutor(ArtemisClient client, int courseId, String tutorLogin) throws ArtemisNetworkException {
+		ArtemisRequest.delete().path(List.of("courses", courseId, "tutors", tutorLogin)).execute(client);
+	}
 }

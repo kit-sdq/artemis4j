@@ -1,7 +1,6 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
-import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
@@ -58,6 +57,7 @@ public final class ArtemisConnection {
 	}
 
 	public Course getCourseById(int id) throws ArtemisNetworkException {
-		return courses.get().stream().filter(c -> c.getId() == id).findAny().orElseThrow(() -> new IllegalArgumentException("No course with id " + id + " found"));
+		return courses.get().stream().filter(c -> c.getId() == id).findAny()
+				.orElseThrow(() -> new IllegalArgumentException("No course with id " + id + " found"));
 	}
 }

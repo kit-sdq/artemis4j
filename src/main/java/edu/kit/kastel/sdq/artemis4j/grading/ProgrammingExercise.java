@@ -88,6 +88,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
 	/**
 	 * Fetches all submissions from correction round 1 and 2 (if enabled).
+	 * 
 	 * @return
 	 * @throws ArtemisNetworkException
 	 */
