@@ -3,7 +3,6 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
-import edu.kit.kastel.sdq.artemis4j.grading.penalty.InvalidGradingConfigException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
@@ -71,7 +70,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 	/**
 	 * Fetches all submissions for this exercise. This may fetch *many* submissions,
 	 * and does not cache the result, so be careful.
-	 * 
+	 *
 	 * @param correctionRound The correction round to fetch submissions for
 	 * @param onlyOwn         Whether to only fetch submissions that the current
 	 *                        user has assessed
@@ -99,7 +98,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 	/**
 	 * Tries to lock the next submission for this exercise. If successful, returns
 	 * the assessment.
-	 * 
+	 *
 	 * @param correctionRound
 	 * @param gradingConfig
 	 * @return An empty optional if no submission was available to lock, otherwise
@@ -132,15 +131,19 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 	/**
 	 * Tries to lock a specific submission for this exercise. Locking is reentrant,
 	 * i.e. a single user may lock the same submission multiple times.
-	 * 
+	 *
 	 * @param submissionId
 	 * @param correctionRound
 	 * @param gradingConfig
 	 * @return An empty optional if a *different* user has already locked the
 	 *         submission, otherwise the assessment
-	 * @throws AnnotationMappingException
-	 * @throws ArtemisNetworkException
-	 * @throws InvalidGradingConfigException
+	 * @throws AnnotationMappingException If the annotations that were already
+	 *                                    present could not be mapped given the
+	 *                                    gradingConfig
+	 * @throws ArtemisNetworkException    Generic network failure
+	 * @throws MoreRecentSubmission       If the requested submission is not the
+	 *                                    most recent submission of the
+	 *                                    corresponding student (i.e. participation)
 	 */
 	public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig)
 			throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
@@ -172,11 +175,6 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
 		var submission = new ProgrammingSubmission(locked, this, correctionRound);
 		return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
-	}
-
-	public Optional<Assessment> tryLockSubmission(ProgrammingSubmission submission, GradingConfig gradingConfig)
-			throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
-		return this.tryLockSubmission(submission.getId(), submission.getCorrectionRound(), gradingConfig);
 	}
 
 	private void assertGradingConfigValid(GradingConfig gradingConfig) {

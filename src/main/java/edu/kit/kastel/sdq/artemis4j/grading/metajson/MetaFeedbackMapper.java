@@ -74,7 +74,7 @@ public class MetaFeedbackMapper {
 			for (var dto : dtos) {
 				var mistake = mistakes.get(dto.mistakeTypeId());
 				if (mistake == null) {
-					throw new MismatchedGradingConfigException("MistakeType with id " + dto.mistakeTypeId() + " not found in GradingConfig");
+					throw new MismatchedGradingConfigException("MistakeType with id " + dto.mistakeTypeId() + " not found in grading config");
 				}
 				annotations.add(new Annotation(dto, mistakes.get(dto.mistakeTypeId())));
 			}

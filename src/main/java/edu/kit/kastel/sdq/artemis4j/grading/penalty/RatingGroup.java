@@ -18,14 +18,17 @@ public final class RatingGroup {
 	private final List<MistakeType> mistakeTypes;
 
 	/* package-private */ RatingGroup(RatingGroupDTO dto) {
-		if (dto.negativeLimit() > dto.positiveLimit()) {
+		double negativeLimit = dto.negativeLimit() != null ? dto.negativeLimit() : Double.NEGATIVE_INFINITY;
+		double positiveLimit = dto.positiveLimit() != null ? dto.positiveLimit() : Double.POSITIVE_INFINITY;
+
+		if (negativeLimit > positiveLimit) {
 			throw new IllegalArgumentException("Invalid penalty range for rating group: %fP -- %fP".formatted(dto.negativeLimit(), dto.positiveLimit()));
 		}
 
 		this.id = dto.shortName();
 		this.displayName = new FormatString(dto.displayName(), dto.additionalDisplayNames());
-		this.minPenalty = dto.negativeLimit();
-		this.maxPenalty = dto.positiveLimit();
+		this.minPenalty = negativeLimit;
+		this.maxPenalty = positiveLimit;
 		this.mistakeTypes = new ArrayList<>();
 	}
 

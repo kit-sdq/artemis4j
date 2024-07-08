@@ -139,6 +139,10 @@ public class Assessment extends ArtemisConnectionHolder {
 			throw new IllegalArgumentException("Mistake type is not a custom annotation");
 		}
 
+		if (customScore > 0.0 && !this.config.isPositiveFeedbackAllowed()) {
+			throw new IllegalArgumentException("Custom annotations with positive scores are not allowed for this exercise");
+		}
+
 		var source = this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
 		this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source));
 	}
@@ -174,8 +178,8 @@ public class Assessment extends ArtemisConnectionHolder {
 				this.getConnection().getAssessor().toDTO());
 
 		// Sanity check
-		double feedbackPoints = result.feedbacks().stream().mapToDouble(FeedbackDTO::credits).sum();
-		if (absoluteScore != feedbackPoints) {
+		double feedbackPoints = Math.clamp(result.feedbacks().stream().mapToDouble(FeedbackDTO::credits).sum(), 0.0, this.getMaxPoints());
+		if (Math.abs(absoluteScore - feedbackPoints) > 1e-7) {
 			throw new IllegalStateException("Feedback points do not match the calculated points. Calculated " + absoluteScore + " but feedbacks sum up to "
 					+ feedbackPoints + " points.");
 		}

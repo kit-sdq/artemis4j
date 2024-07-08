@@ -2,10 +2,10 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
+import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
+import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 
 import java.nio.file.Path;
 import java.util.Objects;
@@ -66,7 +66,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
 	/**
 	 * The student can only be retrieved by instructors.
-	 * 
+	 *
 	 * @return
 	 */
 	public Optional<User> getStudent() {
@@ -94,6 +94,24 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 		return ClonedProgrammingSubmission.cloneSubmission(this, target, tokenOverride);
 	}
 
+	/**
+	 * Tries to lock this submission. Locking is reentrant.
+	 *
+	 * @param gradingConfig
+	 * @return An empty optional if a *different* user has already locked the
+	 *         submission, otherwise the assessment
+	 * @throws AnnotationMappingException If the annotations that were already
+	 *                                    present could not be mapped given the
+	 *                                    gradingConfig
+	 * @throws ArtemisNetworkException    Generic network failure
+	 * @throws MoreRecentSubmission       If the requested submission is not the
+	 *                                    most recent submission of the
+	 *                                    corresponding student (i.e. participation)
+	 */
+	public Optional<Assessment> tryLock(GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
+		return this.exercise.tryLockSubmission(this.getId(), this.getCorrectionRound(), gradingConfig);
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -107,28 +125,5 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(this.getId());
-	}
-
-	private void cloneRepositoryInto(String repositoryURL, Path target, String tokenOverride) throws ArtemisClientException {
-		var assessor = this.getConnection().getAssessor();
-
-		String username = assessor.getLogin();
-		String token;
-		if (tokenOverride != null) {
-			token = tokenOverride;
-		} else if (assessor.getGitToken().isPresent()) {
-			token = assessor.getGitToken().get();
-		} else if (this.getConnection().getClient().getPassword().isPresent()) {
-			token = this.getConnection().getClient().getPassword().get();
-		} else {
-			token = "";
-		}
-
-		try {
-			Git.cloneRepository().setDirectory(target.toAbsolutePath().toFile()).setRemote("origin").setURI(repositoryURL).setCloneAllBranches(true)
-					.setCloneSubmodules(false).setCredentialsProvider(new UsernamePasswordCredentialsProvider(username, token)).call();
-		} catch (GitAPIException e) {
-			throw new ArtemisClientException("Failed to clone the submission repository", e);
-		}
 	}
 }

@@ -15,6 +15,9 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
+/**
+ * This test demonstrates the intended use of the new version of artemis4j
+ */
 public class NewAPITest {
 	private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
 	private static final String ARTEMIS_USERNAME = System.getenv("ARTEMIS_USER");
@@ -46,7 +49,7 @@ public class NewAPITest {
 		// A config is always tailored to a specific exercise, and the constructor
 		// method throws if
 		// they don't match
-		var gradingConfig = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/grading-config-sheet1taskB.json")), exercise);
+		var gradingConfig = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config-newapi-test.json")), exercise);
 
 		// We lock the submission with id 524 for the first correction round
 		// You can also use tryLockNextSubmission(correctionRound, gradingConfig) to
@@ -77,31 +80,30 @@ public class NewAPITest {
 		}
 
 		// Add a non-custom annotation with a custom message
-		assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("complexCode").get(), "src/edu/kit/kastel/StringUtility.java", 12, 13,
+		assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("complexCode"), "src/edu/kit/kastel/StringUtility.java", 12, 13,
 				"this is a custom message");
 		assertEquals(-0.5, assessment.calculateTotalPointsOfAnnotations());
 
 		// Add a custom annotation
 		// The total points will not change, since the grading config specifies that the
 		// "comment" rating group cannot deduct points
-		assessment.addCustomAnnotation(gradingConfig.getMistakeTypeById("custom").get(), "src/edu/kit/kastel/StringUtility.java", 40, 40, "custom", -1.0);
+		assessment.addCustomAnnotation(gradingConfig.getMistakeTypeById("custom"), "src/edu/kit/kastel/StringUtility.java", 40, 40, "custom", -1.0);
 		assertEquals(-0.5, assessment.calculateTotalPointsOfAnnotations());
 
 		// unnecessaryComplex has a threshold of 5 annotations, so adding 4 doesn't
 		// change to total points
 		for (int i = 0; i < 4; i++) {
-			assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("unnecessaryComplex").get(), "src/edu/kit/kastel/StringUtility.java", 13, 13,
-					null);
+			assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("unnecessaryComplex"), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
 		}
 		assertEquals(-0.5, assessment.calculateTotalPointsOfAnnotations());
 
 		// Adding a fifth annotation will deduct 0.5 points
-		assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("unnecessaryComplex").get(), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
+		assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("unnecessaryComplex"), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
 		assertEquals(-1.0, assessment.calculateTotalPointsOfAnnotations());
 
 		// The 'wrongLoopType' is set to be reported, but does not score, so the points
 		// do not change
-		assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("wrongLoopType").get(), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
+		assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("wrongLoopType"), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
 		assertEquals(-1.0, assessment.calculateTotalPointsOfAnnotations());
 
 		// Above, we only checked the points deducted by annotations
