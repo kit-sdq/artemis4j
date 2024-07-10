@@ -42,7 +42,7 @@
 			"additionalButtonTexts": {
 				"en": "Custom Comment"
 			},
-			"autograderProblemTypes": ["AVOID_LABELS"]
+			"autograderProblemTypes": ["AVOID_LABELS", "ASSERT"]
 		},
 		{
 			"shortName": "tryCatch",

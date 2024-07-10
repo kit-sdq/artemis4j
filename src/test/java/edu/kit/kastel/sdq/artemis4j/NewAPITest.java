@@ -55,7 +55,7 @@ public class NewAPITest {
 		// You can also use tryLockNextSubmission(correctionRound, gradingConfig) to
 		// request the next submission to grade
 		// without supplying an id
-		var assessment = exercise.tryLockSubmission(531, 0, gradingConfig).orElseThrow();
+		var assessment = exercise.tryLockSubmission(538, 0, gradingConfig).orElseThrow();
 		assessment.clearAnnotations();
 
 		// Let's clone the test repository & submission into a temporary directory
@@ -108,9 +108,7 @@ public class NewAPITest {
 
 		// Above, we only checked the points deducted by annotations
 		// We can also look at the total points, including tests
-		// The submission passed all tests, so the total points are the maximum points
-		// minus the points deducted by annotations
-		assertEquals(assessment.getMaxPoints() - 1.0, assessment.calculateTotalPoints());
+		assertEquals(assessment.calculateTotalPointsOfTests() - 1.0, assessment.calculateTotalPoints());
 
 		try {
 			// Save & submit the assessment, and translate all messages to German
