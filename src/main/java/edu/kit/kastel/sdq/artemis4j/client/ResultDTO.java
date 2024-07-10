@@ -2,10 +2,8 @@
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -24,19 +22,5 @@ public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime compl
 
 	public static ResultDTO forAssessmentSubmission(long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
 		return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor);
-	}
-
-	public ResultDTO fetchFeedbacks(ArtemisClient client, ProgrammingSubmissionDTO programmingSubmissionDTO) throws ArtemisNetworkException {
-		if (this.feedbacks() != null) {
-			return this;
-		}
-
-		FeedbackDTO[] feedbacks = ArtemisRequest.get()
-				.path(List.of("participations", programmingSubmissionDTO.participation().id(), "results", this.id(), "details"))
-				.executeAndDecode(client, FeedbackDTO[].class);
-
-		assert feedbacks != null;
-
-		return new ResultDTO(this.id(), this.completionDate(), this.successful, this.score, this.rated, Arrays.asList(feedbacks), this.assessor);
 	}
 }

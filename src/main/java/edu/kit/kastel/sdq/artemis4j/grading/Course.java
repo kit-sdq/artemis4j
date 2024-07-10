@@ -57,6 +57,18 @@ public class Course extends ArtemisConnectionHolder {
 	}
 
 	/**
+	 * Gets a programming exercise by its id.
+	 *
+	 * @param id the id of the exercise
+	 * @return the exercise
+	 * @throws ArtemisNetworkException
+	 */
+	public ProgrammingExercise getProgrammingExerciseById(long id) throws ArtemisNetworkException {
+		return this.getProgrammingExercises().stream().filter(e -> e.getId() == id).findAny()
+				.orElseThrow(() -> new IllegalArgumentException("No programming exercise with id " + id + " found"));
+	}
+
+	/**
 	 * Gets all exams of this course. The result is fetched lazily and then cached.
 	 *
 	 * @return

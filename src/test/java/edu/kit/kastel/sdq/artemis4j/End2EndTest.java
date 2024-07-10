@@ -100,7 +100,7 @@ class End2EndTest {
 	}
 
 	@Test
-	void testCreationOfCustomAnnotation() throws IOException, ArtemisClientException {
+	void testCreationOfCustomAnnotation() throws ArtemisClientException {
 		MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("custom");
 
 		this.assessment.addCustomAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, FEEDBACK_TEXT, -2.0);

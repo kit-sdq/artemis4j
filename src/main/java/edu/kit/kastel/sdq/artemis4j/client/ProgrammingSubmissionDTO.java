@@ -52,28 +52,30 @@ public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty Part
 	}
 
 	private ProgrammingSubmissionDTO fetchLongFeedback(ArtemisClient client) throws ArtemisNetworkException {
-		// this ensures that the feedbacks are present in the results (not always the
-		// case)
-		ProgrammingSubmissionDTO submission = this.fetchFeedbacks(client);
-
-		for (var result : submission.results()) {
-			for (int i = 0; i < result.feedbacks().size(); i++) {
-				var feedback = result.feedbacks().get(i);
-				if (feedback.hasLongFeedbackText()) {
-					String detailText = FeedbackDTO.fetchLongFeedback(client, result.id(), feedback.id());
-					result.feedbacks().set(i, new FeedbackDTO(feedback.type(), feedback.id(), feedback.credits(), feedback.positive(), feedback.visibility(),
-							feedback.text(), feedback.reference(), detailText, true, feedback.testCase()));
-				}
-			}
-		}
-
-		return submission;
-	}
-
-	private ProgrammingSubmissionDTO fetchFeedbacks(ArtemisClient client) throws ArtemisNetworkException {
 		List<ResultDTO> results = new ArrayList<>(this.results().size());
 		for (var result : this.results()) {
-			results.add(result.fetchFeedbacks(client, this));
+			if (result.feedbacks() == null) {
+				continue;
+			}
+
+			List<FeedbackDTO> cleanedFeedbacks = new ArrayList<>(result.feedbacks().size());
+			for (var feedback : result.feedbacks()) {
+				if (feedback == null) {
+					continue;
+				}
+
+				String detailText = feedback.detailText();
+				if (feedback.hasLongFeedbackText()) {
+					detailText = FeedbackDTO.fetchLongFeedback(client, result.id(), feedback.id());
+				}
+				FeedbackDTO newFeedback = new FeedbackDTO(feedback.type(), feedback.id(), feedback.credits(), feedback.positive(), feedback.visibility(),
+						feedback.text(), feedback.reference(), detailText, feedback.hasLongFeedbackText(), feedback.testCase());
+				cleanedFeedbacks.add(newFeedback);
+			}
+
+			ResultDTO newResult = new ResultDTO(result.id(), result.completionDate(), result.successful(), result.score(), result.rated(), cleanedFeedbacks,
+					result.assessor());
+			results.add(newResult);
 		}
 
 		return new ProgrammingSubmissionDTO(this.id(), this.participation(), this.commitHash(), this.buildFailed(), results, this.submissionDate());
