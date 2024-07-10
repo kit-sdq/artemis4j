@@ -206,7 +206,11 @@ public class Assessment extends ArtemisConnectionHolder {
 	 * @throws AnnotationMappingException
 	 * @throws ArtemisNetworkException
 	 */
-	public void submit(Locale locale) throws AnnotationMappingException, ArtemisNetworkException {
+	public void submit(Locale locale) throws AnnotationMappingException, ArtemisNetworkException, InvalidAssessmentException {
+		if (this.annotations.isEmpty()) {
+			throw new InvalidAssessmentException("For Artemis reasons, all assessments must have at least one annotation");
+		}
+
 		this.internalSaveOrSubmit(true, locale);
 	}
 
