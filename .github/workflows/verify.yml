@@ -18,7 +18,7 @@ env:
   STUDENT_USER: "student_e2e"
   ARTEMIS_URL: "https://artemis-test.sdq.kastel.kit.edu"
   COURSE_ID: "4"
-  PROGRAMMING_EXERCISE_ID: "14"
+  PROGRAMMING_EXERCISE_ID: "41"
 
 jobs:
   pre_job:
