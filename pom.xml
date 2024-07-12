@@ -4,7 +4,7 @@
 
   <groupId>edu.kit.kastel.sdq</groupId>
   <artifactId>artemis4j</artifactId>
-  <version>6.7.5</version>
+  <version>7.4.1-SNAPSHOT</version>
 
   <name>Artemis4J</name>
   <description>Artemis4J is a Java library for interacting with the Artemis teaching system.</description>
@@ -53,7 +53,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <spotless.version>2.43.0</spotless.version>
-    <jackson.version>2.17.0</jackson.version>
+    <jackson.version>2.17.1</jackson.version>
     <slf4j.version>2.0.13</slf4j.version>
     <okhttp.version>4.12.0</okhttp.version>
     <junit.version>5.10.2</junit.version>
@@ -203,7 +203,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-clean-plugin</artifactId>
-        <version>3.3.2</version>
+        <version>3.4.0</version>
       </plugin>
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
@@ -213,7 +213,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-javadoc-plugin</artifactId>
-        <version>3.6.3</version>
+        <version>3.7.0</version>
         <executions>
           <execution>
             <id>attach-javadocs</id>
@@ -239,7 +239,7 @@
       <plugin>
         <groupId>org.apache.maven.plugins</groupId>
         <artifactId>maven-surefire-plugin</artifactId>
-        <version>3.2.5</version>
+        <version>3.3.0</version>
       </plugin>
       <plugin>
         <groupId>org.codehaus.mojo</groupId>
@@ -301,7 +301,7 @@
           <plugin>
             <groupId>org.sonatype.plugins</groupId>
             <artifactId>nexus-staging-maven-plugin</artifactId>
-            <version>1.6.13</version>
+            <version>1.7.0</version>
             <extensions>true</extensions>
             <configuration>
               <serverId>ossrh-kitsdq</serverId>
