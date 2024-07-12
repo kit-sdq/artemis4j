@@ -28,4 +28,9 @@ public class TestResult {
 	protected FeedbackDTO getDto() {
 		return this.dto;
 	}
+
+	@Override
+	public String toString() {
+		return "%s: %.3fP".formatted(this.getTestName(), this.getPoints());
+	}
 }

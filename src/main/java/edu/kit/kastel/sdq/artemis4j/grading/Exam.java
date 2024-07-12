@@ -43,4 +43,9 @@ public class Exam extends ArtemisConnectionHolder {
 	public ExamExerciseGroup getExerciseGroupById(long id) throws ArtemisNetworkException {
 		return this.exerciseGroups.get().stream().filter(group -> group.getId() == id).findFirst().orElseThrow();
 	}
+
+	@Override
+	public String toString() {
+		return this.getTitle();
+	}
 }

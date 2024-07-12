@@ -127,7 +127,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 		try {
 			var lockResult = this.tryLockSubmission(dto.get().id(), correctionRound, gradingConfig);
 			return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
-		} catch (MoreRecentSubmission ex) {
+		} catch (MoreRecentSubmissionException ex) {
 			// The student has submitted a new submission between our two lock calls
 			// We assume that this doesn't happen to make downstream error handling simpler
 			throw new IllegalStateException("A new submission has been created between successive locking calls", ex);
@@ -147,12 +147,12 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 	 *                                    present could not be mapped given the
 	 *                                    gradingConfig
 	 * @throws ArtemisNetworkException    Generic network failure
-	 * @throws MoreRecentSubmission       If the requested submission is not the
+	 * @throws MoreRecentSubmissionException       If the requested submission is not the
 	 *                                    most recent submission of the
 	 *                                    corresponding student (i.e. participation)
 	 */
 	public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig)
-			throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
+			throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {
 		this.assertGradingConfigValid(gradingConfig);
 
 		var locked = ProgrammingSubmissionDTO.lock(this.getConnection().getClient(), submissionId, correctionRound);
@@ -161,7 +161,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 			// Artemis automatically returns the most recent submission associated with the
 			// same participation
 			// as the requested submission
-			throw new MoreRecentSubmission(submissionId, locked.id(), locked.participation().id());
+			throw new MoreRecentSubmissionException(submissionId, locked.id(), locked.participation().id());
 		}
 
 		if (locked.results() == null) {
@@ -181,6 +181,11 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
 		var submission = new ProgrammingSubmission(locked, this, correctionRound);
 		return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
+	}
+
+	@Override
+	public String toString() {
+		return this.getTitle();
 	}
 
 	private void assertGradingConfigValid(GradingConfig gradingConfig) {

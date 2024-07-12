@@ -82,4 +82,9 @@ public class Course extends ArtemisConnectionHolder {
 		return this.exams.get().stream().filter(e -> e.getId() == id).findAny()
 				.orElseThrow(() -> new IllegalArgumentException("No exam with id " + id + " found"));
 	}
+
+	@Override
+	public String toString() {
+		return this.getTitle();
+	}
 }

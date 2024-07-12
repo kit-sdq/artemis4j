@@ -37,4 +37,9 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
 	public ProgrammingExercise getProgrammingExerciseById(long id) {
 		return this.exercises.stream().filter(exercise -> exercise.getId() == id).findFirst().orElseThrow();
 	}
+
+	@Override
+	public String toString() {
+		return this.getTitle();
+	}
 }

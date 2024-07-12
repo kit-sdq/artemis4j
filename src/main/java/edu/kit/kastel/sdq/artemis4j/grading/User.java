@@ -37,4 +37,9 @@ public class User {
 	protected UserDTO toDTO() {
 		return this.dto;
 	}
+
+	@Override
+	public String toString() {
+		return this.getLogin();
+	}
 }

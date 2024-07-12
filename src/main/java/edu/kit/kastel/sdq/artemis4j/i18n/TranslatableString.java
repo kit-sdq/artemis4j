@@ -1,7 +1,6 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.i18n;
 
-import java.text.MessageFormat;
 import java.util.Locale;
 
 public class TranslatableString {
@@ -11,10 +10,6 @@ public class TranslatableString {
 	TranslatableString(FormatString formatString, Object[] args) {
 		this.formatString = formatString;
 		this.args = args;
-	}
-
-	public String translateTo(String language) {
-		return this.translateTo(Locale.of(language));
 	}
 
 	public String translateTo(Locale locale) {
@@ -30,12 +25,12 @@ public class TranslatableString {
 		return this.formatString.translateTo(locale, translatedArgs);
 	}
 
-	@Override
-	public String toString() {
+	public String translateToDefault() {
 		return this.translateTo((Locale) null);
 	}
 
-	private static MessageFormat escapeStringForMessageFormat(String string) {
-		return new MessageFormat("'" + string.replace("'", "''") + "'");
+	@Override
+	public String toString() {
+		return this.translateToDefault();
 	}
 }

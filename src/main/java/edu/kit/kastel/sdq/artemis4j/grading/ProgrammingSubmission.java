@@ -113,11 +113,11 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 	 *                                    present could not be mapped given the
 	 *                                    gradingConfig
 	 * @throws ArtemisNetworkException    Generic network failure
-	 * @throws MoreRecentSubmission       If the requested submission is not the
+	 * @throws MoreRecentSubmissionException       If the requested submission is not the
 	 *                                    most recent submission of the
 	 *                                    corresponding student (i.e. participation)
 	 */
-	public Optional<Assessment> tryLock(GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmission {
+	public Optional<Assessment> tryLock(GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {
 		return this.exercise.tryLockSubmission(this.getId(), this.getCorrectionRound(), gradingConfig);
 	}
 
