@@ -3,7 +3,6 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.Locale;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
@@ -20,7 +19,6 @@ public final class ArtemisConnection {
 	private final ArtemisClient client;
 	private final LazyNetworkValue<User> assessor;
 	private final LazyNetworkValue<List<Course>> courses;
-	private Locale locale = Locale.GERMANY;
 
 	public static ArtemisConnection connectWithUsernamePassword(ArtemisInstance artemis, String username, String password) throws ArtemisNetworkException {
 		return new ArtemisConnection(ArtemisClient.fromUsernamePassword(artemis, username, password));
@@ -36,20 +34,12 @@ public final class ArtemisConnection {
 		this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this.client).stream().map(dto -> new Course(dto, this)).toList());
 	}
 
-	public void setLocale(Locale locale) {
-		this.locale = locale;
-	}
-
 	public ArtemisClient getClient() {
 		return client;
 	}
 
 	public User getAssessor() throws ArtemisNetworkException {
 		return assessor.get();
-	}
-
-	public Locale getLocale() {
-		return this.locale;
 	}
 
 	public List<Course> getCourses() throws ArtemisNetworkException {
