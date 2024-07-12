@@ -1,14 +1,15 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
-import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
-import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
-import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+
+import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
+import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
+import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
 /* package-private*/ final class FeedbackSplitter {
 	private static final String LINE_SEPARATOR = "\n";

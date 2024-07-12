@@ -1,13 +1,14 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
-import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
-import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+
+import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
+import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
 public final class RatingGroup {
 	private final String id;

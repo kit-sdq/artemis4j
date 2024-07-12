@@ -1,10 +1,11 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 public record CourseDTO(@JsonProperty int id, @JsonProperty String title, @JsonProperty String shortName, @JsonProperty String instructorGroupName,
 		@JsonProperty int numberOfInstructors, @JsonProperty int numberOfTeachingAssistants, @JsonProperty int numberOfEditors,

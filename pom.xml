@@ -173,7 +173,9 @@
               <!--suppress UnresolvedMavenProperty -->
               <file>formatter.xml</file>
             </eclipse>
-            <importOrder />
+            <importOrder>
+              <file>${maven.multiModuleProjectDirectory}/spotless.importorder</file>
+            </importOrder>
             <removeUnusedImports />
             <licenseHeader>
               <file>header.txt</file>

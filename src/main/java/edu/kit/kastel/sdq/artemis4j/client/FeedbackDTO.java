@@ -1,9 +1,10 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
-import java.util.List;
 
 /**
  * Corresponds to an annotation as part of an assessment

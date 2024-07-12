@@ -1,11 +1,12 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import java.util.Collections;
+import java.util.List;
+
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
-import java.util.Collections;
-import java.util.List;
 
 public class Exam extends ArtemisConnectionHolder {
 	private final ExamDTO exam;

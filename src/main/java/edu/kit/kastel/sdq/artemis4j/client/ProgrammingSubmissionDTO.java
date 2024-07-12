@@ -1,12 +1,13 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty ParticipationDTO participation, @JsonProperty String commitHash,
 		@JsonProperty boolean buildFailed, @JsonProperty List<ResultDTO> results, @JsonProperty ZonedDateTime submissionDate) {

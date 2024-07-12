@@ -1,10 +1,11 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import java.time.ZonedDateTime;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 public record ExamDTO(@JsonProperty long id, @JsonProperty String title, @JsonProperty int numberOfCorrectionRoundsInExam,
 		@JsonProperty ZonedDateTime startDate, @JsonProperty ZonedDateTime endDate, @JsonProperty List<ExerciseGroupDTO> exerciseGroups) {

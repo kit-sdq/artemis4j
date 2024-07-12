@@ -1,10 +1,11 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
-import java.util.List;
 
 public final class StackingPenaltyRule implements PenaltyRule {
 	private final double penalty;

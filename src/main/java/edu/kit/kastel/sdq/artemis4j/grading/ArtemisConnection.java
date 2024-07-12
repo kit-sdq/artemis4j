@@ -1,15 +1,16 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import java.util.Collections;
+import java.util.List;
+import java.util.Locale;
+
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
-import java.util.Collections;
-import java.util.List;
-import java.util.Locale;
 
 /**
  * Represents a connection to Artemis, holding the client and providing access

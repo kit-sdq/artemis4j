@@ -1,8 +1,9 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
-import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
 import java.util.List;
+
+import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
 
 public class ExamExerciseGroup extends ArtemisConnectionHolder {
 	private final ExerciseGroupDTO dto;

@@ -1,10 +1,11 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
-import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import java.util.Arrays;
 import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonProperty;
+import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 public record StudentExamDTO(@JsonProperty long id, @JsonProperty boolean submitted, @JsonProperty UserDTO user) {
 	public static List<StudentExamDTO> fetchAll(ArtemisClient client, int courseId, long examId) throws ArtemisNetworkException {

@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.artemis4j.client;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
 import okhttp3.HttpUrl;
 
 public class ArtemisInstance {

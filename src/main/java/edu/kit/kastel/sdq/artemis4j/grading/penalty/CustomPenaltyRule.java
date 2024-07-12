@@ -1,8 +1,9 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
-import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import java.util.List;
+
+import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 
 public final class CustomPenaltyRule implements PenaltyRule {
 	@Override
