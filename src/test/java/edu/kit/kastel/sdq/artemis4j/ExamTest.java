@@ -51,7 +51,7 @@ public class ExamTest {
 		Assessment roundOneAssessment = roundOneSubmission.tryLock(config).orElseThrow();
 		roundOneAssessment.clearAnnotations();
 		roundOneAssessment.addCustomAnnotation(config.getMistakeTypeById("custom"), "src/edu/kit/informatik/BubbleSort.java", 1, 2, ROUND_ONE_FEEDBACK, -2.0);
-		roundOneAssessment.submit(Locale.GERMANY);
+		roundOneAssessment.submit();
 
 		ProgrammingSubmission roundTwoSubmission = findSubmission(exercise.fetchSubmissions(1), STUDENT_USER);
 		Assessment roundTwoAssessment = roundTwoSubmission.tryLock(config).orElseThrow();
@@ -64,7 +64,7 @@ public class ExamTest {
 		assertTrue(annotations.stream()
 				.anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_SECOND_ROUND && a.getCustomMessage().equals(Optional.of(ROUND_TWO_FEEDBACK))));
 
-		roundTwoAssessment.submit(Locale.GERMANY);
+		roundTwoAssessment.submit();
 	}
 
 	private ProgrammingSubmission findSubmission(List<ProgrammingSubmission> submissions, String student) {

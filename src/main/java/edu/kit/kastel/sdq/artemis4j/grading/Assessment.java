@@ -52,13 +52,19 @@ public class Assessment extends ArtemisConnectionHolder {
 	private final ProgrammingSubmission programmingSubmission;
 	private final GradingConfig config;
 	private final int correctionRound;
+	private final Locale studentLocale;
 
-	public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound)
+	public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound) throws AnnotationMappingException {
+		this(result, config, programmingSubmission, correctionRound, Locale.GERMANY);
+	}
+
+	public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound, Locale studentLocale)
 			throws AnnotationMappingException {
 		super(programmingSubmission);
 		this.programmingSubmission = programmingSubmission;
 		this.config = config;
 		this.correctionRound = correctionRound;
+		this.studentLocale = studentLocale;
 
 		// Unpack the result
 		this.annotations = MetaFeedbackMapper.parseMetaFeedbacks(result.feedbacks(), config);
@@ -194,8 +200,8 @@ public class Assessment extends ArtemisConnectionHolder {
 	 * @throws AnnotationMappingException
 	 * @throws ArtemisNetworkException
 	 */
-	public void save(Locale locale) throws AnnotationMappingException, ArtemisNetworkException {
-		this.internalSaveOrSubmit(false, locale);
+	public void save() throws AnnotationMappingException, ArtemisNetworkException {
+		this.internalSaveOrSubmit(false, this.studentLocale);
 	}
 
 	/**
@@ -206,12 +212,12 @@ public class Assessment extends ArtemisConnectionHolder {
 	 * @throws AnnotationMappingException
 	 * @throws ArtemisNetworkException
 	 */
-	public void submit(Locale locale) throws AnnotationMappingException, ArtemisNetworkException, InvalidAssessmentException {
+	public void submit() throws AnnotationMappingException, ArtemisNetworkException, InvalidAssessmentException {
 		if (this.annotations.isEmpty()) {
 			throw new InvalidAssessmentException("For Artemis reasons, all assessments must have at least one annotation");
 		}
 
-		this.internalSaveOrSubmit(true, locale);
+		this.internalSaveOrSubmit(true, this.studentLocale);
 	}
 
 	/**

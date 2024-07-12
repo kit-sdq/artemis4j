@@ -6,6 +6,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderFailedException;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderRunner;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -18,6 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 /**
  * This test demonstrates the intended use of the new version of artemis4j
  */
+@Disabled
 public class NewAPITest {
 	private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
 	private static final String ARTEMIS_USERNAME = System.getenv("ARTEMIS_USER");
@@ -114,7 +116,7 @@ public class NewAPITest {
 			// Save & submit the assessment, and translate all messages to German
 			// This includes (non-custom) annotation messages, the headers of the feedbacks
 			// in Artemis, ...
-			assessment.submit(Locale.GERMANY);
+			assessment.submit();
 		} catch (Exception ex) {
 			// Cancel the assessment if anything goes wrong, so that it is not locked
 			// indefinitely

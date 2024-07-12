@@ -34,7 +34,7 @@ public final class AutograderRunner {
 				.distinct().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
 		var checkConfiguration = CheckConfiguration.fromProblemTypes(new ArrayList<>(problemTypesMap.keySet()));
 
-		try (TempLocation tempLocation = TempLocation.of(".autograder-tmp")) {
+		try (TempLocation tempLocation = TempLocation.random()) {
 			Linter autograder = Linter.builder(locale).threads(threads).tempLocation(tempLocation).maxProblemsPerCheck(-1).build();
 
 			Consumer<LinterStatus> statusConsumerWrapper = status -> statusConsumer.accept(autograder.translateMessage(status.getMessage()));

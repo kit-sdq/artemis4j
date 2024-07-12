@@ -77,7 +77,7 @@ class End2EndTest {
 
 	private void cleanupFeedback() throws ArtemisClientException {
 		this.assessment.clearAnnotations();
-		this.assessment.submit(Locale.GERMANY);
+		this.assessment.submit();
 	}
 
 	@Test
@@ -87,7 +87,7 @@ class End2EndTest {
 		this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", // TODO: the file path did not have .java before
 				1, 2, null);
 
-		this.assessment.submit(Locale.GERMANY);
+		this.assessment.submit();
 
 		// Check Assessments
 		this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
@@ -104,7 +104,7 @@ class End2EndTest {
 		MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("custom");
 
 		this.assessment.addCustomAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, FEEDBACK_TEXT, -2.0);
-		this.assessment.submit(Locale.GERMANY);
+		this.assessment.submit();
 
 		// Check Assessments
 		this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();

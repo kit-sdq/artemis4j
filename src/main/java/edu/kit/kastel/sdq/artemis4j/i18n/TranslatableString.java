@@ -32,7 +32,7 @@ public class TranslatableString {
 
 	@Override
 	public String toString() {
-		throw new IllegalStateException("Translate this string to a specific language before using it.");
+		return this.translateTo((Locale) null);
 	}
 
 	private static MessageFormat escapeStringForMessageFormat(String string) {
