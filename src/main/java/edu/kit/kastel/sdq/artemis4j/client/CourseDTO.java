@@ -24,4 +24,10 @@ public record CourseDTO(@JsonProperty int id, @JsonProperty String title, @JsonP
 	public static void removeTutor(ArtemisClient client, int courseId, String tutorLogin) throws ArtemisNetworkException {
 		ArtemisRequest.delete().path(List.of("courses", courseId, "tutors", tutorLogin)).execute(client);
 	}
+
+	public static List<GenericSubmissionDTO> fetchLockedSubmissions(ArtemisClient client, int courseId) throws ArtemisNetworkException {
+		var submissions = ArtemisRequest.get().path(List.of("courses", courseId, "lockedSubmissions"))
+				.executeAndDecodeMaybe(client, GenericSubmissionDTO[].class).orElse(new GenericSubmissionDTO[0]);
+		return Arrays.asList(submissions);
+	}
 }

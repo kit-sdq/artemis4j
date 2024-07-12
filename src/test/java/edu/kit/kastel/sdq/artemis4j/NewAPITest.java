@@ -43,6 +43,11 @@ public class NewAPITest {
 		var course = connection.getCourses().getFirst();
 		System.out.println("Course is " + course.getTitle());
 
+		// Check how many locks we hold across the entire course
+		System.out.println("Currently " + course.fetchLockedSubmissionCount() + " submissions locked in the course");
+		// We can also look at this value for a specific exercise
+		System.out.println("Currently " + course.getProgrammingExerciseById(47).fetchLockedSubmissionCount(0) + " submissions locked in exercise");
+
 		// Get the first exercise (not the exercise with id 0!) in the course
 		var exercise = course.getProgrammingExercises().getFirst();
 		System.out.println("Exercise is " + exercise.getTitle());

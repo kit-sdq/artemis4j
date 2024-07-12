@@ -88,7 +88,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
 	/**
 	 * Fetches all submissions from correction round 1 and 2 (if enabled).
-	 * 
+	 *
 	 * @return
 	 * @throws ArtemisNetworkException
 	 */
@@ -182,6 +182,14 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
 		var submission = new ProgrammingSubmission(locked, this, correctionRound);
 		return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
+	}
+
+	public int fetchOwnSubmissionCount(int correctionRound) throws ArtemisNetworkException {
+		return this.fetchSubmissions(correctionRound, true).size();
+	}
+
+	public int fetchLockedSubmissionCount(int correctionRound) throws ArtemisNetworkException {
+		return (int) this.fetchSubmissions(correctionRound, true).stream().filter(s -> !s.isSubmitted()).count();
 	}
 
 	@Override

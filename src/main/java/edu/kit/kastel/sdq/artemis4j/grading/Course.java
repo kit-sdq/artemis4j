@@ -83,6 +83,10 @@ public class Course extends ArtemisConnectionHolder {
 				.orElseThrow(() -> new IllegalArgumentException("No exam with id " + id + " found"));
 	}
 
+	public int fetchLockedSubmissionCount() throws ArtemisNetworkException {
+		return CourseDTO.fetchLockedSubmissions(this.getConnection().getClient(), this.getId()).size();
+	}
+
 	@Override
 	public String toString() {
 		return this.getTitle();

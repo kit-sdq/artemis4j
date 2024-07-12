@@ -7,7 +7,9 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import edu.kit.kastel.sdq.artemis4j.client.AssessmentType;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 
@@ -64,15 +66,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 		return this.dto.buildFailed();
 	}
 
-	public Optional<Boolean> hasMandatoryTestFailed() {
-		var latestResult = this.dto.results().getLast();
-		if (latestResult != null) {
-			return Optional.of(latestResult.score() == 0.0);
-		} else {
-			return Optional.empty();
-		}
-	}
-
 	/**
 	 * The student can only be retrieved by instructors.
 	 *
@@ -122,6 +115,16 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 		return this.exercise.tryLockSubmission(this.getId(), this.getCorrectionRound(), gradingConfig);
 	}
 
+	public boolean isSubmitted() {
+		var result = this.getRelevantResult();
+		if (result.isEmpty() || result.get().completionDate() == null) {
+			return false;
+		}
+
+		var assessmentType = result.get().assessmentType();
+		return assessmentType == AssessmentType.MANUAL || assessmentType == AssessmentType.SEMI_AUTOMATIC;
+	}
+
 	@Override
 	public boolean equals(Object o) {
 		if (this == o)
@@ -135,5 +138,19 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 	@Override
 	public int hashCode() {
 		return Objects.hashCode(this.getId());
+	}
+
+	private Optional<ResultDTO> getRelevantResult() {
+		if (this.dto.results().isEmpty()) {
+			return Optional.empty();
+		} else if (this.dto.results().size() == 1) {
+			// We only have one result, so the submission has
+			// probably been created for a specific correction round,
+			// or we only have one correction round
+			return Optional.of(this.dto.results().get(0));
+		} else {
+			// More than one result, so probably multiple correction rounds
+			return Optional.of(this.dto.results().get(this.correctionRound));
+		}
 	}
 }

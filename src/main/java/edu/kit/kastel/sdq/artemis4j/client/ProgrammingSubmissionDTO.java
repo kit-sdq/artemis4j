@@ -74,7 +74,7 @@ public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty Part
 			}
 
 			ResultDTO newResult = new ResultDTO(result.id(), result.completionDate(), result.successful(), result.score(), result.rated(), cleanedFeedbacks,
-					result.assessor());
+					result.assessor(), result.assessmentType());
 			results.add(newResult);
 		}
 
