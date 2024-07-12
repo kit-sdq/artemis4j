@@ -2,7 +2,6 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;

@@ -11,7 +11,6 @@ import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.ClonedProgrammingSubmission;
-
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;

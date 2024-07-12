@@ -1,11 +1,10 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import okhttp3.HttpUrl;
-
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import okhttp3.HttpUrl;
 
 public class ArtemisInstance {
 	// e.g. https://

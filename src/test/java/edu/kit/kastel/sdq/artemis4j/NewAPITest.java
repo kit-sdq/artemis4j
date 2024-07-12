@@ -1,20 +1,19 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderFailedException;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderRunner;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
-
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Locale;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
 
 /**
  * This test demonstrates the intended use of the new version of artemis4j

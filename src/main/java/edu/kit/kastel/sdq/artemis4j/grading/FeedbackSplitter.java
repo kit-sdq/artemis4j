@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
-
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;

@@ -1,22 +1,20 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
-import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
-import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
-import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.MetaFeedbackMapper;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.Points;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.RatingGroup;
-import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
-import org.slf4j.Logger;
-
+import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
+import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -25,6 +23,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
 
 /**
  * An active assessment of a submission for which we hold a lock. This class
@@ -54,7 +53,8 @@ public class Assessment extends ArtemisConnectionHolder {
 	private final int correctionRound;
 	private final Locale studentLocale;
 
-	public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound) throws AnnotationMappingException {
+	public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound)
+			throws AnnotationMappingException {
 		this(result, config, programmingSubmission, correctionRound, Locale.GERMANY);
 	}
 

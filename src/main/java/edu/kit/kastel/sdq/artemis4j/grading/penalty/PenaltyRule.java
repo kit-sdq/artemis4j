@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
-
 import java.util.List;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "shortName")

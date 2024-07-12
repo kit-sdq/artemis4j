@@ -3,7 +3,6 @@ package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

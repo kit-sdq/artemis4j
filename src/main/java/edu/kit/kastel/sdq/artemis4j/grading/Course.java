@@ -6,7 +6,6 @@ import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
-
 import java.util.ArrayList;
 import java.util.List;
 

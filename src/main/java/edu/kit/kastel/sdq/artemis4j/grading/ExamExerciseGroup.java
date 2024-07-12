@@ -2,7 +2,6 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
-
 import java.util.List;
 
 public class ExamExerciseGroup extends ArtemisConnectionHolder {

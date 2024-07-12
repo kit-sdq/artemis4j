@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 import de.firemage.autograder.core.ProblemType;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
-
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;

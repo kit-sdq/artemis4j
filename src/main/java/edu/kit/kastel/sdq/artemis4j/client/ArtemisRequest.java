@@ -2,12 +2,11 @@
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
-import okhttp3.Request;
-
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import okhttp3.Request;
 
 public class ArtemisRequest {
 	private final String method;

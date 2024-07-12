@@ -173,6 +173,7 @@
               <!--suppress UnresolvedMavenProperty -->
               <file>formatter.xml</file>
             </eclipse>
+            <importOrder />
             <removeUnusedImports />
             <licenseHeader>
               <file>header.txt</file>

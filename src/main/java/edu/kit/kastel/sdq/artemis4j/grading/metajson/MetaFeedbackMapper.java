@@ -2,21 +2,20 @@
 package edu.kit.kastel.sdq.artemis4j.grading.metajson;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
+import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
+import edu.kit.kastel.sdq.artemis4j.grading.MismatchedGradingConfigException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
-import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
-import edu.kit.kastel.sdq.artemis4j.grading.MismatchedGradingConfigException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class MetaFeedbackMapper {
 	private static final Logger log = LoggerFactory.getLogger(MetaFeedbackMapper.class);

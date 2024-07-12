@@ -3,7 +3,6 @@ package edu.kit.kastel.sdq.artemis4j.client;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
-
 import java.util.Arrays;
 import java.util.List;
 

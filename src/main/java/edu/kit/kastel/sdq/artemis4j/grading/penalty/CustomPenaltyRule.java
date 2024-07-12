@@ -2,7 +2,6 @@
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
-
 import java.util.List;
 
 public final class CustomPenaltyRule implements PenaltyRule {

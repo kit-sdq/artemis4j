@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
-
 import java.util.Collections;
 import java.util.List;
 

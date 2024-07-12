@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
-
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;

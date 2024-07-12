@@ -1,12 +1,11 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
-import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
-import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
-
+import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
+import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -143,13 +142,14 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 	 * @param gradingConfig
 	 * @return An empty optional if a *different* user has already locked the
 	 *         submission, otherwise the assessment
-	 * @throws AnnotationMappingException If the annotations that were already
-	 *                                    present could not be mapped given the
-	 *                                    gradingConfig
-	 * @throws ArtemisNetworkException    Generic network failure
-	 * @throws MoreRecentSubmissionException       If the requested submission is not the
-	 *                                    most recent submission of the
-	 *                                    corresponding student (i.e. participation)
+	 * @throws AnnotationMappingException    If the annotations that were already
+	 *                                       present could not be mapped given the
+	 *                                       gradingConfig
+	 * @throws ArtemisNetworkException       Generic network failure
+	 * @throws MoreRecentSubmissionException If the requested submission is not the
+	 *                                       most recent submission of the
+	 *                                       corresponding student (i.e.
+	 *                                       participation)
 	 */
 	public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig)
 			throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {

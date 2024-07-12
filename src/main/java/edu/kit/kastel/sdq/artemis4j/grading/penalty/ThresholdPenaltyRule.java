@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
-
 import java.util.List;
 
 public final class ThresholdPenaltyRule implements PenaltyRule {
