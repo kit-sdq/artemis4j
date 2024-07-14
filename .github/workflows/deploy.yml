@@ -25,12 +25,49 @@ env:
   PROGRAMMING_EXERCISE_ID: "41"
 
 jobs:
-  publish:
-    uses: kit-sdq/actions/.github/workflows/maven.yml@main
-    with:
-      deploy: true
-    secrets:
-      OSSRH_USER: ${{secrets.OSSRH_USER}}
-      OSSRH_TOKEN: ${{secrets.OSSRH_TOKEN}}
-      GPG_KEY: ${{secrets.GPG_KEY}}
+  pre_job:
+    name: "Check for duplicate jobs"
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'same_content_newer'
+          skip_after_successful_duplicate: 'true'
+          
+  build:
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    name: "Build and/or Deploy"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
 
+    - uses: joshlong/java-version-export-github-action@v28
+      id: jve   
+
+    - name: Java without Cache
+      uses: actions/setup-java@v4
+      with:
+        java-version: ${{ steps.jve.outputs.java_major_version }}
+        distribution: 'temurin'
+
+    - name: Maven Verify
+      shell: bash
+      run: mvn -U -B verify
+
+    - name: Set maven settings.xml
+      uses: whelk-io/maven-settings-xml-action@v22
+      with:
+        servers: '[{ "id": "ossrh", "username": "${{ secrets.OSSRH_USER }}", "password": "${{ secrets.OSSRH_TOKEN }}" }]'
+
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: ${{ secrets.GPG_KEY }}
+
+    - name: Publish Package
+      shell: bash
+      run: mvn -DskipTests -P deployment -U -B deploy
