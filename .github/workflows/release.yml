@@ -1,0 +1,48 @@
+name: Create Release
+on:
+  workflow_dispatch:
+  push:
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
+
+jobs:
+  pre_job:
+    name: "Check for duplicate jobs"
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'same_content_newer'
+          skip_after_successful_duplicate: 'true'
+          
+  release:
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    name: "Create new GitHub Release"
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
+    - name: Create Changelog
+      shell: bash
+      run: |
+        DIFF=$(git log $(git tag --sort=-creatordate | sed '2q;d')..HEAD --oneline)
+        if [ -z "$DIFF" ]; then
+          echo "Defaulting to full log"
+          DIFF=$(git log --oneline)
+        fi
+        echo "# Commits since last release" > CHANGELOG.txt
+        echo "$DIFF" | sed 's/^/* /' | sed '/Auto-Update Dependencies/{s/Updated\|Updating/\n\t* Updated/g}' | sed '/\[maven-release-plugin\]/d' | sed '/Merge branch/d' | sed '/Prepare for next development cycle/d' | sed -r '/.*\(#\w+\)$/d' >> CHANGELOG.txt
+        
+    - uses: softprops/action-gh-release@v2
+      with:
+        body_path: CHANGELOG.txt
+        generate_release_notes: true
+    

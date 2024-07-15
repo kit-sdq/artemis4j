@@ -1,13 +1,17 @@
-name: Maven Verify
+name: Maven Deploy
 
 on:
-  push: # Ignore releases and main dev branch
-    tags-ignore:
-      - 'v*'
+  push:
     branches:
-      - '**'
-  pull_request:
-    types: [opened, synchronize, reopened]
+      - 'main' # Build the latest develop-SNAPSHOT
+    paths:
+      - '**/src/**'
+      - '**/pom.xml'
+      - 'pom.xml'
+      
+    # Publish `v1.2.3` tags as releases.
+    tags:
+      - v*
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -44,15 +48,26 @@ jobs:
     - uses: joshlong/java-version-export-github-action@v28
       id: jve   
 
-    - name: Java with Cache
+    - name: Java without Cache
       uses: actions/setup-java@v4
       with:
         java-version: ${{ steps.jve.outputs.java_major_version }}
         distribution: 'temurin'
-        cache: 'maven'
 
     - name: Maven Verify
       shell: bash
       run: mvn -U -B verify
 
+    - name: Set maven settings.xml
+      uses: whelk-io/maven-settings-xml-action@v22
+      with:
+        servers: '[{ "id": "ossrh", "username": "${{ secrets.OSSRH_USER }}", "password": "${{ secrets.OSSRH_TOKEN }}" }]'
 
+    - name: Import GPG key
+      uses: crazy-max/ghaction-import-gpg@v6
+      with:
+        gpg_private_key: ${{ secrets.GPG_KEY }}
+
+    - name: Publish Package
+      shell: bash
+      run: mvn -DskipTests -P deployment -U -B deploy

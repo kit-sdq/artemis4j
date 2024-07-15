@@ -1,0 +1,79 @@
+name: Maven Dependency Updates
+
+on:
+  schedule:
+    - cron: "00 15 * * 1"
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+env:
+  INSTRUCTOR_USER: "instructor_e2e"
+  INSTRUCTOR_PASSWORD: ${{ secrets.INSTRUCTOR_PASSWORD }}
+  STUDENT_USER: "student_e2e"
+  ARTEMIS_URL: "https://artemis-test.sdq.kastel.kit.edu"
+  COURSE_ID: "4"
+  PROGRAMMING_EXERCISE_ID: "41"
+
+jobs:
+  pre_job:
+    name: "Check for duplicate jobs"
+    runs-on: ubuntu-latest
+    outputs:
+      should_skip: ${{ steps.skip_check.outputs.should_skip }}
+    steps:
+      - id: skip_check
+        uses: fkirc/skip-duplicate-actions@master
+        with:
+          concurrent_skipping: 'same_content_newer'
+          skip_after_successful_duplicate: 'true'
+          
+  build:
+    needs: pre_job
+    if: ${{ needs.pre_job.outputs.should_skip != 'true' }}
+    name: "Check for Updates"
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        persist-credentials: false
+
+    - uses: joshlong/java-version-export-github-action@v28
+      id: jve
+
+    - uses: actions/setup-java@v4
+      with:
+        java-version: ${{ steps.jve.outputs.java_major_version }}
+        distribution: 'temurin'
+        cache: 'maven'
+
+    - name: Update Dependencies
+      shell: bash
+      run: |
+        mvn -U -B versions:update-parent versions:update-properties versions:update-parent versions:update-child-modules versions:use-latest-releases -DgenerateBackupPoms=false | tee /tmp/updates-raw.txt
+        mvn -U -B verify
+        echo 'Auto-Update Dependencies' > /tmp/updates.txt
+        cat /tmp/updates-raw.txt | grep 'Updat' | sort | uniq | cut -d ' ' -f 2- >> /tmp/updates.txt || true
+        echo 'Setting commit message to ..'
+        cat /tmp/updates.txt
+
+    - name: Check if there are changes
+      id: changes
+      run: echo "changed=$(git status --porcelain | wc -l)" >> $GITHUB_OUTPUT
+
+    - name: Commit Changes of Versions
+      if: steps.changes.outputs.changed != 0
+      shell: bash
+      run: |
+        git config --global user.email "action@github.com"
+        git config --global user.name "GitHub Action"
+        git add . && git commit -F /tmp/updates.txt
+        
+    - name: Push Changes
+      uses: ad-m/github-push-action@master
+      if: steps.changes.outputs.changed != 0
+      with:
+        # See https://github.com/orgs/community/discussions/25702 and https://github.com/orgs/community/discussions/26220
+        github_token: ${{ secrets.PAT }}
+        branch: ${{ github.ref }}
+        tags: false
