@@ -94,7 +94,7 @@ class End2EndTest {
 		Assertions.assertEquals(13, tests.size());
 
 		Assertions.assertEquals(1, this.assessment.getAnnotations().size());
-		Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, this.assessment.getAnnotations().getFirst().getSource());
+		Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, this.assessment.getAnnotations().get(0).getSource());
 	}
 
 	@Test
@@ -111,7 +111,7 @@ class End2EndTest {
 		Assertions.assertEquals(13, tests.size());
 
 		Assertions.assertEquals(1, this.assessment.getAnnotations().size());
-		var annotation = this.assessment.getAnnotations().getFirst();
+		var annotation = this.assessment.getAnnotations().get(0);
 		Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
 		Assertions.assertEquals(Optional.of(-2.0), annotation.getCustomScore());
 		Assertions.assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());

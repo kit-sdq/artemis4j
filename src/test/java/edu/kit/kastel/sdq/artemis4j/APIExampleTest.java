@@ -40,7 +40,7 @@ public class APIExampleTest {
 		// Fetch all courses, and get the first one (not the course with id 0!)
 		// Network requests are generally only performed once when required, and the
 		// results are cached
-		var course = connection.getCourses().getFirst();
+		var course = connection.getCourses().get(0);
 		System.out.println("Course is " + course.getTitle());
 
 		// Check how many locks we hold across the entire course
@@ -49,7 +49,7 @@ public class APIExampleTest {
 		System.out.println("Currently " + course.getProgrammingExerciseById(47).fetchLockedSubmissionCount(0) + " submissions locked in exercise");
 
 		// Get the first exercise (not the exercise with id 0!) in the course
-		var exercise = course.getProgrammingExercises().getFirst();
+		var exercise = course.getProgrammingExercises().get(0);
 		System.out.println("Exercise is " + exercise.getTitle());
 
 		// For grading, we need the grading config

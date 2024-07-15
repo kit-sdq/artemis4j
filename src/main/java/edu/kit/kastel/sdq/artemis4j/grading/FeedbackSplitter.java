@@ -34,12 +34,12 @@ import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 				perFeedbackLines.add(new ArrayList<>());
 				currentLength = translatedHeader.length();
 			}
-			perFeedbackLines.getLast().add(line);
+			perFeedbackLines.get(perFeedbackLines.size() - 1).add(line);
 			currentLength += line.length();
 		}
 
 		if (perFeedbackLines.size() == 1) {
-			return List.of(translatedHeader + LINE_SEPARATOR + String.join("", perFeedbackLines.getFirst()));
+			return List.of(translatedHeader + LINE_SEPARATOR + String.join("", perFeedbackLines.get(0)));
 		} else {
 			// We have more than one feedback to create
 			// To make it easier for students, each feedback gets a running index

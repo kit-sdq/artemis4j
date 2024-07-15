@@ -172,7 +172,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 		if (locked.results().size() != 1) {
 			throw new IllegalStateException("Locking returned %d results, expected 1".formatted(locked.results().size()));
 		}
-		var result = locked.results().getFirst();
+		var result = locked.results().get(0);
 
 		// Locking was successful if we are the assessor
 		// The webui of Artemis does the same check

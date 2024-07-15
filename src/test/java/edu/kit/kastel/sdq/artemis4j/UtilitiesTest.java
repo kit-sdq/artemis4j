@@ -86,7 +86,7 @@ public class UtilitiesTest {
 			}
 
 			for (var submission : submissions) {
-				var latestResult = submission.results().getLast();
+				var latestResult = submission.results().get(submission.results().size() - 1);
 				if (latestResult == null) {
 					log.warn("No result for submission " + submission.id());
 					continue;

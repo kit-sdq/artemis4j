@@ -219,7 +219,7 @@ public class Assessment extends ArtemisConnectionHolder {
 	public double calculateTotalPoints() {
 		double points = this.calculateTotalPointsOfAnnotations();
 		points += this.calculateTotalPointsOfTests();
-		return Math.clamp(points, 0.0, this.getMaxPoints());
+		return Math.min(Math.max(points, 0.0), this.getMaxPoints());
 	}
 
 	/**
@@ -307,7 +307,7 @@ public class Assessment extends ArtemisConnectionHolder {
 				this.getConnection().getAssessor().toDTO());
 
 		// Sanity check
-		double feedbackPoints = Math.clamp(result.feedbacks().stream().mapToDouble(FeedbackDTO::credits).sum(), 0.0, this.getMaxPoints());
+		double feedbackPoints = Math.min(Math.max(result.feedbacks().stream().mapToDouble(FeedbackDTO::credits).sum(), 0.0), this.getMaxPoints());
 		if (Math.abs(absoluteScore - feedbackPoints) > 1e-7) {
 			throw new IllegalStateException("Feedback points do not match the calculated points. Calculated " + absoluteScore + " but feedbacks sum up to "
 					+ feedbackPoints + " points.");
@@ -349,7 +349,7 @@ public class Assessment extends ArtemisConnectionHolder {
 	}
 
 	private FeedbackDTO createInlineFeedback(Map.Entry<Integer, List<Annotation>> annotations) {
-		var sampleAnnotation = annotations.getValue().getFirst();
+		var sampleAnnotation = annotations.getValue().get(0);
 
 		String text = "File " + sampleAnnotation.getFilePathWithoutType() + " at line " + sampleAnnotation.getDisplayLine();
 		String reference = "file:" + sampleAnnotation.getFilePath() + "_line:" + sampleAnnotation.getStartLine();
@@ -427,7 +427,7 @@ public class Assessment extends ArtemisConnectionHolder {
 		// Possibly split into multiple feedbacks
 		List<String> feedbackTexts = FeedbackSplitter.splitLines(lines, header, studentLocale);
 		if (feedbackTexts.size() == 1) {
-			return List.of(FeedbackDTO.newVisibleManualUnreferenced(points.score(), null, feedbackTexts.getFirst()));
+			return List.of(FeedbackDTO.newVisibleManualUnreferenced(points.score(), null, feedbackTexts.get(0)));
 		} else {
 			// We have more than one feedback to create
 			// To make it easier for students, each feedback gets a running index
