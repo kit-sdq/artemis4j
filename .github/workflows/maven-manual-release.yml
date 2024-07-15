@@ -1,0 +1,68 @@
+name: Maven Release (Manual)
+
+on:
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+    inputs:
+      release-version:
+        type: string
+        description: The version for release. E.g., "1.2.3"
+        required: true
+      next-version:
+        type: string
+        description: The version after release. E.g., "2.0.0-SNAPSHOT"
+        required: true
+
+env:
+  INSTRUCTOR_USER: "instructor_e2e"
+  INSTRUCTOR_PASSWORD: ${{ secrets.INSTRUCTOR_PASSWORD }}
+  STUDENT_USER: "student_e2e"
+  ARTEMIS_URL: "https://artemis-test.sdq.kastel.kit.edu"
+  COURSE_ID: "4"
+  PROGRAMMING_EXERCISE_ID: "41"
+        
+jobs:
+    build:
+        name: "Trigger new Release"
+        runs-on: ubuntu-latest
+    
+        steps:
+        - uses: actions/checkout@v4
+          with:
+            persist-credentials: false
+
+        - uses: joshlong/java-version-export-github-action@v28
+          id: jve            
+          
+        - name: Set up JDK
+          uses: actions/setup-java@v4
+          with:
+            distribution: 'temurin'
+            java-version: ${{ steps.jve.outputs.java_major_version }}
+    
+        - name: Prepare GIT
+          shell: bash
+          run: |
+            git config --global user.email "action@github.com"
+            git config --global user.name "GitHub Action"
+    
+        - name: Bump to Release, Verify, Bump to Next Version, and Verify
+          shell: bash
+          run: |
+            # Download version update script to tmp directory
+            curl -s https://raw.githubusercontent.com/kit-sdq/actions/main/scripts/maven-version-update.sh > /tmp/maven-version-update.sh
+            chmod +x /tmp/maven-version-update.sh
+            echo "######### Content of maven-version-update.sh #########"
+            cat /tmp/maven-version-update.sh
+            echo "######################################################"
+            echo "######### Running maven-version-update.sh ###########"
+            RELEASE_VERSION=${{ inputs.release-version }} NEXT_VERSION=${{ inputs.next-version }} AUTO_DIGIT=Patch bash /tmp/maven-version-update.sh  
+            echo "######################################################"
+            
+        - name: Push Changes
+          uses: ad-m/github-push-action@master
+          with:
+            # See https://github.com/orgs/community/discussions/25702 and https://github.com/orgs/community/discussions/26220
+            github_token: ${{ secrets.PAT }}
+            branch: ${{ github.ref }}
+            tags: true 
