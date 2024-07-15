@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import de.firemage.autograder.core.ProblemType;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
@@ -17,7 +16,7 @@ public final class MistakeType {
 	private final FormatString message;
 	private final FormatString buttonTexts;
 	private final MistakeReportingState reporting;
-	private final List<ProblemType> autograderProblemTypes;
+	private final List<String> autograderProblemTypes;
 
 	static void createAndAddToGroup(MistakeTypeDTO dto, boolean shouldScore, RatingGroup ratingGroup) {
 		var mistakeType = new MistakeType(dto, shouldScore, ratingGroup);
@@ -72,7 +71,7 @@ public final class MistakeType {
 		return this.rule instanceof CustomPenaltyRule;
 	}
 
-	public List<ProblemType> getAutograderProblemTypes() {
+	public List<String> getAutograderProblemTypes() {
 		return Collections.unmodifiableList(autograderProblemTypes);
 	}
 
@@ -93,6 +92,6 @@ public final class MistakeType {
 
 	/* package-private */ record MistakeTypeDTO(String shortName, String message, String button, PenaltyRule penaltyRule, String appliesTo,
 			String enabledForExercises, String enabledPenaltyForExercises, Map<String, String> additionalButtonTexts, Map<String, String> additionalMessages,
-			List<ProblemType> autograderProblemTypes) {
+			List<String> autograderProblemTypes) {
 	}
 }

@@ -95,12 +95,7 @@
     <!-- Autograder -->
     <dependency>
       <groupId>de.firemage.autograder</groupId>
-      <artifactId>autograder-core</artifactId>
-      <version>${autograder.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>de.firemage.autograder</groupId>
-      <artifactId>autograder-extra</artifactId>
+      <artifactId>autograder-api</artifactId>
       <version>${autograder.version}</version>
     </dependency>
     <dependency>

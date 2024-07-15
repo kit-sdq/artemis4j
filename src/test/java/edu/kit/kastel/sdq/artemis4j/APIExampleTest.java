@@ -20,7 +20,7 @@ import org.junit.jupiter.api.Test;
  * This test demonstrates the intended use of the new version of artemis4j
  */
 @Disabled
-public class NewAPITest {
+public class APIExampleTest {
 	private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
 	private static final String ARTEMIS_USERNAME = System.getenv("ARTEMIS_USER");
 	private static final String ARTEMIS_PASSWORD = System.getenv("ARTEMIS_PASSWORD");
