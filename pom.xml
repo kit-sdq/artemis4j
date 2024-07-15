@@ -56,7 +56,7 @@
     <jackson.version>2.17.2</jackson.version>
     <slf4j.version>2.0.13</slf4j.version>
     <okhttp.version>4.12.0</okhttp.version>
-    <autograder.version>0.5.41</autograder.version>
+    <autograder.version>0.6.0</autograder.version>
     <junit.version>5.10.3</junit.version>
   </properties>
 
