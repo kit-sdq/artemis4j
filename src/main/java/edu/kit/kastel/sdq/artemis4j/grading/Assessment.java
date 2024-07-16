@@ -28,7 +28,7 @@ import org.slf4j.Logger;
 
 /**
  * An active assessment of a submission for which we hold a lock. This class
- * stores annotations, calculates points, and parses & serializes feedbacks for
+ * stores annotations, calculates points, and parses &amp; serializes feedbacks for
  * Artemis.
  */
 public class Assessment extends ArtemisConnectionHolder {
