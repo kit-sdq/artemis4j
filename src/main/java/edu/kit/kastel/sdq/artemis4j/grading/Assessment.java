@@ -201,7 +201,7 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Cancels the assessment & frees the lock on the submission. This deletes any
+     * Cancels the assessment &amp; frees the lock on the submission. This deletes any
      * feedback that was created in Artemis!
      *
      * @throws ArtemisNetworkException
