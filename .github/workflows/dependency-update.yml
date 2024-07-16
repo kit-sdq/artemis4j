@@ -14,6 +14,9 @@ env:
   ARTEMIS_URL: "https://artemis-test.sdq.kastel.kit.edu"
   COURSE_ID: "4"
   PROGRAMMING_EXERCISE_ID: "41"
+  EXAM_ID: "5"
+  EXAM_EXERCISE_GROUP_ID: "6"
+  EXAM_PROGRAMMING_EXERCISE_ID: "48"
 
 jobs:
   pre_job:
