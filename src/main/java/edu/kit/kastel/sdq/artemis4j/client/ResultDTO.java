@@ -18,9 +18,9 @@ import com.fasterxml.jackson.annotation.JsonProperty;
  * @param assessor       the user who assessed the submission or null
  */
 public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime completionDate, @JsonProperty Boolean successful, @JsonProperty double score,
-		@JsonProperty Boolean rated, @JsonProperty List<FeedbackDTO> feedbacks, @JsonProperty UserDTO assessor, @JsonProperty AssessmentType assessmentType) {
+        @JsonProperty Boolean rated, @JsonProperty List<FeedbackDTO> feedbacks, @JsonProperty UserDTO assessor, @JsonProperty AssessmentType assessmentType) {
 
-	public static ResultDTO forAssessmentSubmission(long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
-		return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor, AssessmentType.SEMI_AUTOMATIC);
-	}
+    public static ResultDTO forAssessmentSubmission(long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
+        return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor, AssessmentType.SEMI_AUTOMATIC);
+    }
 }

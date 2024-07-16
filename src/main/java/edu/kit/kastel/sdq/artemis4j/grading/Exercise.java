@@ -2,11 +2,11 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 public interface Exercise {
-	long getId();
+    long getId();
 
-	String getTitle();
+    String getTitle();
 
-	String getShortName();
+    String getShortName();
 
-	Course getCourse();
+    Course getCourse();
 }

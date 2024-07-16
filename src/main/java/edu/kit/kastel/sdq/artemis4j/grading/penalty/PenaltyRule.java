@@ -9,8 +9,8 @@ import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "shortName")
 @JsonSubTypes({ @JsonSubTypes.Type(value = StackingPenaltyRule.class, name = "stackingPenalty"),
-		@JsonSubTypes.Type(value = ThresholdPenaltyRule.class, name = "thresholdPenalty"),
-		@JsonSubTypes.Type(value = CustomPenaltyRule.class, name = "customPenalty") })
+        @JsonSubTypes.Type(value = ThresholdPenaltyRule.class, name = "thresholdPenalty"),
+        @JsonSubTypes.Type(value = CustomPenaltyRule.class, name = "customPenalty") })
 public sealed interface PenaltyRule permits CustomPenaltyRule, StackingPenaltyRule, ThresholdPenaltyRule {
-	Points calculatePoints(List<Annotation> annotations);
+    Points calculatePoints(List<Annotation> annotations);
 }

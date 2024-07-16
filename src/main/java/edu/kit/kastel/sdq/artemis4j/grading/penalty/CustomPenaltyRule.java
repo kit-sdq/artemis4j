@@ -6,8 +6,8 @@ import java.util.List;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 
 public final class CustomPenaltyRule implements PenaltyRule {
-	@Override
-	public Points calculatePoints(List<Annotation> annotations) {
-		return new Points(annotations.stream().mapToDouble(annotation -> annotation.getCustomScore().orElseThrow()).sum(), false);
-	}
+    @Override
+    public Points calculatePoints(List<Annotation> annotations) {
+        return new Points(annotations.stream().mapToDouble(annotation -> annotation.getCustomScore().orElseThrow()).sum(), false);
+    }
 }

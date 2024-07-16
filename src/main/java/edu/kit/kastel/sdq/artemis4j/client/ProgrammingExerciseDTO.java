@@ -8,11 +8,9 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
-public record ProgrammingExerciseDTO(@JsonProperty long id, @JsonProperty String title, @JsonProperty String shortName,
-                                     @JsonProperty String testRepositoryUri,
-                                     @JsonProperty Boolean secondCorrectionEnabled, @JsonProperty String exerciseType,
-                                     @JsonProperty String assessmentType, @JsonProperty double maxPoints,
-                                     @JsonProperty ZonedDateTime dueDate, @JsonProperty ZonedDateTime startDate) {
+public record ProgrammingExerciseDTO(@JsonProperty long id, @JsonProperty String title, @JsonProperty String shortName, @JsonProperty String testRepositoryUri,
+        @JsonProperty Boolean secondCorrectionEnabled, @JsonProperty String exerciseType, @JsonProperty String assessmentType, @JsonProperty double maxPoints,
+        @JsonProperty ZonedDateTime dueDate, @JsonProperty ZonedDateTime startDate) {
 
     public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, int courseId) throws ArtemisNetworkException {
         var exercises = ArtemisRequest.get().path(List.of("courses", courseId, "with-exercises")).executeAndDecode(client, ExerciseWrapperDTO.class);
@@ -21,8 +19,9 @@ public record ProgrammingExerciseDTO(@JsonProperty long id, @JsonProperty String
     }
 
     /**
-     * Artemis doesn't return the list of exercises directly, but only the list a specific course with the exercises attached.
-     * We don't care about the course here, so this wrapper class exists.
+     * Artemis doesn't return the list of exercises directly, but only the list a
+     * specific course with the exercises attached. We don't care about the course
+     * here, so this wrapper class exists.
      *
      * @param exercises
      */

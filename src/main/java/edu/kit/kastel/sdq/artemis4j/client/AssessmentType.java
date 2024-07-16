@@ -2,5 +2,5 @@
 package edu.kit.kastel.sdq.artemis4j.client;
 
 public enum AssessmentType {
-	AUTOMATIC, SEMI_AUTOMATIC, MANUAL, AUTOMATIC_ATHENA,
+    AUTOMATIC, SEMI_AUTOMATIC, MANUAL, AUTOMATIC_ATHENA,
 }

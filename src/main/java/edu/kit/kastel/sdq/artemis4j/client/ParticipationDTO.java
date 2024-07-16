@@ -6,5 +6,5 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
 public record ParticipationDTO(@JsonProperty long id, @JsonProperty UserDTO student, @JsonProperty String participantIdentifier,
-		@JsonProperty String userIndependentRepositoryUri, @JsonProperty List<ResultDTO> results) {
+        @JsonProperty String userIndependentRepositoryUri, @JsonProperty List<ResultDTO> results) {
 }
