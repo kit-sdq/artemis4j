@@ -32,8 +32,8 @@ public class ExamTest {
     private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
     private static final String COURSE_ID = System.getenv("COURSE_ID");
     private static final String EXAM_ID = System.getenv("EXAM_ID");
-    private static final String EXERCISE_GROUP_ID = System.getenv("EXERCISE_GROUP_ID");
-    private static final String PROGRAMMING_EXERCISE_ID = System.getenv("PROGRAMMING_EXERCISE_ID");
+    private static final String EXERCISE_GROUP_ID = System.getenv("EXAM_EXERCISE_GROUP_ID");
+    private static final String PROGRAMMING_EXERCISE_ID = System.getenv("EXAM_PROGRAMMING_EXERCISE_ID");
 
     @Test
     void testExamAssessment() throws ArtemisClientException, IOException {
