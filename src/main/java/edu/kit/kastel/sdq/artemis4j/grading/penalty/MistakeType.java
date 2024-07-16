@@ -90,7 +90,7 @@ public final class MistakeType {
 		return Objects.hashCode(id);
 	}
 
-	/* package-private */ record MistakeTypeDTO(String shortName, String message, String button, PenaltyRule penaltyRule, String appliesTo,
+	 record MistakeTypeDTO(String shortName, String message, String button, PenaltyRule penaltyRule, String appliesTo,
 			String enabledForExercises, String enabledPenaltyForExercises, Map<String, String> additionalButtonTexts, Map<String, String> additionalMessages,
 			List<String> autograderProblemTypes) {
 	}

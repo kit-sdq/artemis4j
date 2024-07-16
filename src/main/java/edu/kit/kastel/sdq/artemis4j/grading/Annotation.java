@@ -35,7 +35,7 @@ public final class Annotation {
 		this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
 	}
 
-	/* package-private */ Annotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, Double customScore,
+	 Annotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, Double customScore,
 			AnnotationSource source) {
 		// Validate custom penalty and message
 		if (mistakeType.isCustomAnnotation()) {
@@ -45,10 +45,8 @@ public final class Annotation {
 			if (customMessage == null) {
 				throw new IllegalArgumentException("A custom message is required for custom annotation types.");
 			}
-		} else {
-			if (customScore != null) {
-				throw new IllegalArgumentException("A custom penalty is not allowed for non-custom annotation types.");
-			}
+		} else if (customScore != null) {
+			throw new IllegalArgumentException("A custom penalty is not allowed for non-custom annotation types.");
 		}
 
 		this.uuid = generateUUID();
@@ -61,7 +59,7 @@ public final class Annotation {
 		this.source = source;
 	}
 
-	public String getUuid() {
+	public String getUUID() {
 		return uuid;
 	}
 

@@ -93,7 +93,7 @@ public final class GradingConfig {
 		return ratingGroups.stream().map(RatingGroup::getMistakeTypes).flatMap(List::stream);
 	}
 
-	/* package-private */ record GradingConfigDTO(String shortName, @JsonProperty(defaultValue = "true") boolean positiveFeedbackAllowed,
+	 record GradingConfigDTO(String shortName, @JsonProperty(defaultValue = "true") boolean positiveFeedbackAllowed,
 			List<Long> allowedExercises, List<RatingGroup.RatingGroupDTO> ratingGroups, List<MistakeType.MistakeTypeDTO> mistakeTypes) {
 	}
 }

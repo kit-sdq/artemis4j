@@ -51,4 +51,9 @@ public record FeedbackDTO(@JsonProperty FeedbackType type, @JsonProperty Integer
 	public static String fetchLongFeedback(ArtemisClient client, long resultId, long feedbackId) throws ArtemisNetworkException {
 		return ArtemisRequest.get().path(List.of("results", resultId, "feedbacks", feedbackId, "long-feedback")).executeAndDecode(client, String.class);
 	}
+
+	public FeedbackDTO(String detailText, FeedbackDTO other) {
+		this(other.type(), other.id(), other.credits(), other.positive(), other.visibility(),
+				other.text(), other.reference(), detailText, other.hasLongFeedbackText(), other.testCase());
+	}
 }

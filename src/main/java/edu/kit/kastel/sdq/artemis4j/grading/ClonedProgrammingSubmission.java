@@ -17,7 +17,7 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
 	private final Path testsPath;
 	private final Path submissionPath;
 
-	/* package-private */ static ClonedProgrammingSubmission cloneSubmission(ProgrammingSubmission submission, Path target, String tokenOverride)
+	 static ClonedProgrammingSubmission cloneSubmission(ProgrammingSubmission submission, Path target, String tokenOverride)
 			throws ArtemisClientException {
 		var connection = submission.getConnection();
 

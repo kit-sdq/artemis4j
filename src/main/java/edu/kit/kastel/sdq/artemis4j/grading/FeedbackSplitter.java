@@ -11,7 +11,7 @@ import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
-/* package-private*/ final class FeedbackSplitter {
+final class FeedbackSplitter {
 	private static final String LINE_SEPARATOR = "\n";
 	private static final int SAFETY_MARGIN = 50;
 	private static final FormatString HEADER_FEEDBACK_ID = new FormatString(new MessageFormat(" (feedback {0,number}/{1,number})"));

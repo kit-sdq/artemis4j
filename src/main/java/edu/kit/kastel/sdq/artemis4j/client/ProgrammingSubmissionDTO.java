@@ -68,9 +68,7 @@ public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty Part
 				if (feedback.hasLongFeedbackText()) {
 					detailText = FeedbackDTO.fetchLongFeedback(client, result.id(), feedback.id());
 				}
-				FeedbackDTO newFeedback = new FeedbackDTO(feedback.type(), feedback.id(), feedback.credits(), feedback.positive(), feedback.visibility(),
-						feedback.text(), feedback.reference(), detailText, feedback.hasLongFeedbackText(), feedback.testCase());
-				cleanedFeedbacks.add(newFeedback);
+				cleanedFeedbacks.add(new FeedbackDTO(detailText, feedback));
 			}
 
 			ResultDTO newResult = new ResultDTO(result.id(), result.completionDate(), result.successful(), result.score(), result.rated(), cleanedFeedbacks,

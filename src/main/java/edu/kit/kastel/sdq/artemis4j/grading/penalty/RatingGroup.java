@@ -17,7 +17,7 @@ public final class RatingGroup {
 	private final double maxPenalty;
 	private final List<MistakeType> mistakeTypes;
 
-	/* package-private */ RatingGroup(RatingGroupDTO dto) {
+	 RatingGroup(RatingGroupDTO dto) {
 		double negativeLimit = dto.negativeLimit() != null ? dto.negativeLimit() : Double.NEGATIVE_INFINITY;
 		double positiveLimit = dto.positiveLimit() != null ? dto.positiveLimit() : Double.POSITIVE_INFINITY;
 
@@ -62,7 +62,7 @@ public final class RatingGroup {
 	 *
 	 * @param mistakeType
 	 */
-	/* package-private */ void addMistakeType(MistakeType mistakeType) {
+	 void addMistakeType(MistakeType mistakeType) {
 		this.mistakeTypes.add(mistakeType);
 	}
 
@@ -87,7 +87,7 @@ public final class RatingGroup {
 				+ ", " + "mistakeTypes=" + mistakeTypes + ']';
 	}
 
-	/* package-private */ record RatingGroupDTO(String shortName, String displayName, Double positiveLimit, Double negativeLimit,
+	 record RatingGroupDTO(String shortName, String displayName, Double positiveLimit, Double negativeLimit,
 			Map<String, String> additionalDisplayNames) {
 	}
 }
