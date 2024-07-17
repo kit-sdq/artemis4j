@@ -28,8 +28,8 @@ import org.slf4j.Logger;
 
 /**
  * An active assessment of a submission for which we hold a lock. This class
- * stores annotations, calculates points, and parses &amp; serializes feedbacks for
- * Artemis.
+ * stores annotations, calculates points, and parses &amp; serializes feedbacks
+ * for Artemis.
  */
 public class Assessment extends ArtemisConnectionHolder {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Assessment.class);
@@ -201,8 +201,8 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Cancels the assessment &amp; frees the lock on the submission. This deletes any
-     * feedback that was created in Artemis!
+     * Cancels the assessment &amp; frees the lock on the submission. This deletes
+     * any feedback that was created in Artemis!
      *
      * @throws ArtemisNetworkException
      */

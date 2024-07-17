@@ -14,11 +14,11 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
  * @param credits             credits given to the student, may be negative
  * @param positive            null for manual feedback
  * @param visibility          null for manual feedback
- * @param text                null for unreferenced manual &amp; automatic feedback,
- *                            of form "File
+ * @param text                null for unreferenced manual &amp; automatic
+ *                            feedback, of form "File
  *                            src/edu/kit/informatik/BubbleSort.java at line 13"
- * @param reference           null for unreferenced manual &amp; automatic feedback,
- *                            of form
+ * @param reference           null for unreferenced manual &amp; automatic
+ *                            feedback, of form
  *                            "file:src/edu/kit/informatik/BubbleSort.java_line:12"
  * @param detailText          null for automatic feedback
  * @param hasLongFeedbackText whether long feedback needs to be fetched for the

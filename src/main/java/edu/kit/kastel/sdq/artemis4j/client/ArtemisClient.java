@@ -55,9 +55,12 @@ public class ArtemisClient {
         try (var response = client.newCall(request).execute()) {
             throwIfStatusUnsuccessful(response);
 
+            var cookieHeader = response.headers().get("set-cookie");
+
+            // The cookie looks like this:
             // jwt=JWT_CONTENT_HERE; Path=/; Max-Age=2592000; Expires=Sun, 26 Feb 2023
             // 23:56:30 GMT; Secure; HttpOnly; SameSite=Lax
-            var cookieHeader = response.headers().get("set-cookie");
+
             if (cookieHeader == null || !cookieHeader.startsWith(COOKIE_NAME_JWT)) {
                 throw new ArtemisNetworkException("Authentication was not successful. Cookie not received!");
             }
