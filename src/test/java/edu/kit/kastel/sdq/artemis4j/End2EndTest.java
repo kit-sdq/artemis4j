@@ -1,140 +1,119 @@
-/* Licensed under EPL-2.0 2023. */
+/* Licensed under EPL-2.0 2023-2024. */
 package edu.kit.kastel.sdq.artemis4j;
 
-import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
-import edu.kit.kastel.sdq.artemis4j.api.artemis.Course;
-import edu.kit.kastel.sdq.artemis4j.api.artemis.Exercise;
-import edu.kit.kastel.sdq.artemis4j.api.artemis.assessment.*;
-import edu.kit.kastel.sdq.artemis4j.client.RestClientManager;
-import edu.kit.kastel.sdq.artemis4j.grading.artemis.AnnotationMapper;
-import edu.kit.kastel.sdq.artemis4j.grading.config.ExerciseConfig;
-import edu.kit.kastel.sdq.artemis4j.grading.config.JsonFileConfig;
-import edu.kit.kastel.sdq.artemis4j.grading.model.annotation.Annotation;
-
-import org.junit.jupiter.api.*;
-
-import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.Optional;
+
+import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
+import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
+import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
+import edu.kit.kastel.sdq.artemis4j.grading.Course;
+import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
+import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
+import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
+import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
+import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
+import org.junit.jupiter.api.*;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class End2EndTest {
 
-	private static final String FEEDBACK_TEXT = "This is a test feedback. To make it very long, it will just repeated over and over again. ".repeat(30).trim();
+    private static final String FEEDBACK_TEXT = "This is a test feedback. To make it very long, it will just repeated over and over again. ".repeat(30).trim();
 
-	// Configure a simple Programming exercise (Sorting algorithms in Artemis
-	// (Default Template: Package Name: edu.kit.informatik))
-	private static final String INSTRUCTOR_USER = System.getenv("INSTRUCTOR_USER");
-	private static final String INSTRUCTOR_PASSWORD = System.getenv("INSTRUCTOR_PASSWORD");
-	private static final String STUDENT_USER = System.getenv("STUDENT_USER");
-	private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
-	private static final String COURSE_ID = System.getenv("COURSE_ID");
-	private static final String PROGRAMMING_EXERCISE_ID = System.getenv("PROGRAMMING_EXERCISE_ID");
+    // Configure a simple Programming exercise (Sorting algorithms in Artemis
+    // (Default Template: Package Name: edu.kit.informatik))
+    private static final String INSTRUCTOR_USER = System.getenv("INSTRUCTOR_USER");
+    private static final String INSTRUCTOR_PASSWORD = System.getenv("INSTRUCTOR_PASSWORD");
+    private static final String STUDENT_USER = System.getenv("STUDENT_USER");
+    private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
+    private static final String COURSE_ID = System.getenv("COURSE_ID");
+    private static final String PROGRAMMING_EXERCISE_ID = System.getenv("PROGRAMMING_EXERCISE_ID");
 
-	private final File configuration = new File("src/test/resources/config.json");
+    private ArtemisInstance artemisInstance;
+    private ArtemisConnection connection;
+    private Course course;
+    private ProgrammingExercise exercise;
+    private ProgrammingSubmission programmingSubmission;
+    private Assessment assessment;
+    private GradingConfig gradingConfig;
 
-	private RestClientManager restClientManager;
-	private Course course;
-	private Exercise exercise;
-	private Submission submission;
-	private LockResult lock;
-	private ExerciseConfig config;
+    @BeforeAll
+    public void checkConfiguration() {
+        Assertions.assertNotNull(INSTRUCTOR_USER);
+        Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
+        Assertions.assertNotNull(STUDENT_USER);
+        Assertions.assertNotNull(ARTEMIS_URL);
+        Assertions.assertNotNull(COURSE_ID);
+        Assertions.assertNotNull(PROGRAMMING_EXERCISE_ID);
+    }
 
-	@BeforeAll
-	public void checkConfiguration() {
-		Assertions.assertNotNull(INSTRUCTOR_USER);
-		Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
-		Assertions.assertNotNull(STUDENT_USER);
-		Assertions.assertNotNull(ARTEMIS_URL);
-		Assertions.assertNotNull(COURSE_ID);
-		Assertions.assertNotNull(PROGRAMMING_EXERCISE_ID);
-	}
+    @BeforeEach
+    public void setup() throws ArtemisClientException, IOException {
+        this.artemisInstance = new ArtemisInstance(ARTEMIS_URL);
+        this.connection = ArtemisConnection.connectWithUsernamePassword(this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
 
-	@BeforeEach
-	public void setup() throws ArtemisClientException, IOException {
-		restClientManager = new RestClientManager(ARTEMIS_URL, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
-		restClientManager.login();
-		this.course = restClientManager.getCourseArtemisClient().getCourses().stream().filter(c -> c.getCourseId() == Integer.parseInt(COURSE_ID)).findFirst()
-				.orElseThrow();
-		this.exercise = course.getExercises().stream().filter(e -> e.getExerciseId() == Integer.parseInt(PROGRAMMING_EXERCISE_ID)).findFirst().orElseThrow();
-		var submissions = restClientManager.getSubmissionArtemisClient().getSubmissions(this.exercise);
-		this.submission = submissions.stream().filter(a -> a.getParticipantIdentifier().equals(STUDENT_USER)).findFirst().orElseThrow();
-		this.lock = this.restClientManager.getAssessmentArtemisClient().startAssessment(this.submission);
-		this.cleanupFeedback();
-		this.lock = this.restClientManager.getAssessmentArtemisClient().startAssessment(this.submission);
+        this.course = this.connection.getCourses().stream().filter(c -> c.getId() == Integer.parseInt(COURSE_ID)).findFirst().orElseThrow();
+        this.exercise = this.course.getProgrammingExercises().stream().filter(e -> e.getId() == Long.parseLong(PROGRAMMING_EXERCISE_ID)).findFirst()
+                .orElseThrow();
 
-		for (var feedback : this.lock.getLatestFeedback()) {
-			Assertions.assertEquals(FeedbackType.AUTOMATIC, feedback.getFeedbackType());
-		}
+        var submissions = this.exercise.fetchSubmissions();
+        this.programmingSubmission = submissions.stream().filter(a -> a.getParticipantIdentifier().equals(STUDENT_USER)).findFirst().orElseThrow();
 
-		JsonFileConfig jsonFileConfig = new JsonFileConfig(configuration);
-		config = jsonFileConfig.getExerciseConfig(this.exercise);
-	}
+        this.gradingConfig = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), this.exercise);
 
-	private void cleanupFeedback() throws ArtemisClientException {
-		var feedbackAutomatic = this.lock.getLatestFeedback().stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC).toList();
-		final List<Feedback> tests = this.lock.getLatestFeedback().stream().filter(f -> f.getCodeLocation() == null).toList();
+        // ensure that the submission is locked
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.cleanupFeedback();
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
 
-		int codeIssueCount = (int) this.lock.getLatestFeedback().stream().filter(Feedback::isStaticCodeAnalysis).count();
-		int passedTestCaseCount = (int) tests.stream().filter(feedback -> feedback.getPositive() != null && feedback.getPositive()).count();
-		double absoluteScore = tests.stream().mapToDouble(Feedback::getCredits).sum();
+        Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
+    }
 
-		AssessmentResult assessmentResult = new AssessmentResult(this.lock.getSubmissionId(), "SEMI_AUTOMATIC",
-				absoluteScore / this.exercise.getMaxPoints() * 100D, true, this.restClientManager.getAuthenticationClient().getUser(), feedbackAutomatic,
-				codeIssueCount, passedTestCaseCount, tests.size());
-		this.restClientManager.getAssessmentArtemisClient().saveAssessment(this.lock.getParticipationId(), true, assessmentResult);
-	}
+    private void cleanupFeedback() throws ArtemisClientException {
+        this.assessment.clearAnnotations();
+        this.assessment.submit();
+    }
 
-	@Test
-	void testCreationOfSimpleAnnotations() throws IOException, ArtemisClientException {
-		Annotation annotation = new Annotation(UUID.randomUUID().toString(), config.getMistakeTypes().get(1), 1, 2, "src/edu/kit/informatik/BubbleSort", null,
-				null);
-		AnnotationMapper annotationMapper = new AnnotationMapper(exercise, submission, List.of(annotation), config.getIRatingGroups(),
-				this.restClientManager.getAuthenticationClient().getUser(), lock);
-		var result = annotationMapper.createAssessmentResult();
-		this.restClientManager.getAssessmentArtemisClient().saveAssessment(this.lock.getParticipationId(), true, result);
+    @Test
+    void testCreationOfSimpleAnnotations() throws ArtemisClientException {
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
-		// Check Assessments
-		this.lock = this.restClientManager.getAssessmentArtemisClient().startAssessment(this.submission);
-		List<Feedback> allFeedback = this.lock.getLatestFeedback();
-		List<Feedback> tests = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC && f.getCodeLocation() == null).toList();
-		Assertions.assertEquals(13, tests.size());
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", // TODO: the file path did not have .java before
+                1, 2, null);
 
-		List<Feedback> clientData = allFeedback.stream()
-				.filter(f -> f.getFeedbackType() == FeedbackType.MANUAL_UNREFERENCED && Objects.equals(f.getCodeLocationHumanReadable(), "CLIENT_DATA"))
-				.toList();
-		Assertions.assertEquals(1, clientData.size());
+        this.assessment.submit();
 
-		List<Feedback> manualFeedback = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.MANUAL).toList();
-		Assertions.assertEquals(1, manualFeedback.size());
-	}
+        // Check Assessments
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
 
-	@Test
-	void testCreationOfCustomAnnotations() throws IOException, ArtemisClientException {
-		Annotation annotation = new Annotation(UUID.randomUUID().toString(), config.getMistakeTypes().get(0), 1, 2, "src/edu/kit/informatik/BubbleSort",
-				FEEDBACK_TEXT, -2.0);
-		AnnotationMapper annotationMapper = new AnnotationMapper(exercise, submission, List.of(annotation), config.getIRatingGroups(),
-				this.restClientManager.getAuthenticationClient().getUser(), lock);
-		var result = annotationMapper.createAssessmentResult();
-		this.restClientManager.getAssessmentArtemisClient().saveAssessment(this.lock.getParticipationId(), true, result);
+        List<TestResult> tests = this.assessment.getTestResults();
+        Assertions.assertEquals(13, tests.size());
 
-		// Check Assessments
-		this.lock = this.restClientManager.getAssessmentArtemisClient().startAssessment(this.submission);
-		List<Feedback> allFeedback = this.lock.getLatestFeedback();
-		List<Feedback> tests = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.AUTOMATIC && f.getCodeLocation() == null).toList();
-		Assertions.assertEquals(13, tests.size());
+        Assertions.assertEquals(1, this.assessment.getAnnotations().size());
+        Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, this.assessment.getAnnotations().get(0).getSource());
+    }
 
-		List<Feedback> clientData = allFeedback.stream()
-				.filter(f -> f.getFeedbackType() == FeedbackType.MANUAL_UNREFERENCED && Objects.equals(f.getCodeLocationHumanReadable(), "CLIENT_DATA"))
-				.toList();
-		Assertions.assertEquals(1, clientData.size());
-		Assertions.assertTrue(clientData.get(0).getDetailText().contains(FEEDBACK_TEXT));
+    @Test
+    void testCreationOfCustomAnnotation() throws ArtemisClientException {
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("custom");
 
-		List<Feedback> manualFeedback = allFeedback.stream().filter(f -> f.getFeedbackType() == FeedbackType.MANUAL).toList();
-		Assertions.assertEquals(1, manualFeedback.size());
-		Assertions.assertTrue(manualFeedback.get(0).getDetailText().contains(FEEDBACK_TEXT));
-	}
+        this.assessment.addCustomAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, FEEDBACK_TEXT, -2.0);
+        this.assessment.submit();
 
+        // Check Assessments
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+
+        List<TestResult> tests = this.assessment.getTestResults();
+        Assertions.assertEquals(13, tests.size());
+
+        Assertions.assertEquals(1, this.assessment.getAnnotations().size());
+        var annotation = this.assessment.getAnnotations().get(0);
+        Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
+        Assertions.assertEquals(Optional.of(-2.0), annotation.getCustomScore());
+        Assertions.assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());
+    }
 }

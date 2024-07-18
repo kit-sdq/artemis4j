@@ -1,113 +1,117 @@
-/* Licensed under EPL-2.0 2023. */
+/* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j;
-
-import edu.kit.kastel.sdq.artemis4j.api.ArtemisClientException;
-import edu.kit.kastel.sdq.artemis4j.api.artemis.assessment.AssessmentResult;
-import edu.kit.kastel.sdq.artemis4j.api.artemis.assessment.Feedback;
-import edu.kit.kastel.sdq.artemis4j.api.artemis.assessment.Submission;
-import edu.kit.kastel.sdq.artemis4j.client.RestClientManager;
-import org.junit.jupiter.api.Assertions;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
+import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
+import edu.kit.kastel.sdq.artemis4j.client.StudentExamDTO;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
+import org.junit.jupiter.api.Test;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * This class does not contain tests as usual. It is used to perform recurring
  * tasks like toggling all exams to submitted.
  */
 @Disabled
-class UtilitiesTest {
+public class UtilitiesTest {
+    private static final Logger log = LoggerFactory.getLogger(UtilitiesTest.class);
 
-	private static final String hostname = "https://artemis.praktomat.cs.kit.edu";
-	private final String username = System.getenv("ARTEMIS_USERNAME");
-	private final String password = System.getenv("ARTEMIS_PASSWORD");
-	private final String courseId = System.getenv("ARTEMIS_COURSE_ID");
-	private final String examId = System.getenv("ARTEMIS_EXAM_ID");
+    private static final String hostname = "https://artemis.praktomat.cs.kit.edu";
+    private final String username = System.getenv("ARTEMIS_USERNAME");
+    private final String password = System.getenv("ARTEMIS_PASSWORD");
+    private final String courseId = System.getenv("ARTEMIS_COURSE_ID");
+    private final String examId = System.getenv("ARTEMIS_EXAM_ID");
 
-	@Test
-	void toggleExams() throws ArtemisClientException {
-		Assertions.assertNotNull(username);
-		Assertions.assertNotNull(password);
-		Assertions.assertNotNull(courseId);
-		Assertions.assertNotNull(examId);
+    private ArtemisClient client;
 
-		RestClientManager client = new RestClientManager(hostname, username, password);
-		client.login();
+    @BeforeEach
+    void setup() throws ArtemisClientException {
+        Assertions.assertNotNull(username);
+        Assertions.assertNotNull(password);
 
-		var course = client.getCourseArtemisClient().getCourses().stream().filter(c -> String.valueOf(c.getCourseId()).equals(courseId)).findFirst()
-				.orElseThrow();
-		var exam = course.getExams().stream().filter(e -> String.valueOf(e.getExamId()).equals(examId)).findFirst().orElseThrow();
+        ArtemisInstance artemis = new ArtemisInstance(hostname);
+        this.client = ArtemisClient.fromUsernamePassword(artemis, username, password);
+    }
 
-		var result = client.getExamArtemisClient().markAllExamsAsSubmitted(course, exam);
-		System.out.println("All exams: " + result.exams().size());
-		System.out.println("Toggle successful: " + result.toggleSuccessful().size());
-		System.out.println("Toggle failed:\n" + String.join("\n", result.toggleFailed().stream().map(it -> it.getStudent().getLogin()).toList()));
-	}
+    @Test
+    void toggleExams() throws ArtemisClientException {
+        Assertions.assertNotNull(courseId);
+        int courseId = Integer.parseInt(this.courseId);
+        Assertions.assertNotNull(examId);
+        long examId = Long.parseLong(this.examId);
 
-	@Test
-	void markMandatoryFailedAsFailed() throws ArtemisClientException {
-		Assertions.assertNotNull(username);
-		Assertions.assertNotNull(password);
-		Assertions.assertNotNull(courseId);
-		Assertions.assertNotNull(examId);
+        var studentExams = StudentExamDTO.fetchAll(client, courseId, examId);
+        System.out.println("All exams: " + studentExams.size());
 
-		RestClientManager client = new RestClientManager(hostname, username, password);
-		client.login();
+        int toggleSucceeded = 0;
+        List<String> toggleFailed = new ArrayList<>();
+        for (var studentExam : studentExams) {
+            try {
+                StudentExamDTO.toggleToSubmitted(client, courseId, examId, studentExam.id());
+                toggleSucceeded++;
+            } catch (ArtemisNetworkException e) {
+                log.error("Toggling failed for student " + studentExam.user().login(), e);
+                toggleFailed.add(studentExam.user().login());
+            }
+        }
 
-		var course = client.getCourseArtemisClient().getCourses().stream().filter(c -> String.valueOf(c.getCourseId()).equals(courseId)).findFirst()
-				.orElseThrow();
-		var exam = course.getExams().stream().filter(e -> String.valueOf(e.getExamId()).equals(examId)).findFirst().orElseThrow();
+        System.out.println("Toggle successful: " + toggleSucceeded);
+        System.out.println("Toggle failed:\n" + String.join("\n", toggleFailed));
+    }
 
-		for (var exercise : exam.getExerciseGroups().stream().flatMap(it -> it.getExercises().stream()).toList()) {
-			System.out.println("Exercise: " + exercise.getTitle());
-			List<Submission> submissionsRound0 = client.getSubmissionArtemisClient().getSubmissions(exercise, 0);
-			List<Submission> submissionsRound1 = exam.hasSecondCorrectionRound() ? client.getSubmissionArtemisClient().getSubmissions(exercise, 1) : List.of();
+    @Test
+    void markMandatoryFailedAsFailed() throws ArtemisClientException {
+        Assertions.assertNotNull(courseId);
+        int courseId = Integer.parseInt(this.courseId);
+        Assertions.assertNotNull(examId);
+        long examId = Long.parseLong(this.examId);
 
-			List<Submission> submissions = new ArrayList<>();
-			submissions.addAll(submissionsRound0);
-			submissions.addAll(submissionsRound1);
+        var exam = ExamDTO.fetch(client, courseId, examId);
+        var exercises = exam.exerciseGroups().stream().flatMap(e -> e.exercises().stream()).toList();
+        for (var exercise : exercises) {
+            System.out.println("Exercise: " + exercise.title());
+            var submissions = new ArrayList<>(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), 0, false));
+            if (exercise.secondCorrectionEnabled()) {
+                submissions.addAll(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), 1, false));
+            }
 
-			for (var submission : submissions) {
-				var latestResult = submission.getLatestResult();
-				if (latestResult == null) {
-					System.err.println("No result for submission " + submission.getSubmissionId());
-					continue;
-				}
-				boolean mandatoryFailed = latestResult.score == 0;
-				if (mandatoryFailed) {
-					System.out.println("Student " + submission.getParticipantIdentifier() + " failed mandatory tests");
-					var assessment = client.getAssessmentArtemisClient().startAssessment(submission);
-					final List<Feedback> tests = assessment.getLatestFeedback().stream().filter(f -> f.getCodeLocation() == null).toList();
-					int codeIssueCount = (int) assessment.getLatestFeedback().stream().filter(Feedback::isStaticCodeAnalysis).count();
-					int passedTestCaseCount = (int) tests.stream().filter(feedback -> feedback.getPositive() != null && feedback.getPositive()).count();
-					AssessmentResult assessmentResult = new AssessmentResult(assessment.getSubmissionId(), "SEMI_AUTOMATIC", 0, true,
-							client.getAuthenticationClient().getUser(), assessment.getLatestFeedback(), codeIssueCount, passedTestCaseCount, tests.size());
-					client.getAssessmentArtemisClient().saveAssessment(assessment.getParticipationId(), true, assessmentResult);
-				}
-			}
+            for (var submission : submissions) {
+                var latestResult = submission.results().get(submission.results().size() - 1);
+                if (latestResult == null) {
+                    log.warn("No result for submission " + submission.id());
+                    continue;
+                }
 
-		}
+                boolean mandatoryFailed = latestResult.score() == 0.0;
+                if (mandatoryFailed) {
+                    log.info("Student " + submission.participation().participantIdentifier() + " failed mandatory tests");
+                    var newResult = ResultDTO.forAssessmentSubmission(submission.id(), 0.0, latestResult.feedbacks(), latestResult.assessor());
+                    ProgrammingSubmissionDTO.saveAssessment(client, submission.participation().id(), true, newResult);
+                }
+            }
+        }
+    }
 
-	}
+    @Test
+    void removeTAsFromCourse() throws ArtemisClientException {
+        Assertions.assertNotNull(username);
+        Assertions.assertNotNull(password);
+        Assertions.assertNotNull(courseId);
+        int courseId = Integer.parseInt(this.courseId);
 
-	@Test
-	void removeTAsFromCourse() throws ArtemisClientException {
-		Assertions.assertNotNull(username);
-		Assertions.assertNotNull(password);
-		Assertions.assertNotNull(courseId);
-
-		RestClientManager client = new RestClientManager(hostname, username, password);
-		client.login();
-
-		var course = client.getCourseArtemisClient().getCourses().stream().filter(c -> String.valueOf(c.getCourseId()).equals(courseId)).findFirst()
-				.orElseThrow();
-
-		var users = client.getCourseArtemisClient().getTAs(course);
-		for (var user : users) {
-			System.out.println("Removing TA " + user.getLogin() + " from course " + course.getTitle());
-			client.getCourseArtemisClient().removeTAFromCourse(course, user);
-		}
-	}
+        var tutors = CourseDTO.fetchAllTutors(client, courseId);
+        for (var tutor : tutors) {
+            CourseDTO.removeTutor(client, courseId, tutor.login());
+        }
+    }
 }

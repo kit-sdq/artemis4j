@@ -1,0 +1,124 @@
+{
+	"shortName": "config-final-tasks.json",
+	"allowedExercises": [42],
+	"ratingGroups": [
+		{
+			"shortName": "task",
+			"displayName": "Aufgabenspezifisch",
+			"negativeLimit": 0,
+			"positiveLimit": 0,
+			"additionalDisplayNames": {
+				"en": "Task-Specific"
+			}
+		},
+		{
+			"shortName": "comment",
+			"displayName": "Custom Kommentare",
+			"negativeLimit": 0,
+			"positiveLimit": 0,
+			"additionalDisplayNames": {
+				"en": "Custom Comment"
+			}
+		},
+		{
+			"shortName": "modelling",
+			"displayName": "Methodik",
+			"negativeLimit": -4,
+			"positiveLimit": 0,
+			"additionalDisplayNames": {
+				"en": "Methodology"
+			}
+		}
+	],
+	"mistakeTypes": [
+		{
+			"shortName": "custom",
+			"message": "",
+			"button": "Individueller Kommentar",
+			"penaltyRule": {
+				"shortName": "customPenalty"
+			},
+			"appliesTo": "comment",
+			"additionalButtonTexts": {
+				"en": "Custom Comment"
+			},
+			"autograderProblemTypes": ["AVOID_LABELS", "ASSERT"]
+		},
+		{
+			"shortName": "tryCatch",
+			"message": "Try/catch Blöcke sind sehr groß und umfassen nicht nur die nötigen Konstrukte",
+			"button": "try/catch Blöcke",
+			"penaltyRule": {
+				"shortName": "thresholdPenalty",
+				"threshold": 1,
+				"penalty": 1.0
+			},
+			"appliesTo": "modelling",
+			"enabledForExercises": "artemis4j2.0",
+			"enabledPenaltyForExercises": "artemis4j2.0",
+			"additionalButtonTexts": {
+				"en": "try/catch blocks"
+			},
+			"additionalMessages": {
+				"en": "Try/catch blocks are very large and include not only the necessary constructs"
+			}
+		},
+		{
+			"shortName": "wrongLoopType",
+			"message": "Nicht den geeignetsten Schleifentyp gewählt, z.B. While statt For oder For statt ForEach.",
+			"button": "Falscher Schleifentyp",
+			"penaltyRule": {
+				"shortName": "thresholdPenalty",
+				"threshold": 1,
+				"penalty": 0.5
+			},
+			"appliesTo": "modelling",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j2.0",
+			"additionalButtonTexts": {
+				"en": "Incorrect loop type"
+			},
+			"additionalMessages": {
+				"en": "Not chosen the most appropriate loop type, e.g. While instead of For or For instead of ForEach."
+			}
+		},
+		{
+			"shortName": "unnecessaryComplex",
+			"message": "Kleinere Code-Stelle (Teil einer Klasse) ist unnötig komplex",
+			"button": "unnötige Komplexität (klein)",
+			"penaltyRule": {
+				"shortName": "thresholdPenalty",
+				"threshold": 5,
+				"penalty": 0.5
+			},
+			"appliesTo": "modelling",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j",
+			"additionalButtonTexts": {
+				"en": "unnecessary complexity (small)"
+			},
+			"additionalMessages": {
+				"en": "Smaller code location (part of a class) is unnecessarily complex"
+			}
+		},
+		{
+			"shortName": "complexCode",
+			"message": "Sehr komplexe Codestelle; es fehlt ein erklärender Kommentar oder der Code sollte durch geeignete Hilfsmethoden strukturiert werden",
+			"button": "Schwieriger Code",
+			"penaltyRule": {
+				"shortName": "thresholdPenalty",
+				"penalty": 0.5,
+				"threshold": 1
+			},
+			"appliesTo": "modelling",
+			"enabledForExercises": "artemis4j",
+			"enabledPenaltyForExercises": "artemis4j",
+			"additionalButtonTexts": {
+				"en": "Difficult Code"
+			},
+			"additionalMessages": {
+				"en": "Very complex code location; an explanatory comment is missing or the code should be structured by suitable auxiliary methods"
+			}
+		}
+	]
+}
