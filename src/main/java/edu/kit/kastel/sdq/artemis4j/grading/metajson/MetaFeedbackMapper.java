@@ -27,12 +27,10 @@ public class MetaFeedbackMapper {
     }
 
     public static List<Annotation> parseMetaFeedbacks(List<FeedbackDTO> allFeedbacks, GradingConfig config) throws AnnotationMappingException {
-        var mistakeTypeMap = config.getMistakeTypes().stream().collect(Collectors.toMap(MistakeType::getId, Function.identity()));
-
         var annotations = new ArrayList<Annotation>();
         for (var feedback : allFeedbacks) {
             if (feedback.type() == FeedbackType.MANUAL_UNREFERENCED && METAJSON_TEXT.equals(feedback.text())) {
-                annotations.addAll(unpackAnnotationsFromMetaFeedback(feedback, mistakeTypeMap));
+                annotations.addAll(deserializeAnnotations(feedback.detailText(), config));
                 log.info("Found meta feedback with {} annotations", annotations.size());
             }
         }
@@ -41,46 +39,51 @@ public class MetaFeedbackMapper {
     }
 
     public static List<FeedbackDTO> createMetaFeedbacks(List<Annotation> annotations) throws AnnotationMappingException {
+        String text = serializeAnnotations(annotations);
+
+        if (text.length() < FeedbackDTO.DETAIL_TEXT_MAX_CHARACTERS) {
+            // The text fits in a single feedback
+            log.info("Created meta feedback with {} characters", text.length());
+            return List.of(FeedbackDTO.newInvisibleManualUnreferenced(0.0, METAJSON_TEXT, text));
+        }
+
+        if (annotations.size() == 1) {
+            // No good, we cannot further split a single annotation
+            throw new AnnotationMappingException("Annotation too long to be split for the meta feedback: " + text);
+        }
+
+        // Recursively split the list in half
+        List<FeedbackDTO> feedbacks = new ArrayList<>();
+        feedbacks.addAll(createMetaFeedbacks(annotations.subList(0, annotations.size() / 2)));
+        feedbacks.addAll(createMetaFeedbacks(annotations.subList(annotations.size() / 2, annotations.size())));
+        return feedbacks;
+    }
+
+    public static String serializeAnnotations(List<Annotation> annotations) throws AnnotationMappingException {
         var dtos = annotations.stream().map(Annotation::toDTO).toList();
         try {
-            String text = ArtemisClient.MAPPER.writeValueAsString(dtos);
-
-            if (text.length() < FeedbackDTO.DETAIL_TEXT_MAX_CHARACTERS) {
-                // The text fits in a single feedback
-                log.info("Created meta feedback with {} characters", text.length());
-                return List.of(FeedbackDTO.newInvisibleManualUnreferenced(0.0, METAJSON_TEXT, text));
-            }
-
-            if (dtos.size() == 1) {
-                // No good, we cannot further split a single annotation
-                throw new AnnotationMappingException("Annotation too long to be split for the meta feedback: " + text);
-            }
-
-            // Recursively split the list in half
-            List<FeedbackDTO> feedbacks = new ArrayList<>();
-            feedbacks.addAll(createMetaFeedbacks(annotations.subList(0, annotations.size() / 2)));
-            feedbacks.addAll(createMetaFeedbacks(annotations.subList(annotations.size() / 2, annotations.size())));
-            return feedbacks;
+            return ArtemisClient.MAPPER.writeValueAsString(dtos);
         } catch (JsonProcessingException ex) {
             throw new AnnotationMappingException(ex);
         }
     }
 
-    private static List<Annotation> unpackAnnotationsFromMetaFeedback(FeedbackDTO feedback, Map<String, MistakeType> mistakes)
-            throws AnnotationMappingException {
+    public static List<Annotation> deserializeAnnotations(String text, GradingConfig config) throws AnnotationMappingException {
+        var mistakes = config.getMistakeTypes().stream().collect(Collectors.toMap(MistakeType::getId, Function.identity()));
+
         try {
-            var dtos = ArtemisClient.MAPPER.readValue(feedback.detailText(), AnnotationDTO[].class);
+            var dtos = ArtemisClient.MAPPER.readValue(text, AnnotationDTO[].class);
             List<Annotation> annotations = new ArrayList<>();
             for (var dto : dtos) {
                 var mistake = mistakes.get(dto.mistakeTypeId());
                 if (mistake == null) {
                     throw new MismatchedGradingConfigException("MistakeType with id " + dto.mistakeTypeId() + " not found in grading config");
                 }
-                annotations.add(new Annotation(dto, mistakes.get(dto.mistakeTypeId())));
+                annotations.add(new Annotation(dto, mistake));
             }
             return annotations;
         } catch (JsonProcessingException ex) {
-            throw new AnnotationMappingException("Failed to parse CLIENT_DATA", ex);
+            throw new AnnotationMappingException(ex);
         }
     }
 }

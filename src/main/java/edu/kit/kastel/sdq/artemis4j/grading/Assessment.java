@@ -123,13 +123,15 @@ public class Assessment extends ArtemisConnectionHolder {
      * @param endLine
      * @param customMessage May be null if no custom message is provided
      */
-    public void addPredefinedAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage) {
+    public Annotation addPredefinedAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage) {
         if (mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is a custom annotation");
         }
 
         var source = this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, customMessage, null, source));
+        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, null, source);
+        this.annotations.add(annotation);
+        return annotation;
     }
 
     /**
@@ -142,7 +144,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * @param customMessage May not be null
      * @param customScore
      */
-    public void addCustomAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, double customScore) {
+    public Annotation addCustomAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, double customScore) {
         if (!mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is not a custom annotation");
         }
@@ -152,12 +154,16 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var source = this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source));
+        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source);
+        this.annotations.add(annotation);
+        return annotation;
     }
 
-    public void addAutograderAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String explanation) {
+    public Annotation addAutograderAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String explanation) {
         Double customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
-        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, explanation, customScore, AnnotationSource.AUTOGRADER));
+        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, explanation, customScore, AnnotationSource.AUTOGRADER);
+        this.annotations.add(annotation);
+        return annotation;
     }
 
     /**
@@ -198,6 +204,41 @@ public class Assessment extends ArtemisConnectionHolder {
      */
     public void submit() throws AnnotationMappingException, ArtemisNetworkException {
         this.internalSaveOrSubmit(true);
+    }
+
+    /**
+     * Exports the assessment to a string. Useful for (offline) checkpointing of assessments.
+     * The returned string contains all information necessary to recreate the exact state of the assessment, as long as the underlying
+     * submission is the same.
+     * @return
+     * @throws AnnotationMappingException
+     */
+    public String exportAssessment() throws AnnotationMappingException {
+        String header = this.programmingSubmission.getId() + ";" + this.correctionRound + ";";
+        return header + MetaFeedbackMapper.serializeAnnotations(this.annotations);
+    }
+
+    /**
+     * Imports the given assessment string. This overwrites the current assessment. It is checked
+     * that the submission ID and correction round match the current assessment.
+     * @param exportedAssessment
+     * @throws AnnotationMappingException
+     */
+    public void importAssessment(String exportedAssessment) throws AnnotationMappingException {
+        String[] parts = exportedAssessment.split(";", 3);
+        try {
+            if (Integer.parseInt(parts[0]) != this.programmingSubmission.getId()) {
+                throw new IllegalArgumentException("Submission ID does not match");
+            }
+            if (Integer.parseInt(parts[1]) != this.correctionRound) {
+                throw new IllegalArgumentException("Correction round does not match");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid header in exported annotations");
+        }
+
+        this.annotations.clear();
+        this.annotations.addAll(MetaFeedbackMapper.deserializeAnnotations(parts[2], this.config));
     }
 
     /**
