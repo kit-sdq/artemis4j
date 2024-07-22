@@ -3,7 +3,6 @@ package edu.kit.kastel.sdq.artemis4j.grading.metajson;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 

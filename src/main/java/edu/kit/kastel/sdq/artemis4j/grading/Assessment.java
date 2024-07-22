@@ -207,9 +207,11 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Exports the assessment to a string. Useful for (offline) checkpointing of assessments.
-     * The returned string contains all information necessary to recreate the exact state of the assessment, as long as the underlying
+     * Exports the assessment to a string. Useful for (offline) checkpointing of
+     * assessments. The returned string contains all information necessary to
+     * recreate the exact state of the assessment, as long as the underlying
      * submission is the same.
+     * 
      * @return
      * @throws AnnotationMappingException
      */
@@ -219,8 +221,10 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Imports the given assessment string. This overwrites the current assessment. It is checked
-     * that the submission ID and correction round match the current assessment.
+     * Imports the given assessment string. This overwrites the current assessment.
+     * It is checked that the submission ID and correction round match the current
+     * assessment.
+     * 
      * @param exportedAssessment
      * @throws AnnotationMappingException
      */

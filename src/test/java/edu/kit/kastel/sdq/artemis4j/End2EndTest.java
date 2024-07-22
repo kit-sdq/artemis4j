@@ -82,8 +82,7 @@ class End2EndTest {
     void testCreationOfSimpleAnnotations() throws ArtemisClientException {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
-        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java",
-                1, 2, null);
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
 
         this.assessment.submit();
 
@@ -121,8 +120,7 @@ class End2EndTest {
     void testExportImport() throws ArtemisClientException {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
-        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java",
-                1, 2, null);
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
         Assertions.assertEquals(1, this.assessment.getAnnotations().size());
         var oldAnnotations = this.assessment.getAnnotations();
 
