@@ -58,6 +58,7 @@
     <okhttp.version>4.12.0</okhttp.version>
     <autograder.version>0.6.0</autograder.version>
     <junit.version>5.10.3</junit.version>
+    <versions-maven-plugin.version>2.17.1</versions-maven-plugin.version>
   </properties>
 
   <dependencies>
@@ -265,6 +266,22 @@
             <phase>process-resources</phase>
           </execution>
         </executions>
+      </plugin>
+      <plugin>
+        <groupId>org.codehaus.mojo</groupId>
+        <artifactId>versions-maven-plugin</artifactId>
+        <version>${versions-maven-plugin.version}</version>
+        <configuration>
+          <ruleSet>
+            <rule>
+              <groupId>*</groupId>
+              <ignoreVersion>
+                <type>regex</type>
+                <version>.+-(alpha|Alpha|beta|Beta|BETA|RC|rc).*</version>
+              </ignoreVersion>
+            </rule>
+          </ruleSet>
+        </configuration>
       </plugin>
     </plugins>
   </build>
