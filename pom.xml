@@ -52,12 +52,12 @@
     <maven.compiler.target>17</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <spotless.version>2.44.0.BETA1</spotless.version>
+    <spotless.version>2.43.0</spotless.version>
     <jackson.version>2.17.2</jackson.version>
-    <slf4j.version>2.1.0-alpha1</slf4j.version>
-    <okhttp.version>5.0.0-alpha.14</okhttp.version>
+    <slf4j.version>2.0.13</slf4j.version>
+    <okhttp.version>4.12.0</okhttp.version>
     <autograder.version>0.6.0</autograder.version>
-    <junit.version>5.11.0-M2</junit.version>
+    <junit.version>5.10.3</junit.version>
   </properties>
 
   <dependencies>
@@ -101,7 +101,7 @@
     <dependency>
       <groupId>org.eclipse.jgit</groupId>
       <artifactId>org.eclipse.jgit</artifactId>
-      <version>6.10.0.202406032230-r</version>
+      <version>6.9.0.202403050737-r</version>
     </dependency>
 
     <!-- Test dependencies -->
