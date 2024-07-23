@@ -67,15 +67,9 @@ class End2EndTest {
 
         // ensure that the submission is locked
         this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
-        this.cleanupFeedback();
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment.clearAnnotations();
 
         Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
-    }
-
-    private void cleanupFeedback() throws ArtemisClientException {
-        this.assessment.clearAnnotations();
-        this.assessment.submit();
     }
 
     @Test
