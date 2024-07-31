@@ -23,6 +23,10 @@ env:
   EXAM_EXERCISE_GROUP_ID: "6"
   EXAM_PROGRAMMING_EXERCISE_ID: "48"
 
+concurrency:
+  group: artemis-test-system
+  cancel-in-progress: true
+
 jobs:
   pre_job:
     name: "Check for duplicate jobs"
