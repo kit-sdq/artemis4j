@@ -41,6 +41,13 @@ public class ArtemisRequest {
         return this;
     }
 
+    /**
+     *
+     * @param managementRequest whether the request shall be performed against
+     *                          Artemis' "normal" API (/api), or against the
+     *                          management API (/management)
+     * @return
+     */
     public ArtemisRequest managementRequest(boolean managementRequest) {
         this.managementRequest = managementRequest;
         return this;
