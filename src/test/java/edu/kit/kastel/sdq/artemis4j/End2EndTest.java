@@ -76,8 +76,7 @@ class End2EndTest {
     void testCreationOfSimpleAnnotations() throws ArtemisClientException {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
-        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", // TODO: the file path did not have .java before
-                1, 2, null);
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
 
         this.assessment.submit();
 
@@ -109,5 +108,22 @@ class End2EndTest {
         Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
         Assertions.assertEquals(Optional.of(-2.0), annotation.getCustomScore());
         Assertions.assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());
+    }
+
+    @Test
+    void testExportImport() throws ArtemisClientException {
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
+
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
+        Assertions.assertEquals(1, this.assessment.getAnnotations().size());
+        var oldAnnotations = this.assessment.getAnnotations();
+
+        String exportedAssessment = this.assessment.exportAssessment();
+
+        this.assessment.clearAnnotations();
+        Assertions.assertEquals(0, this.assessment.getAnnotations().size());
+
+        this.assessment.importAssessment(exportedAssessment);
+        Assertions.assertEquals(oldAnnotations, this.assessment.getAnnotations());
     }
 }
