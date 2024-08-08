@@ -41,9 +41,18 @@ public class ArtemisInstance {
         return this.protocol + this.domain + "/api";
     }
 
+    public String getManagementBaseURL() {
+        return this.protocol + this.domain + "/management";
+    }
+
     public HttpUrl url(List<Object> pathComponents, Map<String, Object> queryParams) {
+        return this.url(pathComponents, queryParams, false);
+    }
+
+    public HttpUrl url(List<Object> pathComponents, Map<String, Object> queryParams, boolean managementRequest) {
+        String baseUrl = managementRequest ? this.getManagementBaseURL() : this.getAPIBaseURL();
         String path = pathComponents.stream().map(Object::toString).collect(Collectors.joining("/"));
-        var url = HttpUrl.parse(this.getAPIBaseURL() + "/" + path);
+        var url = HttpUrl.parse(baseUrl + "/" + path);
         if (queryParams != null && !queryParams.isEmpty()) {
             var builder = url.newBuilder();
             queryParams.forEach((p, v) -> builder.addQueryParameter(p, v.toString()));

@@ -40,7 +40,7 @@ public class APIExampleTest {
         // Fetch all courses, and get the first one (not the course with id 0!)
         // Network requests are generally only performed once when required, and the
         // results are cached
-        var course = connection.getCourses().get(0);
+        var course = connection.getCourseById(9);
         System.out.println("Course is " + course.getTitle());
 
         // Check how many locks we hold across the entire course

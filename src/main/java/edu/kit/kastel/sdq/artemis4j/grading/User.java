@@ -30,6 +30,10 @@ public class User {
         return Optional.ofNullable(this.dto.vcsAccessToken());
     }
 
+    public Optional<String> getGitSSHKey() {
+        return Optional.ofNullable(this.dto.sshPublicKey());
+    }
+
     public List<String> getGroups() {
         return Collections.unmodifiableList(this.dto.groups());
     }

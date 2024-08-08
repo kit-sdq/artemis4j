@@ -12,6 +12,7 @@ import okhttp3.Request;
 public class ArtemisRequest {
     private final String method;
     private List<Object> path;
+    private boolean managementRequest = false;
     private final Map<String, Object> requestParams = new HashMap<>();
     private Object body;
 
@@ -40,6 +41,18 @@ public class ArtemisRequest {
         return this;
     }
 
+    /**
+     *
+     * @param managementRequest whether the request shall be performed against
+     *                          Artemis' "normal" API (/api), or against the
+     *                          management API (/management)
+     * @return
+     */
+    public ArtemisRequest managementRequest(boolean managementRequest) {
+        this.managementRequest = managementRequest;
+        return this;
+    }
+
     public <E> ArtemisRequest body(E entity) {
         if (this.method.equals("GET")) {
             throw new IllegalArgumentException("GET requests cannot have a body");
@@ -63,7 +76,7 @@ public class ArtemisRequest {
             request.method(this.method, ArtemisClient.encodeJSON(this.body));
         }
 
-        request.url(client.getInstance().url(this.path, this.requestParams));
+        request.url(client.getInstance().url(this.path, this.requestParams, this.managementRequest));
         return client.call(request.build(), resultClass);
     }
 
