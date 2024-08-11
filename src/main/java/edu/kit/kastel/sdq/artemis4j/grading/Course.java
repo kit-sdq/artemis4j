@@ -45,6 +45,10 @@ public class Course extends ArtemisConnectionHolder {
         return this.dto.title();
     }
 
+    public String getShortName() {
+        return this.dto.shortName();
+    }
+
     /**
      * Gets all programming exercises of this course. The result is fetched lazily
      * and then cached.
@@ -78,6 +82,10 @@ public class Course extends ArtemisConnectionHolder {
 
     public int fetchLockedSubmissionCount() throws ArtemisNetworkException {
         return CourseDTO.fetchLockedSubmissions(this.getConnection().getClient(), this.getId()).size();
+    }
+
+    public int getNumberOfStudents() {
+        return this.dto.numberOfStudents();
     }
 
     @Override

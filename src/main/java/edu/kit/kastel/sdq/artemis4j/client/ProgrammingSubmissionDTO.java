@@ -51,9 +51,19 @@ public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty Part
         ArtemisRequest.put().path(List.of("participations", participationId, "manual-results")).param("submit", submit).body(result).execute(client);
     }
 
+    public List<ResultDTO> nonAutomaticResults() {
+        return this.results().stream().filter(r -> r.assessmentType() != AssessmentType.AUTOMATIC).toList();
+    }
+
     private ProgrammingSubmissionDTO fetchLongFeedback(ArtemisClient client) throws ArtemisNetworkException {
         List<ResultDTO> results = new ArrayList<>(this.results().size());
         for (var result : this.results()) {
+            // sometimes the feedbacks are not loaded, to fetch the long feedbacks, we need
+            // to load the feedbacks first
+            if (result.feedbacks() == null) {
+                result = result.fetchFeedbacks(client, this.participation().id());
+            }
+
             if (result.feedbacks() == null) {
                 continue;
             }

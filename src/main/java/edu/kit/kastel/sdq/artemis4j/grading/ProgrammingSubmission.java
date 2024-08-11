@@ -121,6 +121,32 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         return assessmentType == AssessmentType.MANUAL || assessmentType == AssessmentType.SEMI_AUTOMATIC;
     }
 
+    /**
+     * Opens the assessment for this submission.
+     * <p>
+     * If the submission has not been assessed by you, you might not be able to
+     * change the assessment.
+     *
+     * @param config the config for the exercise
+     * @return the assessment if there are results for this submission
+     * @throws AnnotationMappingException If the annotations that were already
+     *                                    present could not be mapped given the
+     *                                    gradingConfig
+     */
+    public Optional<Assessment> openAssessment(GradingConfig config) throws AnnotationMappingException {
+        ResultDTO resultDTO = this.getRelevantResult().orElse(null);
+
+        if (resultDTO != null) {
+            return Optional.of(new Assessment(resultDTO, config, this, this.correctionRound));
+        }
+
+        return Optional.empty();
+    }
+
+    public boolean isBuildFailed() {
+        return this.dto.buildFailed();
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o)
@@ -146,7 +172,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
             return Optional.of(this.dto.results().get(0));
         } else {
             // More than one result, so probably multiple correction rounds
-            return Optional.of(this.dto.results().get(this.correctionRound));
+            return Optional.of(this.dto.nonAutomaticResults().get(this.correctionRound));
         }
     }
 }
