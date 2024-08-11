@@ -25,7 +25,11 @@ public class TestResult {
         return this.dto.credits();
     }
 
-    protected FeedbackDTO getDto() {
+    public FeedbackType getFeedbackType() {
+        return this.dto.type();
+    }
+
+    public FeedbackDTO getDto() {
         return this.dto;
     }
 
