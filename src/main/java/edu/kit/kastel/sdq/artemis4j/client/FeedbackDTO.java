@@ -31,10 +31,10 @@ public record FeedbackDTO(@JsonProperty FeedbackType type, @JsonProperty Integer
         @JsonProperty Boolean hasLongFeedbackText, @JsonProperty TestCaseDTO testCase) {
 
     /**
-     * keep this up to date with
-     * https://github.com/ls1intum/Artemis/blob/develop/src/main/java/de/tum/in/www1/artemis/config/Constants.java#L137
+     * keep this up to date with <a href=
+     * "https://github.com/ls1intum/Artemis/blob/develop/src/main/java/de/tum/in/www1/artemis/config/Constants.java#L137">Artemis-Constants</a>
      */
-    public static int DETAIL_TEXT_MAX_CHARACTERS = 5000;
+    public static final int DETAIL_TEXT_MAX_CHARACTERS = 5000;
 
     public static FeedbackDTO newManual(double credits, String text, String reference, String detailText) {
         return new FeedbackDTO(FeedbackType.MANUAL, null, credits, null, null, text, reference, detailText, null, null);

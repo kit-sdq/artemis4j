@@ -59,8 +59,6 @@ public final class RatingGroup {
     /**
      * Only used during deserialization to create the circular references between
      * RatingGroup and MistakeType
-     *
-     * @param mistakeType
      */
     void addMistakeType(MistakeType mistakeType) {
         this.mistakeTypes.add(mistakeType);
