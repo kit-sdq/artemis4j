@@ -9,6 +9,7 @@ import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ManagementInfoDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
 
 /**
@@ -17,6 +18,7 @@ import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
  */
 public final class ArtemisConnection {
     private final ArtemisClient client;
+    private final LazyNetworkValue<ManagementInfoDTO> managementInfo;
     private final LazyNetworkValue<User> assessor;
     private final LazyNetworkValue<List<Course>> courses;
 
@@ -30,12 +32,17 @@ public final class ArtemisConnection {
 
     public ArtemisConnection(ArtemisClient client) {
         this.client = client;
+        this.managementInfo = new LazyNetworkValue<>(() -> ManagementInfoDTO.fetch(this.client));
         this.assessor = new LazyNetworkValue<>(() -> new User(UserDTO.getAssessingUser(this.client)));
         this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this.client).stream().map(dto -> new Course(dto, this)).toList());
     }
 
     public ArtemisClient getClient() {
         return client;
+    }
+
+    public ManagementInfoDTO getManagementInfo() throws ArtemisNetworkException {
+        return managementInfo.get();
     }
 
     public User getAssessor() throws ArtemisNetworkException {

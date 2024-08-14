@@ -52,9 +52,6 @@ public class Course extends ArtemisConnectionHolder {
     /**
      * Gets all programming exercises of this course. The result is fetched lazily
      * and then cached.
-     *
-     * @return
-     * @throws ArtemisNetworkException
      */
     public List<ProgrammingExercise> getProgrammingExercises() throws ArtemisNetworkException {
         return this.exercises.get().stream().filter(ProgrammingExercise.class::isInstance).map(ProgrammingExercise.class::cast).toList();
@@ -65,7 +62,6 @@ public class Course extends ArtemisConnectionHolder {
      *
      * @param id the id of the exercise
      * @return the exercise
-     * @throws ArtemisNetworkException
      */
     public ProgrammingExercise getProgrammingExerciseById(long id) throws ArtemisNetworkException {
         return this.getProgrammingExercises().stream().filter(e -> e.getId() == id).findAny()
@@ -74,9 +70,6 @@ public class Course extends ArtemisConnectionHolder {
 
     /**
      * Gets all exams of this course. The result is fetched lazily and then cached.
-     *
-     * @return
-     * @throws ArtemisNetworkException
      */
     public List<Exam> getExams() throws ArtemisNetworkException {
         return this.exams.get();

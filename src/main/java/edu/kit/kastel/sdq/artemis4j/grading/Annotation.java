@@ -27,9 +27,6 @@ public final class Annotation {
 
     /**
      * Deserializes an annotation from its metajson format
-     *
-     * @param dto
-     * @param mistakeType
      */
     public Annotation(AnnotationDTO dto, MistakeType mistakeType) {
         this.uuid = dto.uuid();
@@ -67,8 +64,6 @@ public final class Annotation {
 
     /**
      * Uniquely identifies this annotation
-     *
-     * @return
      */
     public String getUUID() {
         return uuid;
@@ -81,8 +76,6 @@ public final class Annotation {
     /**
      * The path of the file this annotation is associated with, including its file
      * ending
-     *
-     * @return
      */
     public String getFilePath() {
         return filePath;
@@ -91,8 +84,6 @@ public final class Annotation {
     /**
      * The path of the file this annotation is associated with, excluding its file
      * ending
-     *
-     * @return
      */
     public String getFilePathWithoutType() {
         return this.filePath.replace(".java", "");
@@ -100,8 +91,6 @@ public final class Annotation {
 
     /**
      * The line in the file where this annotation starts (0-based)
-     *
-     * @return
      */
     public int getStartLine() {
         return startLine;
@@ -110,8 +99,6 @@ public final class Annotation {
     /**
      * The line in the file where this annotation starts (1-based, for display to
      * the user e.g. in Artemis)
-     *
-     * @return
      */
     public int getDisplayLine() {
         return startLine + 1;
@@ -119,8 +106,6 @@ public final class Annotation {
 
     /**
      * The line in the file where this annotation ends (0-based)
-     *
-     * @return
      */
     public int getEndLine() {
         return endLine;
@@ -129,8 +114,6 @@ public final class Annotation {
     /**
      * The custom message associated with this message, if any. Is never empty for
      * custom annotations.
-     *
-     * @return
      */
     public Optional<String> getCustomMessage() {
         return Optional.ofNullable(customMessage);
@@ -139,8 +122,6 @@ public final class Annotation {
     /**
      * The custom score associated with this message, if any. Is always empty for
      * predefined annotations, and never empty for custom annotations.
-     *
-     * @return
      */
     public Optional<Double> getCustomScore() {
         return Optional.ofNullable(customScore);
@@ -152,8 +133,6 @@ public final class Annotation {
 
     /**
      * Serializes this annotation to its metajson format
-     *
-     * @return
      */
     public AnnotationDTO toDTO() {
         return new AnnotationDTO(uuid, type.getId(), startLine, endLine, filePath, customMessage, customScore, source);

@@ -26,7 +26,7 @@ public class TranslatableString {
     }
 
     public String translateToDefault() {
-        return this.translateTo((Locale) null);
+        return this.translateTo(null);
     }
 
     @Override

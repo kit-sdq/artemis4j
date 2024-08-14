@@ -74,8 +74,6 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * @param correctionRound The correction round to fetch submissions for
      * @param onlyOwn         Whether to only fetch submissions that the current
      *                        user has assessed
-     * @return
-     * @throws ArtemisNetworkException
      */
     public List<ProgrammingSubmission> fetchSubmissions(int correctionRound, boolean onlyOwn) throws ArtemisNetworkException {
         return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), correctionRound, onlyOwn).stream()
@@ -89,8 +87,6 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
     /**
      * Fetches all submissions from correction round 1 and 2 (if enabled).
      *
-     * @return
-     * @throws ArtemisNetworkException
      */
     public List<ProgrammingSubmission> fetchSubmissions() throws ArtemisNetworkException {
         List<ProgrammingSubmission> submissions = new ArrayList<>(this.fetchSubmissions(0));
@@ -105,12 +101,8 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * Tries to lock the next submission for this exercise. If successful, returns
      * the assessment.
      *
-     * @param correctionRound
-     * @param gradingConfig
      * @return An empty optional if no submission was available to lock, otherwise
      *         the assessment
-     * @throws AnnotationMappingException
-     * @throws ArtemisNetworkException
      */
     public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig)
             throws AnnotationMappingException, ArtemisNetworkException {
@@ -138,9 +130,6 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * Tries to lock a specific submission for this exercise. Locking is reentrant,
      * i.e. a single user may lock the same submission multiple times.
      *
-     * @param submissionId
-     * @param correctionRound
-     * @param gradingConfig
      * @return An empty optional if a *different* user has already locked the
      *         submission, otherwise the assessment
      * @throws AnnotationMappingException    If the annotations that were already
