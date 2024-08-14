@@ -221,9 +221,6 @@ public class Assessment extends ArtemisConnectionHolder {
      * Imports the given assessment string. This overwrites the current assessment.
      * It is checked that the submission ID and correction round match the current
      * assessment.
-     * 
-     * @param exportedAssessment
-     * @throws AnnotationMappingException
      */
     public void importAssessment(String exportedAssessment) throws AnnotationMappingException {
         String[] parts = exportedAssessment.split(";", 3);
