@@ -211,8 +211,6 @@ public class Assessment extends ArtemisConnectionHolder {
      * assessments. The returned string contains all information necessary to
      * recreate the exact state of the assessment, as long as the underlying
      * submission is the same.
-     * 
-     * @throws AnnotationMappingException
      */
     public String exportAssessment() throws AnnotationMappingException {
         String header = this.programmingSubmission.getId() + ";" + this.correctionRound + ";";
