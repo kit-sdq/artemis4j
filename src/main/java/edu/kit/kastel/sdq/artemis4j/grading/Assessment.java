@@ -212,7 +212,6 @@ public class Assessment extends ArtemisConnectionHolder {
      * recreate the exact state of the assessment, as long as the underlying
      * submission is the same.
      * 
-     * @return
      * @throws AnnotationMappingException
      */
     public String exportAssessment() throws AnnotationMappingException {
