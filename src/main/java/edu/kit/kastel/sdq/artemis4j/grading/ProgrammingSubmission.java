@@ -68,8 +68,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
     /**
      * The student can only be retrieved by instructors.
-     *
-     * @return
      */
     public Optional<User> getStudent() {
         return Optional.ofNullable(this.student);
@@ -90,7 +88,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
      * @param target        The path to clone into
      * @param tokenOverride (optional) The git password to use for cloning
      * @return The path to the actual submission within the target location
-     * @throws ArtemisClientException
      */
     public ClonedProgrammingSubmission cloneInto(Path target, String tokenOverride) throws ArtemisClientException {
         return ClonedProgrammingSubmission.cloneSubmission(this, target, tokenOverride);
@@ -99,7 +96,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     /**
      * Tries to lock this submission. Locking is reentrant.
      *
-     * @param gradingConfig
      * @return An empty optional if a *different* user has already locked the
      *         submission, otherwise the assessment
      * @throws AnnotationMappingException    If the annotations that were already

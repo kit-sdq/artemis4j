@@ -14,11 +14,6 @@ public record ExamDTO(@JsonProperty long id, @JsonProperty String title, @JsonPr
      * This call does not populate exerciseGroups - they will be null! Use
      * {@link #fetch(ArtemisClient client, int courseId, long examId)} to get the
      * full exam.
-     *
-     * @param client
-     * @param courseId
-     * @return
-     * @throws ArtemisNetworkException
      */
     public static List<ExamDTO> fetchAll(ArtemisClient client, int courseId) throws ArtemisNetworkException {
         return List.of(ArtemisRequest.get().path(List.of("courses", courseId, "exams")).executeAndDecode(client, ExamDTO[].class));

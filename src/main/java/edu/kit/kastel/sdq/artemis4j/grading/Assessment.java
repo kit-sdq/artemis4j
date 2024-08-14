@@ -75,8 +75,6 @@ public class Assessment extends ArtemisConnectionHolder {
 
     /**
      * Get the submission associated with this assessment
-     *
-     * @return
      */
     public ProgrammingSubmission getSubmission() {
         return programmingSubmission;
@@ -96,7 +94,6 @@ public class Assessment extends ArtemisConnectionHolder {
      * Gets all annotations associated with the specified mistake type. The mistake
      * type must be associated with the same grading config as this assessment.
      *
-     * @param mistakeType
      * @return An unmodifiable list of annotations, possibly empty but never null.
      */
     public List<Annotation> getAnnotations(MistakeType mistakeType) {
@@ -107,7 +104,6 @@ public class Assessment extends ArtemisConnectionHolder {
      * Gets all annotations associated with the specified rating group. The rating
      * group must be associated with the same grading config as this assessment.
      *
-     * @param ratingGroup
      * @return An unmodifiable list of annotations, possibly empty but never null.
      */
     public List<Annotation> getAnnotations(RatingGroup ratingGroup) {
@@ -118,31 +114,26 @@ public class Assessment extends ArtemisConnectionHolder {
      * Adds a non-custom manual annotation to the assessment.
      *
      * @param mistakeType   Must not be a custom mistake type
-     * @param filePath
-     * @param startLine
-     * @param endLine
      * @param customMessage May be null if no custom message is provided
      */
-    public void addPredefinedAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage) {
+    public Annotation addPredefinedAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage) {
         if (mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is a custom annotation");
         }
 
         var source = this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, customMessage, null, source));
+        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, null, source);
+        this.annotations.add(annotation);
+        return annotation;
     }
 
     /**
      * Adds a custom manual annotation to the assessment.
      *
      * @param mistakeType   Must be a custom mistake type
-     * @param filePath
-     * @param startLine
-     * @param endLine
      * @param customMessage May not be null
-     * @param customScore
      */
-    public void addCustomAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, double customScore) {
+    public Annotation addCustomAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, double customScore) {
         if (!mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is not a custom annotation");
         }
@@ -152,19 +143,21 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var source = this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source));
+        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source);
+        this.annotations.add(annotation);
+        return annotation;
     }
 
-    public void addAutograderAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String explanation) {
+    public Annotation addAutograderAnnotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String explanation) {
         Double customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
-        this.annotations.add(new Annotation(mistakeType, filePath, startLine, endLine, explanation, customScore, AnnotationSource.AUTOGRADER));
+        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, explanation, customScore, AnnotationSource.AUTOGRADER);
+        this.annotations.add(annotation);
+        return annotation;
     }
 
     /**
      * Removes an annotation from the assessment. If the annotation is not present,
      * nothing happens.
-     *
-     * @param annotation
      */
     public void removeAnnotation(Annotation annotation) {
         this.annotations.remove(annotation);
@@ -180,9 +173,6 @@ public class Assessment extends ArtemisConnectionHolder {
     /**
      * Saves the assessment to Artemis. This does not free the lock on the
      * submission.
-     *
-     * @throws AnnotationMappingException
-     * @throws ArtemisNetworkException
      */
     public void save() throws AnnotationMappingException, ArtemisNetworkException {
         this.internalSaveOrSubmit(false);
@@ -192,19 +182,47 @@ public class Assessment extends ArtemisConnectionHolder {
      * Saves and submits the assessment. A submitted assessment can still be changed
      * if you have its ID, but it will be marked as assessed. This also frees the
      * lock on the submission.
-     *
-     * @throws AnnotationMappingException
-     * @throws ArtemisNetworkException
      */
     public void submit() throws AnnotationMappingException, ArtemisNetworkException {
         this.internalSaveOrSubmit(true);
     }
 
     /**
+     * Exports the assessment to a string. Useful for (offline) checkpointing of
+     * assessments. The returned string contains all information necessary to
+     * recreate the exact state of the assessment, as long as the underlying
+     * submission is the same.
+     */
+    public String exportAssessment() throws AnnotationMappingException {
+        String header = this.programmingSubmission.getId() + ";" + this.correctionRound + ";";
+        return header + MetaFeedbackMapper.serializeAnnotations(this.annotations);
+    }
+
+    /**
+     * Imports the given assessment string. This overwrites the current assessment.
+     * It is checked that the submission ID and correction round match the current
+     * assessment.
+     */
+    public void importAssessment(String exportedAssessment) throws AnnotationMappingException {
+        String[] parts = exportedAssessment.split(";", 3);
+        try {
+            if (Integer.parseInt(parts[0]) != this.programmingSubmission.getId()) {
+                throw new IllegalArgumentException("Submission ID does not match");
+            }
+            if (Integer.parseInt(parts[1]) != this.correctionRound) {
+                throw new IllegalArgumentException("Correction round does not match");
+            }
+        } catch (NumberFormatException e) {
+            throw new IllegalArgumentException("Invalid header in exported annotations");
+        }
+
+        this.annotations.clear();
+        this.annotations.addAll(MetaFeedbackMapper.deserializeAnnotations(parts[2], this.config));
+    }
+
+    /**
      * Cancels the assessment &amp; frees the lock on the submission. This deletes
      * any feedback that was created in Artemis!
-     *
-     * @throws ArtemisNetworkException
      */
     public void cancel() throws ArtemisNetworkException {
         ProgrammingSubmissionDTO.cancelAssessment(this.getConnection().getClient(), this.programmingSubmission.getId());
@@ -213,8 +231,6 @@ public class Assessment extends ArtemisConnectionHolder {
     /**
      * Calculates the total points that the student receives for his submission.
      * This value will be shown to the student in Artemis.
-     *
-     * @return
      */
     public double calculateTotalPoints() {
         double points = this.calculateTotalPointsOfAnnotations();
@@ -225,8 +241,6 @@ public class Assessment extends ArtemisConnectionHolder {
     /**
      * Calculates the total points of the annotations, not including points from the
      * tests.
-     *
-     * @return
      */
     public double calculateTotalPointsOfAnnotations() {
         return this.config.getRatingGroups().stream().map(this::calculatePointsForRatingGroup).mapToDouble(Points::score).sum();
@@ -234,8 +248,6 @@ public class Assessment extends ArtemisConnectionHolder {
 
     /**
      * Calculates the total points from (automatic) tests, as reported by Artemis.
-     *
-     * @return
      */
     public double calculateTotalPointsOfTests() {
         return this.testResults.stream().mapToDouble(TestResult::getPoints).sum();
@@ -244,8 +256,6 @@ public class Assessment extends ArtemisConnectionHolder {
     /**
      * Get the maximum number of points that the student can receive for his
      * submission.
-     *
-     * @return
      */
     public double getMaxPoints() {
         return this.programmingSubmission.getExercise().getMaxPoints();
@@ -254,7 +264,6 @@ public class Assessment extends ArtemisConnectionHolder {
     /**
      * Calculates the points from all annotations of a specific mistake type.
      *
-     * @param mistakeType
      * @return Empty, if no annotations of this type are present. Otherwise, the
      *         total points for the annotations.
      */
@@ -269,9 +278,6 @@ public class Assessment extends ArtemisConnectionHolder {
     /**
      * Calculates the total points of all annotations that are part of the given
      * rating group.
-     *
-     * @param ratingGroup
-     * @return
      */
     public Points calculatePointsForRatingGroup(RatingGroup ratingGroup) {
         double points = this.annotations.stream().filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
@@ -373,9 +379,6 @@ public class Assessment extends ArtemisConnectionHolder {
      * This builds one (or more if the feedback is too long) global feedback for a
      * rating group. The feedback deducts points, and lists all annotations that are
      * part of the rating group.
-     *
-     * @param ratingGroup
-     * @return
      */
     private List<FeedbackDTO> createGlobalFeedback(RatingGroup ratingGroup) {
         Points points = this.calculatePointsForRatingGroup(ratingGroup);

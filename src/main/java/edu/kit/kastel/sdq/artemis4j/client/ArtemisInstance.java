@@ -21,7 +21,7 @@ public class ArtemisInstance {
 
     /**
      *
-     * @return the protocol with which to communicate with Artemis as an URL prefix,
+     * @return the protocol with which to communicate with Artemis as a URL prefix,
      *         e.g. https://
      */
     public String getProtocol() {
