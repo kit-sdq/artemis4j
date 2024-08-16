@@ -26,7 +26,7 @@ public record CourseDTO(@JsonProperty int id, @JsonProperty String title, @JsonP
     }
 
     public static List<GenericSubmissionDTO> fetchLockedSubmissions(ArtemisClient client, int courseId) throws ArtemisNetworkException {
-        var submissions = ArtemisRequest.get().path(List.of("courses", courseId, "lockedSubmissions"))
+        var submissions = ArtemisRequest.get().path(List.of("courses", courseId, "locked-submissions"))
                 .executeAndDecodeMaybe(client, GenericSubmissionDTO[].class).orElse(new GenericSubmissionDTO[0]);
         return Arrays.asList(submissions);
     }
