@@ -31,6 +31,10 @@ public class TestResult {
         return this.dto.type();
     }
 
+    protected FeedbackDTO getDto() {
+        return this.dto;
+    }
+
     public Optional<Boolean> getPositive() {
         return Optional.ofNullable(this.dto.positive());
     }
