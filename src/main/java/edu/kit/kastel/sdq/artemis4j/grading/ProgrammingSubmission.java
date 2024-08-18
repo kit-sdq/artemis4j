@@ -133,7 +133,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
      *                                    present could not be mapped given the
      *                                    gradingConfig
      */
-    public Optional<Assessment> openAssessment(GradingConfig config) throws AnnotationMappingException {
+    public Optional<Assessment> openAssessment(GradingConfig config) throws AnnotationMappingException, ArtemisNetworkException {
         ResultDTO resultDTO = this.getRelevantResult().orElse(null);
 
         if (resultDTO != null) {

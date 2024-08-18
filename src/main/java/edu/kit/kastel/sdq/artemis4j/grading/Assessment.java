@@ -56,21 +56,26 @@ public class Assessment extends ArtemisConnectionHolder {
     private final Locale studentLocale;
 
     public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound)
-            throws AnnotationMappingException {
+            throws AnnotationMappingException, ArtemisNetworkException {
         this(result, config, programmingSubmission, correctionRound, Locale.GERMANY);
     }
 
     public Assessment(ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound, Locale studentLocale)
-            throws AnnotationMappingException {
+            throws AnnotationMappingException, ArtemisNetworkException {
         super(programmingSubmission);
         this.programmingSubmission = programmingSubmission;
         this.config = config;
         this.correctionRound = correctionRound;
         this.studentLocale = studentLocale;
 
+        // ensure that the feedbacks are fetched (some api endpoints do not return them)
+        // and for long feedbacks, we need to
+        // fetch the detailed feedbacks
+        var feedbacks = result.fetchDetailedFeedbacks(this.getConnection().getClient(), programmingSubmission.getParticipationId());
+
         // Unpack the result
-        this.annotations = MetaFeedbackMapper.parseMetaFeedbacks(result.feedbacks(), config);
-        this.testResults = result.feedbacks().stream().filter(f -> f.type() == FeedbackType.AUTOMATIC).map(TestResult::new).toList();
+        this.annotations = MetaFeedbackMapper.parseMetaFeedbacks(feedbacks, config);
+        this.testResults = feedbacks.stream().filter(f -> f.type() == FeedbackType.AUTOMATIC).map(TestResult::new).toList();
     }
 
     /**
