@@ -4,6 +4,8 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 
+import java.util.Optional;
+
 public class TestResult {
     private final long id;
     private final FeedbackDTO dto;
@@ -29,8 +31,8 @@ public class TestResult {
         return this.dto.type();
     }
 
-    public FeedbackDTO getDto() {
-        return this.dto;
+    public Optional<Boolean> getPositive() {
+        return Optional.ofNullable(this.dto.positive());
     }
 
     @Override
