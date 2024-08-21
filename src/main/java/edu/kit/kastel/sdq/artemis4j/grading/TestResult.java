@@ -1,10 +1,10 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import java.util.Optional;
+
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
-
-import java.util.Optional;
 
 public class TestResult {
     private final long id;

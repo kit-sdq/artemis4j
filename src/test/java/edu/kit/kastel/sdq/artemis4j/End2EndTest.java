@@ -15,7 +15,6 @@ import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
 import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
-import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 import org.junit.jupiter.api.*;
@@ -130,7 +129,8 @@ class End2EndTest {
 
     @Test
     void testAssessmentFetchesFeedbacks() throws ArtemisClientException {
-        // This test fetches all submissions of an exercise and checks that the assessment
+        // This test fetches all submissions of an exercise and checks that the
+        // assessment
         // contains the previously added feedback.
 
         // Create an annotation (feedback) in the submission:
@@ -140,7 +140,8 @@ class End2EndTest {
         this.assessment.submit();
 
         ProgrammingSubmission updatedSubmission = null;
-        // find the programming submission that was just assessed in all submissions of the exercise:
+        // find the programming submission that was just assessed in all submissions of
+        // the exercise:
         for (ProgrammingSubmission submission : this.exercise.fetchSubmissions()) {
             if (submission.getId() == this.programmingSubmission.getId()) {
                 updatedSubmission = programmingSubmission;

@@ -4,7 +4,6 @@ package edu.kit.kastel.sdq.artemis4j.client;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -29,12 +28,8 @@ public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime compl
         return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor, AssessmentType.SEMI_AUTOMATIC);
     }
 
-    private List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long participationId) throws ArtemisNetworkException {
-        if (this.feedbacks != null) {
-            return Collections.unmodifiableList(this.feedbacks);
-        }
-
-        return Arrays.asList(ArtemisRequest.get().path(List.of("participations", participationId, "results", this.id(), "details")).executeAndDecode(client,
+    private static List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long resultId, long participationId) throws ArtemisNetworkException {
+        return Arrays.asList(ArtemisRequest.get().path(List.of("participations", participationId, "results", resultId, "details")).executeAndDecode(client,
                 FeedbackDTO[].class));
     }
 
@@ -43,15 +38,21 @@ public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime compl
      * necessary.
      *
      * @param client          the client to use
+     * @param resultId        the result id
      * @param participationId the participation id, likely
      *                        {@link ProgrammingSubmission#getParticipationId()}
+     * @param feedbacks       the feedbacks to load the details for or null if they
+     *                        should be fetched first
      * @return the feedbacks
      * @throws ArtemisNetworkException if it fails to fetch the feedbacks
      */
-    public List<FeedbackDTO> fetchDetailedFeedbacks(ArtemisClient client, long participationId) throws ArtemisNetworkException {
+    public static List<FeedbackDTO> fetchDetailedFeedbacks(ArtemisClient client, long resultId, long participationId, List<FeedbackDTO> feedbacks)
+            throws ArtemisNetworkException {
         // Sometimes the feedbacks are not loaded, to fetch the long feedbacks, we need
         // to load the feedbacks first
-        List<FeedbackDTO> feedbacks = this.fetchFeedbacks(client, participationId);
+        if (feedbacks == null) {
+            feedbacks = ResultDTO.fetchFeedbacks(client, resultId, participationId);
+        }
 
         List<FeedbackDTO> cleanedFeedbacks = new ArrayList<>(feedbacks.size());
         for (var feedback : feedbacks) {
@@ -61,7 +62,7 @@ public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime compl
 
             String detailText = feedback.detailText();
             if (feedback.hasLongFeedbackText()) {
-                detailText = FeedbackDTO.fetchLongFeedback(client, this.id(), feedback.id());
+                detailText = FeedbackDTO.fetchLongFeedback(client, resultId, feedback.id());
             }
             cleanedFeedbacks.add(new FeedbackDTO(detailText, feedback));
         }

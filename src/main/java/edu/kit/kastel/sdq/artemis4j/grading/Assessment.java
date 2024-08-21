@@ -69,9 +69,9 @@ public class Assessment extends ArtemisConnectionHolder {
         this.studentLocale = studentLocale;
 
         // ensure that the feedbacks are fetched (some api endpoints do not return them)
-        // and for long feedbacks, we need to
-        // fetch the detailed feedbacks
-        var feedbacks = result.fetchDetailedFeedbacks(this.getConnection().getClient(), programmingSubmission.getParticipationId());
+        // and for long feedbacks, we need to fetch the detailed feedbacks
+        var feedbacks = ResultDTO.fetchDetailedFeedbacks(this.getConnection().getClient(), result.id(), programmingSubmission.getParticipationId(),
+                result.feedbacks());
 
         // Unpack the result
         this.annotations = MetaFeedbackMapper.parseMetaFeedbacks(feedbacks, config);
