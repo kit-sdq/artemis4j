@@ -126,4 +126,32 @@ class End2EndTest {
         this.assessment.importAssessment(exportedAssessment);
         Assertions.assertEquals(oldAnnotations, this.assessment.getAnnotations());
     }
+
+    @Test
+    void testAssessmentFetchesFeedbacks() throws ArtemisClientException {
+        // This test fetches all submissions of an exercise and checks that the
+        // assessment
+        // contains the previously added feedback.
+
+        // Create an annotation (feedback) in the submission:
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
+
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
+        this.assessment.submit();
+
+        ProgrammingSubmission updatedSubmission = null;
+        // find the programming submission that was just assessed in all submissions of
+        // the exercise:
+        for (ProgrammingSubmission submission : this.exercise.fetchSubmissions()) {
+            if (submission.getId() == this.programmingSubmission.getId()) {
+                updatedSubmission = programmingSubmission;
+                break;
+            }
+        }
+
+        Assertions.assertEquals(this.programmingSubmission, updatedSubmission);
+
+        Assessment newAssessment = updatedSubmission.openAssessment(this.gradingConfig).orElseThrow();
+        Assertions.assertEquals(1, newAssessment.getAnnotations().size());
+    }
 }

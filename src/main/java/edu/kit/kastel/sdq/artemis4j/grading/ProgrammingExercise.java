@@ -71,12 +71,14 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * Fetches all submissions for this exercise. This may fetch *many* submissions,
      * and does not cache the result, so be careful.
      *
-     * @param correctionRound The correction round to fetch submissions for
-     * @param onlyOwn         Whether to only fetch submissions that the current
-     *                        user has assessed
+     * @param correctionRound       The correction round to fetch submissions for
+     * @param filterAssessedByTutor Whether to only fetch submissions that the
+     *                              current user has assessed
+     * @return a list of submissions
+     * @throws ArtemisNetworkException if the request fails
      */
-    public List<ProgrammingSubmission> fetchSubmissions(int correctionRound, boolean onlyOwn) throws ArtemisNetworkException {
-        return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), correctionRound, onlyOwn).stream()
+    public List<ProgrammingSubmission> fetchSubmissions(int correctionRound, boolean filterAssessedByTutor) throws ArtemisNetworkException {
+        return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), correctionRound, filterAssessedByTutor).stream()
                 .map(dto -> new ProgrammingSubmission(dto, this, correctionRound)).toList();
     }
 
