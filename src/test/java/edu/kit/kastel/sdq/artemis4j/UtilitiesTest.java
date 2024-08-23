@@ -20,13 +20,13 @@ import org.slf4j.LoggerFactory;
 
 /**
  * This class does not contain tests as usual. It is used to perform recurring
- * tasks like toggling all exams to submitted.
+ * tasks like toggling all exams to "submitted".
  */
 @Disabled
-public class UtilitiesTest {
+class UtilitiesTest {
     private static final Logger log = LoggerFactory.getLogger(UtilitiesTest.class);
 
-    private static final String hostname = "https://artemis.praktomat.cs.kit.edu";
+    private static final String HOSTNAME = "https://artemis.praktomat.cs.kit.edu";
     private final String username = System.getenv("ARTEMIS_USERNAME");
     private final String password = System.getenv("ARTEMIS_PASSWORD");
     private final String courseId = System.getenv("ARTEMIS_COURSE_ID");
@@ -39,7 +39,7 @@ public class UtilitiesTest {
         Assertions.assertNotNull(username);
         Assertions.assertNotNull(password);
 
-        ArtemisInstance artemis = new ArtemisInstance(hostname);
+        ArtemisInstance artemis = new ArtemisInstance(HOSTNAME);
         this.client = ArtemisClient.fromUsernamePassword(artemis, username, password);
     }
 
@@ -60,7 +60,7 @@ public class UtilitiesTest {
                 StudentExamDTO.toggleToSubmitted(client, courseId, examId, studentExam.id());
                 toggleSucceeded++;
             } catch (ArtemisNetworkException e) {
-                log.error("Toggling failed for student " + studentExam.user().login(), e);
+                log.error("Toggling failed for student {}", studentExam.user().login(), e);
                 toggleFailed.add(studentExam.user().login());
             }
         }
@@ -90,14 +90,15 @@ public class UtilitiesTest {
             for (var submission : submissions) {
                 var latestResult = submission.results().get(submission.results().size() - 1);
                 if (latestResult == null) {
-                    log.warn("No result for submission " + submission.id());
+                    log.warn("No result for submission {}", submission.id());
                     continue;
                 }
 
                 boolean mandatoryFailed = latestResult.score() == 0.0;
                 if (mandatoryFailed) {
-                    log.info("Student " + submission.participation().participantIdentifier()
-                            + " failed mandatory tests");
+                    log.info(
+                            "Student {} failed mandatory tests",
+                            submission.participation().participantIdentifier());
                     var newResult = ResultDTO.forAssessmentSubmission(
                             submission.id(), 0.0, latestResult.feedbacks(), latestResult.assessor());
                     ProgrammingSubmissionDTO.saveAssessment(

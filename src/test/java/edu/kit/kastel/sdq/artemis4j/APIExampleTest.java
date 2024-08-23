@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * This test demonstrates the intended use of the new version of artemis4j
+ * This test demonstrates the intended use of the new version of Artemis4J.
  */
 @Disabled
-public class APIExampleTest {
+class APIExampleTest {
     private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
     private static final String ARTEMIS_USERNAME = System.getenv("ARTEMIS_USER");
     private static final String ARTEMIS_PASSWORD = System.getenv("ARTEMIS_PASSWORD");
@@ -80,10 +80,12 @@ public class APIExampleTest {
         var submissionPath = Path.of("test_content");
         try (var clonedSubmission = assessment.getSubmission().cloneInto(submissionPath, null)) {
             // Execute the autograder on the cloned submission
-            var autograderResult =
-                    AutograderRunner.runAutograder(assessment, clonedSubmission, Locale.GERMANY, 0, status -> {
-                        System.out.println("Autograder Status: " + status);
-                    });
+            var autograderResult = AutograderRunner.runAutograder(
+                    assessment,
+                    clonedSubmission,
+                    Locale.GERMANY,
+                    0,
+                    status -> System.out.println("Autograder Status: " + status));
             System.out.println("Autograder made " + autograderResult.annotationsMade() + " annotations");
         } catch (AutograderFailedException e) {
             System.err.println("Autograder failed: " + e.getMessage());
