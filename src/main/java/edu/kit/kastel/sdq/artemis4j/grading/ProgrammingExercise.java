@@ -82,7 +82,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return ProgrammingSubmissionDTO.fetchAll(
                         this.getConnection().getClient(), this.getId(), correctionRound, filterAssessedByTutor)
                 .stream()
-                .map(dto -> new ProgrammingSubmission(dto, this, correctionRound))
+                .map(submissionDto -> new ProgrammingSubmission(submissionDto, this, correctionRound))
                 .toList();
     }
 
@@ -118,15 +118,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
         // This line already locks the submission, but doesn't tell us what the relevant
         // ResultDTO is
-        var dto = ProgrammingSubmissionDTO.lockNextSubmission(
+        var nextSubmissionDto = ProgrammingSubmissionDTO.lockNextSubmission(
                 this.getConnection().getClient(), this.getId(), correctionRound);
-        if (dto.isEmpty()) {
+        if (nextSubmissionDto.isEmpty()) {
             return Optional.empty();
         }
 
         // Second lock call to get the ResultDTO
         try {
-            var lockResult = this.tryLockSubmission(dto.get().id(), correctionRound, gradingConfig);
+            var lockResult = this.tryLockSubmission(nextSubmissionDto.get().id(), correctionRound, gradingConfig);
             return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
         } catch (MoreRecentSubmissionException ex) {
             // The student has submitted a new submission between our two lock calls

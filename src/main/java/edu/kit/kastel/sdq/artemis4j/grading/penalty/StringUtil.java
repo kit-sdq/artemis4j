@@ -1,7 +1,11 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
-public class StringUtil {
+public final class StringUtil {
+    private StringUtil() {
+        throw new IllegalAccessError("Utility class");
+    }
+
     /**
      * Optionally matches the string s against the given pattern if the pattern is
      * not null

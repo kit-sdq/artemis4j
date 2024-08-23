@@ -127,7 +127,6 @@ public class ArtemisClient {
         try {
             return MAPPER.readValue(json, resultClass);
         } catch (JsonProcessingException e) {
-            log.error("Failed to decode JSON: '{}'", json, e);
             throw new ArtemisNetworkException(e);
         }
     }

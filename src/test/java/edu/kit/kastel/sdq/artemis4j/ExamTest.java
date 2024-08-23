@@ -22,7 +22,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import org.junit.jupiter.api.Test;
 
-public class ExamTest {
+class ExamTest {
     private static final String ROUND_ONE_FEEDBACK = "feedback round 1";
     private static final String ROUND_TWO_FEEDBACK = "feedback round 2";
 

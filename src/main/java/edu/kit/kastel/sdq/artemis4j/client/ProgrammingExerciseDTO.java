@@ -38,5 +38,19 @@ public record ProgrammingExerciseDTO(
      *
      * @param exercises
      */
-    private record ExerciseWrapperDTO(ProgrammingExerciseDTO[] exercises) {}
+    private record ExerciseWrapperDTO(ProgrammingExerciseDTO[] exercises) {
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+
+            ExerciseWrapperDTO that = (ExerciseWrapperDTO) o;
+            return Arrays.equals(exercises, that.exercises);
+        }
+
+        @Override
+        public int hashCode() {
+            return Arrays.hashCode(exercises);
+        }
+    }
 }

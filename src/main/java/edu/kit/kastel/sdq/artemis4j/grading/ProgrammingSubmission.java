@@ -32,9 +32,9 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         this.exercise = exercise;
 
         // The student is only present for instructors
-        var student = dto.participation().student();
-        if (student != null) {
-            this.student = new User(student);
+        var studentDto = dto.participation().student();
+        if (studentDto != null) {
+            this.student = new User(studentDto);
         } else {
             this.student = null;
         }
