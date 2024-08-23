@@ -22,7 +22,8 @@ public final class RatingGroup {
         double positiveLimit = dto.positiveLimit() != null ? dto.positiveLimit() : Double.POSITIVE_INFINITY;
 
         if (negativeLimit > positiveLimit) {
-            throw new IllegalArgumentException("Invalid penalty range for rating group: %fP -- %fP".formatted(dto.negativeLimit(), dto.positiveLimit()));
+            throw new IllegalArgumentException("Invalid penalty range for rating group: %fP -- %fP"
+                    .formatted(dto.negativeLimit(), dto.positiveLimit()));
         }
 
         this.id = dto.shortName();
@@ -66,10 +67,8 @@ public final class RatingGroup {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         RatingGroup that = (RatingGroup) o;
         return Objects.equals(id, that.id);
     }
@@ -81,10 +80,14 @@ public final class RatingGroup {
 
     @Override
     public String toString() {
-        return "RatingGroup[" + "id=" + id + ", " + "displayName=" + displayName + ", " + "minPenalty=" + minPenalty + ", " + "getMaxPenalty=" + maxPenalty
-                + ", " + "mistakeTypes=" + mistakeTypes + ']';
+        return "RatingGroup[" + "id=" + id + ", " + "displayName=" + displayName + ", " + "minPenalty=" + minPenalty
+                + ", " + "getMaxPenalty=" + maxPenalty + ", " + "mistakeTypes=" + mistakeTypes + ']';
     }
 
-    record RatingGroupDTO(String shortName, String displayName, Double positiveLimit, Double negativeLimit, Map<String, String> additionalDisplayNames) {
-    }
+    record RatingGroupDTO(
+            String shortName,
+            String displayName,
+            Double positiveLimit,
+            Double negativeLimit,
+            Map<String, String> additionalDisplayNames) {}
 }

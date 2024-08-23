@@ -12,7 +12,8 @@ public final class StackingPenaltyRule implements PenaltyRule {
     private final Integer maxUses;
 
     @JsonCreator
-    public StackingPenaltyRule(@JsonProperty(value = "penalty", required = true) int penalty, @JsonProperty("maxUses") Integer maxUses) {
+    public StackingPenaltyRule(
+            @JsonProperty(value = "penalty", required = true) int penalty, @JsonProperty("maxUses") Integer maxUses) {
         this.penalty = penalty;
         this.maxUses = maxUses;
     }

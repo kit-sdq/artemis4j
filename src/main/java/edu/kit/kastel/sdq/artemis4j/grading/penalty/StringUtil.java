@@ -5,7 +5,7 @@ public class StringUtil {
     /**
      * Optionally matches the string s against the given pattern if the pattern is
      * not null
-     * 
+     *
      * @param s       The string to match. Must not be null
      * @param pattern The pattern to match against, or null
      * @return True if the pattern is null or the string s matches the pattern,

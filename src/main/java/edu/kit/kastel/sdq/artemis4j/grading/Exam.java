@@ -20,7 +20,9 @@ public class Exam extends ArtemisConnectionHolder {
         this.course = course;
         this.exerciseGroups = new LazyNetworkValue<>(() -> {
             var fullExam = ExamDTO.fetch(this.getConnection().getClient(), this.course.getId(), this.exam.id());
-            return fullExam.exerciseGroups().stream().map(dto -> new ExamExerciseGroup(dto, this)).toList();
+            return fullExam.exerciseGroups().stream()
+                    .map(dto -> new ExamExerciseGroup(dto, this))
+                    .toList();
         });
     }
 
@@ -41,7 +43,10 @@ public class Exam extends ArtemisConnectionHolder {
     }
 
     public ExamExerciseGroup getExerciseGroupById(long id) throws ArtemisNetworkException {
-        return this.exerciseGroups.get().stream().filter(group -> group.getId() == id).findFirst().orElseThrow();
+        return this.exerciseGroups.get().stream()
+                .filter(group -> group.getId() == id)
+                .findFirst()
+                .orElseThrow();
     }
 
     @Override

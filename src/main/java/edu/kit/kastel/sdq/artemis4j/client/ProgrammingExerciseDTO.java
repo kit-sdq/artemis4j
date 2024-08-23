@@ -8,14 +8,27 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
-public record ProgrammingExerciseDTO(@JsonProperty long id, @JsonProperty String title, @JsonProperty String shortName, @JsonProperty String testRepositoryUri,
-        @JsonProperty Boolean secondCorrectionEnabled, @JsonProperty String exerciseType, @JsonProperty String assessmentType, @JsonProperty double maxPoints,
-        @JsonProperty ZonedDateTime dueDate, @JsonProperty ZonedDateTime startDate) {
+public record ProgrammingExerciseDTO(
+        @JsonProperty long id,
+        @JsonProperty String title,
+        @JsonProperty String shortName,
+        @JsonProperty String testRepositoryUri,
+        @JsonProperty Boolean secondCorrectionEnabled,
+        @JsonProperty String exerciseType,
+        @JsonProperty String assessmentType,
+        @JsonProperty double maxPoints,
+        @JsonProperty ZonedDateTime dueDate,
+        @JsonProperty ZonedDateTime startDate) {
 
-    public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, int courseId) throws ArtemisNetworkException {
-        var exercises = ArtemisRequest.get().path(List.of("courses", courseId, "with-exercises")).executeAndDecode(client, ExerciseWrapperDTO.class);
+    public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, int courseId)
+            throws ArtemisNetworkException {
+        var exercises = ArtemisRequest.get()
+                .path(List.of("courses", courseId, "with-exercises"))
+                .executeAndDecode(client, ExerciseWrapperDTO.class);
         // Remove all non-programming exercises
-        return Arrays.stream(exercises.exercises()).filter(e -> e.exerciseType().equals("PROGRAMMING")).toList();
+        return Arrays.stream(exercises.exercises())
+                .filter(e -> e.exerciseType().equals("PROGRAMMING"))
+                .toList();
     }
 
     /**
@@ -25,6 +38,5 @@ public record ProgrammingExerciseDTO(@JsonProperty long id, @JsonProperty String
      *
      * @param exercises
      */
-    private record ExerciseWrapperDTO(ProgrammingExerciseDTO[] exercises) {
-    }
+    private record ExerciseWrapperDTO(ProgrammingExerciseDTO[] exercises) {}
 }

@@ -40,7 +40,8 @@ public class ArtemisClient {
     private final String password;
     private final OkHttpClient client;
 
-    public static ArtemisClient fromUsernamePassword(ArtemisInstance artemis, String username, String password) throws ArtemisNetworkException {
+    public static ArtemisClient fromUsernamePassword(ArtemisInstance artemis, String username, String password)
+            throws ArtemisNetworkException {
         if (username == null || password == null) {
             throw new IllegalArgumentException("Username and password must not be null");
         }
@@ -49,7 +50,10 @@ public class ArtemisClient {
         var client = new OkHttpClient();
 
         var payload = ArtemisClient.encodeJSON(new AuthenticationDTO(username, password));
-        var request = new Request.Builder().url(artemis.url(List.of("public", "authenticate"), null)).post(payload).build();
+        var request = new Request.Builder()
+                .url(artemis.url(List.of("public", "authenticate"), null))
+                .post(payload)
+                .build();
 
         String jwtToken;
         try (var response = client.newCall(request).execute()) {
@@ -144,7 +148,8 @@ public class ArtemisClient {
     public static void throwIfStatusUnsuccessful(Response response) throws ArtemisNetworkException {
         if (!response.isSuccessful()) {
             try {
-                throw new ArtemisNetworkException("Got response code " + response.code() + " with body " + response.body().string());
+                throw new ArtemisNetworkException("Got response code " + response.code() + " with body "
+                        + response.body().string());
             } catch (IOException e) {
                 log.error("Failed to decode the Artemis error response body", e);
                 throw new ArtemisNetworkException("Got response code " + response.code() + " with an unreadable body");
@@ -153,18 +158,30 @@ public class ArtemisClient {
     }
 
     private static ObjectMapper createObjectMapper() {
-        ObjectMapper oom = JsonMapper.builder().disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES).enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
-                .addModule(new JavaTimeModule()).addModule(new ParameterNamesModule()).build().setSerializationInclusion(JsonInclude.Include.NON_NULL);
+        ObjectMapper oom = JsonMapper.builder()
+                .disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES)
+                .enable(StreamReadFeature.INCLUDE_SOURCE_IN_LOCATION)
+                .addModule(new JavaTimeModule())
+                .addModule(new ParameterNamesModule())
+                .build()
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
 
-        oom.setVisibility(oom.getSerializationConfig().getDefaultVisibilityChecker().withFieldVisibility(JsonAutoDetect.Visibility.ANY)
-                .withGetterVisibility(JsonAutoDetect.Visibility.NONE).withSetterVisibility(JsonAutoDetect.Visibility.NONE)
-                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE).withCreatorVisibility(JsonAutoDetect.Visibility.ANY));
+        oom.setVisibility(oom.getSerializationConfig()
+                .getDefaultVisibilityChecker()
+                .withFieldVisibility(JsonAutoDetect.Visibility.ANY)
+                .withGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withSetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withIsGetterVisibility(JsonAutoDetect.Visibility.NONE)
+                .withCreatorVisibility(JsonAutoDetect.Visibility.ANY));
 
         return oom;
     }
 
     private static OkHttpClient buildHttpClient(ArtemisInstance artemis, String jwtToken) {
-        var builder = new OkHttpClient.Builder().connectTimeout(5, TimeUnit.SECONDS).callTimeout(20, TimeUnit.SECONDS).readTimeout(20, TimeUnit.SECONDS)
+        var builder = new OkHttpClient.Builder()
+                .connectTimeout(5, TimeUnit.SECONDS)
+                .callTimeout(20, TimeUnit.SECONDS)
+                .readTimeout(20, TimeUnit.SECONDS)
                 .writeTimeout(20, TimeUnit.SECONDS);
 
         builder.cookieJar(new CookieJar() {
@@ -175,7 +192,14 @@ public class ArtemisClient {
 
             @Override
             public List<Cookie> loadForRequest(HttpUrl httpUrl) {
-                return List.of(new Cookie.Builder().domain(artemis.getDomain()).path("/").name(COOKIE_NAME_JWT).value(jwtToken).httpOnly().secure().build());
+                return List.of(new Cookie.Builder()
+                        .domain(artemis.getDomain())
+                        .path("/")
+                        .name(COOKIE_NAME_JWT)
+                        .value(jwtToken)
+                        .httpOnly()
+                        .secure()
+                        .build());
             }
         });
 

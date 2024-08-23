@@ -11,8 +11,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.grading.Exercise;
 
-public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty ParticipationDTO participation, @JsonProperty String commitHash,
-        @JsonProperty boolean buildFailed, @JsonProperty List<ResultDTO> results, @JsonProperty ZonedDateTime submissionDate) {
+public record ProgrammingSubmissionDTO(
+        @JsonProperty long id,
+        @JsonProperty ParticipationDTO participation,
+        @JsonProperty String commitHash,
+        @JsonProperty boolean buildFailed,
+        @JsonProperty List<ResultDTO> results,
+        @JsonProperty ZonedDateTime submissionDate) {
     /**
      * Fetch all programming submissions for an exercise.
      *
@@ -25,34 +30,52 @@ public record ProgrammingSubmissionDTO(@JsonProperty long id, @JsonProperty Part
      * @return a list of programming submissions
      * @throws ArtemisNetworkException if the request fails
      */
-    public static List<ProgrammingSubmissionDTO> fetchAll(ArtemisClient client, long exerciseId, int correctionRound, boolean filterAssessedByTutor)
+    public static List<ProgrammingSubmissionDTO> fetchAll(
+            ArtemisClient client, long exerciseId, int correctionRound, boolean filterAssessedByTutor)
             throws ArtemisNetworkException {
-        return new ArrayList<>(Arrays
-                .asList(ArtemisRequest.get().path(List.of("exercises", exerciseId, "programming-submissions")).param("assessedByTutor", filterAssessedByTutor)
-                        .param("correction-round", correctionRound).executeAndDecode(client, ProgrammingSubmissionDTO[].class)));
+        return new ArrayList<>(Arrays.asList(ArtemisRequest.get()
+                .path(List.of("exercises", exerciseId, "programming-submissions"))
+                .param("assessedByTutor", filterAssessedByTutor)
+                .param("correction-round", correctionRound)
+                .executeAndDecode(client, ProgrammingSubmissionDTO[].class)));
     }
 
-    public static ProgrammingSubmissionDTO lock(ArtemisClient client, long submissionId, int correctionRound) throws ArtemisNetworkException {
-        return ArtemisRequest.get().path(List.of("programming-submissions", submissionId, "lock")).param("correction-round", correctionRound)
+    public static ProgrammingSubmissionDTO lock(ArtemisClient client, long submissionId, int correctionRound)
+            throws ArtemisNetworkException {
+        return ArtemisRequest.get()
+                .path(List.of("programming-submissions", submissionId, "lock"))
+                .param("correction-round", correctionRound)
                 .executeAndDecode(client, ProgrammingSubmissionDTO.class);
     }
 
-    public static Optional<ProgrammingSubmissionDTO> lockNextSubmission(ArtemisClient client, long exerciseId, int correctionRound)
-            throws ArtemisNetworkException {
+    public static Optional<ProgrammingSubmissionDTO> lockNextSubmission(
+            ArtemisClient client, long exerciseId, int correctionRound) throws ArtemisNetworkException {
         // Artemis returns an empty string if there is no new submission to lock
-        return ArtemisRequest.get().path(List.of("exercises", exerciseId, "programming-submission-without-assessment")).param("lock", true)
-                .param("correction-round", correctionRound).executeAndDecodeMaybe(client, ProgrammingSubmissionDTO.class);
+        return ArtemisRequest.get()
+                .path(List.of("exercises", exerciseId, "programming-submission-without-assessment"))
+                .param("lock", true)
+                .param("correction-round", correctionRound)
+                .executeAndDecodeMaybe(client, ProgrammingSubmissionDTO.class);
     }
 
     public static void cancelAssessment(ArtemisClient client, long submissionId) throws ArtemisNetworkException {
-        ArtemisRequest.put().path(List.of("programming-submissions", submissionId, "cancel-assessment")).execute(client);
+        ArtemisRequest.put()
+                .path(List.of("programming-submissions", submissionId, "cancel-assessment"))
+                .execute(client);
     }
 
-    public static void saveAssessment(ArtemisClient client, long participationId, boolean submit, ResultDTO result) throws ArtemisNetworkException {
-        ArtemisRequest.put().path(List.of("participations", participationId, "manual-results")).param("submit", submit).body(result).execute(client);
+    public static void saveAssessment(ArtemisClient client, long participationId, boolean submit, ResultDTO result)
+            throws ArtemisNetworkException {
+        ArtemisRequest.put()
+                .path(List.of("participations", participationId, "manual-results"))
+                .param("submit", submit)
+                .body(result)
+                .execute(client);
     }
 
     public List<ResultDTO> nonAutomaticResults() {
-        return this.results().stream().filter(r -> r.assessmentType() != AssessmentType.AUTOMATIC).toList();
+        return this.results().stream()
+                .filter(r -> r.assessmentType() != AssessmentType.AUTOMATIC)
+                .toList();
     }
 }

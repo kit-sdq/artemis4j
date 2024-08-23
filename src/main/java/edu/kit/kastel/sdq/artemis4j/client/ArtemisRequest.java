@@ -80,7 +80,8 @@ public class ArtemisRequest {
         return client.call(request.build(), resultClass);
     }
 
-    public <R> Optional<R> executeAndDecodeMaybe(ArtemisClient client, Class<R> resultClass) throws ArtemisNetworkException {
+    public <R> Optional<R> executeAndDecodeMaybe(ArtemisClient client, Class<R> resultClass)
+            throws ArtemisNetworkException {
         // Empty response == failure, so first parse as string and only convert if not
         // blank/empty
         String response = this.executeAndDecode(client, String.class);

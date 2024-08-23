@@ -77,7 +77,9 @@ public class UtilitiesTest {
         long examId = Long.parseLong(this.examId);
 
         var exam = ExamDTO.fetch(client, courseId, examId);
-        var exercises = exam.exerciseGroups().stream().flatMap(e -> e.exercises().stream()).toList();
+        var exercises = exam.exerciseGroups().stream()
+                .flatMap(e -> e.exercises().stream())
+                .toList();
         for (var exercise : exercises) {
             System.out.println("Exercise: " + exercise.title());
             var submissions = new ArrayList<>(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), 0, false));
@@ -94,9 +96,12 @@ public class UtilitiesTest {
 
                 boolean mandatoryFailed = latestResult.score() == 0.0;
                 if (mandatoryFailed) {
-                    log.info("Student " + submission.participation().participantIdentifier() + " failed mandatory tests");
-                    var newResult = ResultDTO.forAssessmentSubmission(submission.id(), 0.0, latestResult.feedbacks(), latestResult.assessor());
-                    ProgrammingSubmissionDTO.saveAssessment(client, submission.participation().id(), true, newResult);
+                    log.info("Student " + submission.participation().participantIdentifier()
+                            + " failed mandatory tests");
+                    var newResult = ResultDTO.forAssessmentSubmission(
+                            submission.id(), 0.0, latestResult.feedbacks(), latestResult.assessor());
+                    ProgrammingSubmissionDTO.saveAssessment(
+                            client, submission.participation().id(), true, newResult);
                 }
             }
         }

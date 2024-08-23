@@ -9,7 +9,7 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
  */
 public class MoreRecentSubmissionException extends ArtemisClientException {
     public MoreRecentSubmissionException(long oldSubmissionId, long newSubmissionId, long participationId) {
-        super("There is a more recent submission (%d) than the requested submission %d for participation %d".formatted(newSubmissionId, oldSubmissionId,
-                participationId));
+        super("There is a more recent submission (%d) than the requested submission %d for participation %d"
+                .formatted(newSubmissionId, oldSubmissionId, participationId));
     }
 }

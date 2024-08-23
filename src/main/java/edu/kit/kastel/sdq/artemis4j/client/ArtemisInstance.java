@@ -79,6 +79,5 @@ public class ArtemisInstance {
         }
 
         return finalHostname;
-
     }
 }

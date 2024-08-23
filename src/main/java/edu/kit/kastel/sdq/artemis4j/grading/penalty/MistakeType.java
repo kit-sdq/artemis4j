@@ -77,10 +77,8 @@ public final class MistakeType {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         MistakeType that = (MistakeType) o;
         return Objects.equals(id, that.id);
     }
@@ -90,8 +88,15 @@ public final class MistakeType {
         return Objects.hashCode(id);
     }
 
-    record MistakeTypeDTO(String shortName, String message, String button, PenaltyRule penaltyRule, String appliesTo, String enabledForExercises,
-            String enabledPenaltyForExercises, Map<String, String> additionalButtonTexts, Map<String, String> additionalMessages,
-            List<String> autograderProblemTypes) {
-    }
+    record MistakeTypeDTO(
+            String shortName,
+            String message,
+            String button,
+            PenaltyRule penaltyRule,
+            String appliesTo,
+            String enabledForExercises,
+            String enabledPenaltyForExercises,
+            Map<String, String> additionalButtonTexts,
+            Map<String, String> additionalMessages,
+            List<String> autograderProblemTypes) {}
 }

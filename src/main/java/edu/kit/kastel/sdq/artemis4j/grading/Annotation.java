@@ -39,7 +39,14 @@ public final class Annotation {
         this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
     }
 
-    Annotation(MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage, Double customScore, AnnotationSource source) {
+    Annotation(
+            MistakeType mistakeType,
+            String filePath,
+            int startLine,
+            int endLine,
+            String customMessage,
+            Double customScore,
+            AnnotationSource source) {
         // Validate custom penalty and message
         if (mistakeType.isCustomAnnotation()) {
             if (customScore == null) {
@@ -140,10 +147,8 @@ public final class Annotation {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         Annotation that = (Annotation) o;
         return Objects.equals(uuid, that.uuid);
     }

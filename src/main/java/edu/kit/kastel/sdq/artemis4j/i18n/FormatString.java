@@ -24,10 +24,15 @@ public class FormatString {
     }
 
     public FormatString(String defaultTranslation, Map<String, String> additionalTranslations) {
-        this(escapeStringForMessageFormat(defaultTranslation, DEFAULT_LOCALE),
-                additionalTranslations == null ? null
-                        : additionalTranslations.entrySet().stream().collect(Collectors.toMap(e -> Locale.forLanguageTag(e.getKey()),
-                                e -> escapeStringForMessageFormat(e.getValue(), Locale.forLanguageTag(e.getKey())))));
+        this(
+                escapeStringForMessageFormat(defaultTranslation, DEFAULT_LOCALE),
+                additionalTranslations == null
+                        ? null
+                        : additionalTranslations.entrySet().stream()
+                                .collect(Collectors.toMap(
+                                        e -> Locale.forLanguageTag(e.getKey()),
+                                        e -> escapeStringForMessageFormat(
+                                                e.getValue(), Locale.forLanguageTag(e.getKey())))));
     }
 
     public FormatString(MessageFormat defaultTranslation, Map<Locale, MessageFormat> additionalTranslations) {
@@ -54,8 +59,16 @@ public class FormatString {
         } catch (IllegalArgumentException e) {
             // format(...) throws an IllegalArgumentException for all kinds of failures
             // We just want to add some info to make debugging easier
-            throw new FormatException("Failed to format string '%s' with locale '%s' and %d arguments of types (%s)".formatted(formatString.toPattern(), locale,
-                    args.length, Arrays.stream(args).map(a -> a.getClass().getTypeName()).collect(Collectors.joining(","))), e);
+            throw new FormatException(
+                    "Failed to format string '%s' with locale '%s' and %d arguments of types (%s)"
+                            .formatted(
+                                    formatString.toPattern(),
+                                    locale,
+                                    args.length,
+                                    Arrays.stream(args)
+                                            .map(a -> a.getClass().getTypeName())
+                                            .collect(Collectors.joining(","))),
+                    e);
         }
     }
 
