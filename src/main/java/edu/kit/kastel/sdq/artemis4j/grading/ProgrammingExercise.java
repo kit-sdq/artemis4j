@@ -77,13 +77,19 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * @return a list of submissions
      * @throws ArtemisNetworkException if the request fails
      */
-    public List<ProgrammingSubmission> fetchSubmissions(int correctionRound, boolean filterAssessedByTutor) throws ArtemisNetworkException {
-        return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), correctionRound, filterAssessedByTutor).stream()
-                .map(dto -> new ProgrammingSubmission(dto, this, correctionRound)).toList();
+    public List<ProgrammingSubmission> fetchSubmissions(int correctionRound, boolean filterAssessedByTutor)
+            throws ArtemisNetworkException {
+        return ProgrammingSubmissionDTO.fetchAll(
+                        this.getConnection().getClient(), this.getId(), correctionRound, filterAssessedByTutor)
+                .stream()
+                .map(submissionDto -> new ProgrammingSubmission(submissionDto, this, correctionRound))
+                .toList();
     }
 
     public List<ProgrammingSubmission> fetchSubmissions(int correctionRound) throws ArtemisNetworkException {
-        return this.fetchSubmissions(correctionRound, !this.getCourse().isInstructor(this.getConnection().getAssessor()));
+        return this.fetchSubmissions(
+                correctionRound,
+                !this.getCourse().isInstructor(this.getConnection().getAssessor()));
     }
 
     /**
@@ -112,14 +118,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
         // This line already locks the submission, but doesn't tell us what the relevant
         // ResultDTO is
-        var dto = ProgrammingSubmissionDTO.lockNextSubmission(this.getConnection().getClient(), this.getId(), correctionRound);
-        if (dto.isEmpty()) {
+        var nextSubmissionDto = ProgrammingSubmissionDTO.lockNextSubmission(
+                this.getConnection().getClient(), this.getId(), correctionRound);
+        if (nextSubmissionDto.isEmpty()) {
             return Optional.empty();
         }
 
         // Second lock call to get the ResultDTO
         try {
-            var lockResult = this.tryLockSubmission(dto.get().id(), correctionRound, gradingConfig);
+            var lockResult = this.tryLockSubmission(nextSubmissionDto.get().id(), correctionRound, gradingConfig);
             return Optional.of(lockResult.orElseThrow(IllegalStateException::new));
         } catch (MoreRecentSubmissionException ex) {
             // The student has submitted a new submission between our two lock calls
@@ -153,7 +160,8 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             // Artemis automatically returns the most recent submission associated with the
             // same participation
             // as the requested submission
-            throw new MoreRecentSubmissionException(submissionId, locked.id(), locked.participation().id());
+            throw new MoreRecentSubmissionException(
+                    submissionId, locked.id(), locked.participation().id());
         }
 
         if (locked.results() == null) {
@@ -161,13 +169,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         }
 
         if (locked.results().size() != 1) {
-            throw new IllegalStateException("Locking returned %d results, expected 1".formatted(locked.results().size()));
+            throw new IllegalStateException("Locking returned %d results, expected 1"
+                    .formatted(locked.results().size()));
         }
         var result = locked.results().get(0);
 
         // Locking was successful if we are the assessor
         // The webui of Artemis does the same check
-        if (result.assessor() == null || result.assessor().id() != this.getConnection().getAssessor().getId()) {
+        if (result.assessor() == null
+                || result.assessor().id() != this.getConnection().getAssessor().getId()) {
             return Optional.empty();
         }
 
@@ -180,7 +190,9 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
     }
 
     public int fetchLockedSubmissionCount(int correctionRound) throws ArtemisNetworkException {
-        return (int) this.fetchSubmissions(correctionRound, true).stream().filter(s -> !s.isSubmitted()).count();
+        return (int) this.fetchSubmissions(correctionRound, true).stream()
+                .filter(s -> !s.isSubmitted())
+                .count();
     }
 
     @Override

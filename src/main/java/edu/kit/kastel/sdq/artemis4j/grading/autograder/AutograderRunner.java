@@ -17,11 +17,15 @@ import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.ClonedProgrammingSubmission;
 
 public final class AutograderRunner {
-    private AutograderRunner() {
-    }
+    private AutograderRunner() {}
 
-    public static AutograderStats runAutograder(Assessment assessment, ClonedProgrammingSubmission submission, Locale locale, int threads,
-            Consumer<String> statusConsumer) throws AutograderFailedException {
+    public static AutograderStats runAutograder(
+            Assessment assessment,
+            ClonedProgrammingSubmission submission,
+            Locale locale,
+            int threads,
+            Consumer<String> statusConsumer)
+            throws AutograderFailedException {
         if (!assessment.getSubmission().equals(submission.getSubmission())) {
             throw new IllegalArgumentException("The assessment and submission do not match");
         }
@@ -37,22 +41,38 @@ public final class AutograderRunner {
             throw new AutograderFailedException("Failed to check for or download the latest Autograder release", e);
         }
 
-        var problemTypesMap = assessment.getConfig().getMistakeTypes().stream().flatMap(m -> m.getAutograderProblemTypes().stream().map(p -> Map.entry(p, m)))
-                .distinct().collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
-        var checkConfiguration = CheckConfiguration.fromProblemTypes(problemTypesMap.keySet().stream().map(AutograderLoader::convertProblemType).toList());
+        var problemTypesMap = assessment.getConfig().getMistakeTypes().stream()
+                .flatMap(m -> m.getAutograderProblemTypes().stream().map(p -> Map.entry(p, m)))
+                .distinct()
+                .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue));
+        var checkConfiguration = CheckConfiguration.fromProblemTypes(problemTypesMap.keySet().stream()
+                .map(AutograderLoader::convertProblemType)
+                .toList());
 
         try (var tempLocation = AutograderLoader.instantiateTempLocation()) {
-            var autograderBuilder = AbstractLinter.builder(locale).threads(threads).tempLocation(tempLocation).maxProblemsPerCheck(-1);
+            var autograderBuilder = AbstractLinter.builder(locale)
+                    .threads(threads)
+                    .tempLocation(tempLocation)
+                    .maxProblemsPerCheck(-1);
             var autograder = AutograderLoader.instantiateLinter(autograderBuilder);
 
-            Consumer<Translatable> statusConsumerWrapper = status -> statusConsumer.accept(autograder.translateMessage(status));
+            Consumer<Translatable> statusConsumerWrapper =
+                    status -> statusConsumer.accept(autograder.translateMessage(status));
 
-            var problems = autograder.checkFile(submission.getSubmissionSourcePath(), JavaVersion.JAVA_21, checkConfiguration, statusConsumerWrapper);
+            var problems = autograder.checkFile(
+                    submission.getSubmissionSourcePath(),
+                    JavaVersion.JAVA_21,
+                    checkConfiguration,
+                    statusConsumerWrapper);
 
             for (var problem : problems) {
                 var mistakeType = problemTypesMap.get(problem.getType());
                 var position = problem.getPosition();
-                assessment.addAutograderAnnotation(mistakeType, position.path().toString(), position.startLine(), position.endLine(),
+                assessment.addAutograderAnnotation(
+                        mistakeType,
+                        position.path().toString(),
+                        position.startLine(),
+                        position.endLine(),
                         autograder.translateMessage(problem.getExplanation()));
             }
 

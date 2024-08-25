@@ -172,10 +172,11 @@
           </formats>
           <!-- define a language-specific format -->
           <java>
-            <eclipse>
-              <!--suppress UnresolvedMavenProperty -->
-              <file>formatter.xml</file>
-            </eclipse>
+            <palantirJavaFormat>
+              <version>2.39.0</version>
+              <style>PALANTIR</style>
+              <formatJavadoc>false</formatJavadoc>
+            </palantirJavaFormat>
             <importOrder>
               <file>${maven.multiModuleProjectDirectory}/spotless.importorder</file>
             </importOrder>

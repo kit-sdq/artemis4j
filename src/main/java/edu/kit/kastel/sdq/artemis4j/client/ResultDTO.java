@@ -21,16 +21,26 @@ import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
  * @param feedbacks      the feedbacks given for the submission, might be null
  * @param assessor       the user who assessed the submission or null
  */
-public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime completionDate, @JsonProperty Boolean successful, @JsonProperty double score,
-        @JsonProperty Boolean rated, @JsonProperty List<FeedbackDTO> feedbacks, @JsonProperty UserDTO assessor, @JsonProperty AssessmentType assessmentType) {
+public record ResultDTO(
+        @JsonProperty long id,
+        @JsonProperty ZonedDateTime completionDate,
+        @JsonProperty Boolean successful,
+        @JsonProperty double score,
+        @JsonProperty Boolean rated,
+        @JsonProperty List<FeedbackDTO> feedbacks,
+        @JsonProperty UserDTO assessor,
+        @JsonProperty AssessmentType assessmentType) {
 
-    public static ResultDTO forAssessmentSubmission(long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
+    public static ResultDTO forAssessmentSubmission(
+            long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
         return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor, AssessmentType.SEMI_AUTOMATIC);
     }
 
-    private static List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long resultId, long participationId) throws ArtemisNetworkException {
-        return Arrays.asList(ArtemisRequest.get().path(List.of("participations", participationId, "results", resultId, "details")).executeAndDecode(client,
-                FeedbackDTO[].class));
+    private static List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long resultId, long participationId)
+            throws ArtemisNetworkException {
+        return Arrays.asList(ArtemisRequest.get()
+                .path(List.of("participations", participationId, "results", resultId, "details"))
+                .executeAndDecode(client, FeedbackDTO[].class));
     }
 
     /**
@@ -46,7 +56,8 @@ public record ResultDTO(@JsonProperty long id, @JsonProperty ZonedDateTime compl
      * @return the feedbacks
      * @throws ArtemisNetworkException if it fails to fetch the feedbacks
      */
-    public static List<FeedbackDTO> fetchDetailedFeedbacks(ArtemisClient client, long resultId, long participationId, List<FeedbackDTO> feedbacks)
+    public static List<FeedbackDTO> fetchDetailedFeedbacks(
+            ArtemisClient client, long resultId, long participationId, List<FeedbackDTO> feedbacks)
             throws ArtemisNetworkException {
         // Sometimes the feedbacks are not loaded, to fetch the long feedbacks, we need
         // to load the feedbacks first

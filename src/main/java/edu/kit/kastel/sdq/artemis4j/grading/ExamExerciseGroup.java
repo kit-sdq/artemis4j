@@ -15,7 +15,9 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
         super(exam);
         this.dto = dto;
         this.exam = exam;
-        this.exercises = dto.exercises().stream().map(exerciseDto -> new ProgrammingExercise(exerciseDto, exam.getCourse())).toList();
+        this.exercises = dto.exercises().stream()
+                .map(exerciseDto -> new ProgrammingExercise(exerciseDto, exam.getCourse()))
+                .toList();
     }
 
     public Exam getExam() {
@@ -35,7 +37,10 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
     }
 
     public ProgrammingExercise getProgrammingExerciseById(long id) {
-        return this.exercises.stream().filter(exercise -> exercise.getId() == id).findFirst().orElseThrow();
+        return this.exercises.stream()
+                .filter(exercise -> exercise.getId() == id)
+                .findFirst()
+                .orElseThrow();
     }
 
     @Override

@@ -12,7 +12,8 @@ public final class StackingPenaltyRule implements PenaltyRule {
     private final Integer maxUses;
 
     @JsonCreator
-    public StackingPenaltyRule(@JsonProperty(value = "penalty", required = true) int penalty, @JsonProperty("maxUses") Integer maxUses) {
+    public StackingPenaltyRule(
+            @JsonProperty(value = "penalty", required = true) int penalty, @JsonProperty("maxUses") Integer maxUses) {
         this.penalty = penalty;
         this.maxUses = maxUses;
     }
@@ -20,7 +21,7 @@ public final class StackingPenaltyRule implements PenaltyRule {
     @Override
     public Points calculatePoints(List<Annotation> annotations) {
         int multiplier = this.maxUses == null ? annotations.size() : Math.min(annotations.size(), this.maxUses);
-        double penalty = multiplier * -this.penalty;
-        return new Points(penalty, this.maxUses != null && annotations.size() > this.maxUses);
+        double penaltyPoints = multiplier * -this.penalty;
+        return new Points(penaltyPoints, this.maxUses != null && annotations.size() > this.maxUses);
     }
 }

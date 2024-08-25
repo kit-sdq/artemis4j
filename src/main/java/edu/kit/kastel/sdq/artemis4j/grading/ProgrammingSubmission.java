@@ -32,9 +32,9 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         this.exercise = exercise;
 
         // The student is only present for instructors
-        var student = dto.participation().student();
-        if (student != null) {
-            this.student = new User(student);
+        var studentDto = dto.participation().student();
+        if (studentDto != null) {
+            this.student = new User(studentDto);
         } else {
             this.student = null;
         }
@@ -107,7 +107,8 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
      *                                       corresponding student (i.e.
      *                                       participation)
      */
-    public Optional<Assessment> tryLock(GradingConfig gradingConfig) throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {
+    public Optional<Assessment> tryLock(GradingConfig gradingConfig)
+            throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {
         return this.exercise.tryLockSubmission(this.getId(), this.getCorrectionRound(), gradingConfig);
     }
 
@@ -133,7 +134,8 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
      *                                    present could not be mapped given the
      *                                    gradingConfig
      */
-    public Optional<Assessment> openAssessment(GradingConfig config) throws AnnotationMappingException, ArtemisNetworkException {
+    public Optional<Assessment> openAssessment(GradingConfig config)
+            throws AnnotationMappingException, ArtemisNetworkException {
         ResultDTO resultDTO = this.getRelevantResult().orElse(null);
 
         if (resultDTO != null) {
@@ -149,10 +151,8 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o)
-            return true;
-        if (o == null || getClass() != o.getClass())
-            return false;
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
         ProgrammingSubmission that = (ProgrammingSubmission) o;
         return this.getId() == that.getId();
     }

@@ -21,11 +21,10 @@ public class MetaFeedbackMapper {
     private static final Logger log = LoggerFactory.getLogger(MetaFeedbackMapper.class);
     private static final String METAJSON_TEXT = "CLIENT_DATA";
 
-    private MetaFeedbackMapper() {
+    private MetaFeedbackMapper() {}
 
-    }
-
-    public static List<Annotation> parseMetaFeedbacks(List<FeedbackDTO> allFeedbacks, GradingConfig config) throws AnnotationMappingException {
+    public static List<Annotation> parseMetaFeedbacks(List<FeedbackDTO> allFeedbacks, GradingConfig config)
+            throws AnnotationMappingException {
         var annotations = new ArrayList<Annotation>();
         for (var feedback : allFeedbacks) {
             if (feedback.type() == FeedbackType.MANUAL_UNREFERENCED && METAJSON_TEXT.equals(feedback.text())) {
@@ -37,7 +36,8 @@ public class MetaFeedbackMapper {
         return annotations;
     }
 
-    public static List<FeedbackDTO> createMetaFeedbacks(List<Annotation> annotations) throws AnnotationMappingException {
+    public static List<FeedbackDTO> createMetaFeedbacks(List<Annotation> annotations)
+            throws AnnotationMappingException {
         String text = serializeAnnotations(annotations);
 
         if (text.length() < FeedbackDTO.DETAIL_TEXT_MAX_CHARACTERS) {
@@ -67,8 +67,10 @@ public class MetaFeedbackMapper {
         }
     }
 
-    public static List<Annotation> deserializeAnnotations(String text, GradingConfig config) throws AnnotationMappingException {
-        var mistakes = config.getMistakeTypes().stream().collect(Collectors.toMap(MistakeType::getId, Function.identity()));
+    public static List<Annotation> deserializeAnnotations(String text, GradingConfig config)
+            throws AnnotationMappingException {
+        var mistakes =
+                config.getMistakeTypes().stream().collect(Collectors.toMap(MistakeType::getId, Function.identity()));
 
         try {
             var dtos = ArtemisClient.MAPPER.readValue(text, AnnotationDTO[].class);
@@ -76,7 +78,8 @@ public class MetaFeedbackMapper {
             for (var dto : dtos) {
                 var mistake = mistakes.get(dto.mistakeTypeId());
                 if (mistake == null) {
-                    throw new MismatchedGradingConfigException("MistakeType with id " + dto.mistakeTypeId() + " not found in grading config");
+                    throw new MismatchedGradingConfigException(
+                            "MistakeType with id " + dto.mistakeTypeId() + " not found in grading config");
                 }
                 annotations.add(new Annotation(dto, mistake));
             }

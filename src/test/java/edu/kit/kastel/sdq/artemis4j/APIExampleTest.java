@@ -17,10 +17,10 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 /**
- * This test demonstrates the intended use of the new version of artemis4j
+ * This test demonstrates the intended use of the new version of Artemis4J.
  */
 @Disabled
-public class APIExampleTest {
+class APIExampleTest {
     private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
     private static final String ARTEMIS_USERNAME = System.getenv("ARTEMIS_USER");
     private static final String ARTEMIS_PASSWORD = System.getenv("ARTEMIS_PASSWORD");
@@ -46,7 +46,8 @@ public class APIExampleTest {
         // Check how many locks we hold across the entire course
         System.out.println("Currently " + course.fetchLockedSubmissionCount() + " submissions locked in the course");
         // We can also look at this value for a specific exercise
-        System.out.println("Currently " + course.getProgrammingExerciseById(47).fetchLockedSubmissionCount(0) + " submissions locked in exercise");
+        System.out.println("Currently " + course.getProgrammingExerciseById(47).fetchLockedSubmissionCount(0)
+                + " submissions locked in exercise");
 
         // Get the first exercise (not the exercise with id 0!) in the course
         var exercise = course.getProgrammingExercises().get(0);
@@ -56,7 +57,8 @@ public class APIExampleTest {
         // A config is always tailored to a specific exercise, and the constructor
         // method throws if
         // they don't match
-        var gradingConfig = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config-newapi-test.json")), exercise);
+        var gradingConfig = GradingConfig.readFromString(
+                Files.readString(Path.of("src/test/resources/config-newapi-test.json")), exercise);
 
         // We lock the submission with id 524 for the first correction round
         // You can also use tryLockNextSubmission(correctionRound, gradingConfig) to
@@ -78,39 +80,67 @@ public class APIExampleTest {
         var submissionPath = Path.of("test_content");
         try (var clonedSubmission = assessment.getSubmission().cloneInto(submissionPath, null)) {
             // Execute the autograder on the cloned submission
-            var autograderResult = AutograderRunner.runAutograder(assessment, clonedSubmission, Locale.GERMANY, 0, status -> {
-                System.out.println("Autograder Status: " + status);
-            });
+            var autograderResult = AutograderRunner.runAutograder(
+                    assessment,
+                    clonedSubmission,
+                    Locale.GERMANY,
+                    0,
+                    status -> System.out.println("Autograder Status: " + status));
             System.out.println("Autograder made " + autograderResult.annotationsMade() + " annotations");
         } catch (AutograderFailedException e) {
             System.err.println("Autograder failed: " + e.getMessage());
         }
 
         // Add a non-custom annotation with a custom message
-        assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("complexCode"), "src/edu/kit/kastel/StringUtility.java", 12, 13,
+        assessment.addPredefinedAnnotation(
+                gradingConfig.getMistakeTypeById("complexCode"),
+                "src/edu/kit/kastel/StringUtility.java",
+                12,
+                13,
                 "this is a custom message");
         assertEquals(-0.5, assessment.calculateTotalPointsOfAnnotations());
 
         // Add a custom annotation
         // The total points will not change, since the grading config specifies that the
         // "comment" rating group cannot deduct points
-        assessment.addCustomAnnotation(gradingConfig.getMistakeTypeById("custom"), "src/edu/kit/kastel/StringUtility.java", 40, 40, "custom", -1.0);
+        assessment.addCustomAnnotation(
+                gradingConfig.getMistakeTypeById("custom"),
+                "src/edu/kit/kastel/StringUtility.java",
+                40,
+                40,
+                "custom",
+                -1.0);
         assertEquals(-0.5, assessment.calculateTotalPointsOfAnnotations());
 
         // unnecessaryComplex has a threshold of 5 annotations, so adding 4 doesn't
         // change to total points
         for (int i = 0; i < 4; i++) {
-            assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("unnecessaryComplex"), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
+            assessment.addPredefinedAnnotation(
+                    gradingConfig.getMistakeTypeById("unnecessaryComplex"),
+                    "src/edu/kit/kastel/StringUtility.java",
+                    13,
+                    13,
+                    null);
         }
         assertEquals(-0.5, assessment.calculateTotalPointsOfAnnotations());
 
         // Adding a fifth annotation will deduct 0.5 points
-        assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("unnecessaryComplex"), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
+        assessment.addPredefinedAnnotation(
+                gradingConfig.getMistakeTypeById("unnecessaryComplex"),
+                "src/edu/kit/kastel/StringUtility.java",
+                13,
+                13,
+                null);
         assertEquals(-1.0, assessment.calculateTotalPointsOfAnnotations());
 
         // The 'wrongLoopType' is set to be reported, but does not score, so the points
         // do not change
-        assessment.addPredefinedAnnotation(gradingConfig.getMistakeTypeById("wrongLoopType"), "src/edu/kit/kastel/StringUtility.java", 13, 13, null);
+        assessment.addPredefinedAnnotation(
+                gradingConfig.getMistakeTypeById("wrongLoopType"),
+                "src/edu/kit/kastel/StringUtility.java",
+                13,
+                13,
+                null);
         assertEquals(-1.0, assessment.calculateTotalPointsOfAnnotations());
 
         // Above, we only checked the points deducted by annotations

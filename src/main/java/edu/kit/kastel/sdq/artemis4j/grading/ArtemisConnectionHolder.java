@@ -4,11 +4,11 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 public abstract class ArtemisConnectionHolder {
     private final ArtemisConnection connection;
 
-    public ArtemisConnectionHolder(ArtemisConnection connection) {
+    protected ArtemisConnectionHolder(ArtemisConnection connection) {
         this.connection = connection;
     }
 
-    public ArtemisConnectionHolder(ArtemisConnectionHolder connectionHolder) {
+    protected ArtemisConnectionHolder(ArtemisConnectionHolder connectionHolder) {
         this.connection = connectionHolder.getConnection();
     }
 
