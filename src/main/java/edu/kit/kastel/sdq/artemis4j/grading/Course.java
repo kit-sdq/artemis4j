@@ -22,9 +22,13 @@ public class Course extends ArtemisConnectionHolder {
         super(connection);
 
         this.dto = dto;
-        this.exercises = new LazyNetworkValue<>(() -> new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
-                .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this)).toList()));
-        this.exams = new LazyNetworkValue<>(() -> ExamDTO.fetchAll(connection.getClient(), dto.id()).stream().map(examDTO -> new Exam(examDTO, this)).toList());
+        this.exercises = new LazyNetworkValue<>(
+                () -> new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
+                        .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this))
+                        .toList()));
+        this.exams = new LazyNetworkValue<>(() -> ExamDTO.fetchAll(connection.getClient(), dto.id()).stream()
+                .map(examDTO -> new Exam(examDTO, this))
+                .toList());
     }
 
     /**
@@ -45,12 +49,19 @@ public class Course extends ArtemisConnectionHolder {
         return this.dto.title();
     }
 
+    public String getShortName() {
+        return this.dto.shortName();
+    }
+
     /**
      * Gets all programming exercises of this course. The result is fetched lazily
      * and then cached.
      */
     public List<ProgrammingExercise> getProgrammingExercises() throws ArtemisNetworkException {
-        return this.exercises.get().stream().filter(ProgrammingExercise.class::isInstance).map(ProgrammingExercise.class::cast).toList();
+        return this.exercises.get().stream()
+                .filter(ProgrammingExercise.class::isInstance)
+                .map(ProgrammingExercise.class::cast)
+                .toList();
     }
 
     /**
@@ -60,7 +71,9 @@ public class Course extends ArtemisConnectionHolder {
      * @return the exercise
      */
     public ProgrammingExercise getProgrammingExerciseById(long id) throws ArtemisNetworkException {
-        return this.getProgrammingExercises().stream().filter(e -> e.getId() == id).findAny()
+        return this.getProgrammingExercises().stream()
+                .filter(e -> e.getId() == id)
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("No programming exercise with id " + id + " found"));
     }
 
@@ -72,12 +85,19 @@ public class Course extends ArtemisConnectionHolder {
     }
 
     public Exam getExamById(long id) throws ArtemisNetworkException {
-        return this.exams.get().stream().filter(e -> e.getId() == id).findAny()
+        return this.exams.get().stream()
+                .filter(e -> e.getId() == id)
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("No exam with id " + id + " found"));
     }
 
     public int fetchLockedSubmissionCount() throws ArtemisNetworkException {
-        return CourseDTO.fetchLockedSubmissions(this.getConnection().getClient(), this.getId()).size();
+        return CourseDTO.fetchLockedSubmissions(this.getConnection().getClient(), this.getId())
+                .size();
+    }
+
+    public int getNumberOfStudents() {
+        return this.dto.numberOfStudents();
     }
 
     @Override

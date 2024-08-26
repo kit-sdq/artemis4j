@@ -22,7 +22,8 @@ public final class ArtemisConnection {
     private final LazyNetworkValue<User> assessor;
     private final LazyNetworkValue<List<Course>> courses;
 
-    public static ArtemisConnection connectWithUsernamePassword(ArtemisInstance artemis, String username, String password) throws ArtemisNetworkException {
+    public static ArtemisConnection connectWithUsernamePassword(
+            ArtemisInstance artemis, String username, String password) throws ArtemisNetworkException {
         return new ArtemisConnection(ArtemisClient.fromUsernamePassword(artemis, username, password));
     }
 
@@ -34,7 +35,9 @@ public final class ArtemisConnection {
         this.client = client;
         this.managementInfo = new LazyNetworkValue<>(() -> ManagementInfoDTO.fetch(this.client));
         this.assessor = new LazyNetworkValue<>(() -> new User(UserDTO.getAssessingUser(this.client)));
-        this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this.client).stream().map(dto -> new Course(dto, this)).toList());
+        this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this.client).stream()
+                .map(dto -> new Course(dto, this))
+                .toList());
     }
 
     public ArtemisClient getClient() {
@@ -54,7 +57,9 @@ public final class ArtemisConnection {
     }
 
     public Course getCourseById(int id) throws ArtemisNetworkException {
-        return courses.get().stream().filter(c -> c.getId() == id).findAny()
+        return courses.get().stream()
+                .filter(c -> c.getId() == id)
+                .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("No course with id " + id + " found"));
     }
 }

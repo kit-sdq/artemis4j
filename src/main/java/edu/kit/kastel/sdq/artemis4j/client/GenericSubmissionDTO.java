@@ -6,5 +6,4 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * Minimal data that is common to all possible submission DTOs.
  */
-public record GenericSubmissionDTO(@JsonProperty String type, @JsonProperty long id) {
-}
+public record GenericSubmissionDTO(@JsonProperty String type, @JsonProperty long id) {}

@@ -2,8 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j;
 
 public class ArtemisClientException extends Exception {
-    public ArtemisClientException() {
-    }
+    public ArtemisClientException() {}
 
     public ArtemisClientException(String message) {
         super(message);

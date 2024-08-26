@@ -1,6 +1,8 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
+import java.util.Optional;
+
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 
@@ -25,8 +27,16 @@ public class TestResult {
         return this.dto.credits();
     }
 
+    public FeedbackType getFeedbackType() {
+        return this.dto.type();
+    }
+
     protected FeedbackDTO getDto() {
         return this.dto;
+    }
+
+    public Optional<Boolean> getPositive() {
+        return Optional.ofNullable(this.dto.positive());
     }
 
     @Override

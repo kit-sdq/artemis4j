@@ -12,7 +12,9 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
     private final double penalty;
 
     @JsonCreator
-    public ThresholdPenaltyRule(@JsonProperty("threshold") int threshold, @JsonProperty(value = "penalty", required = true) double penalty) {
+    public ThresholdPenaltyRule(
+            @JsonProperty("threshold") int threshold,
+            @JsonProperty(value = "penalty", required = true) double penalty) {
         this.threshold = threshold;
         this.penalty = penalty;
     }

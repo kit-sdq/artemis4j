@@ -8,11 +8,14 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
 /**
  * There are many more fields in the actual entity that are added as needed
- * 
+ *
  * @param sshCloneURLTemplate Base URL for cloning repositories via SSH
  */
 public record ManagementInfoDTO(@JsonProperty String sshCloneURLTemplate) {
     public static ManagementInfoDTO fetch(ArtemisClient client) throws ArtemisNetworkException {
-        return ArtemisRequest.get().path(List.of("info")).managementRequest(true).executeAndDecode(client, ManagementInfoDTO.class);
+        return ArtemisRequest.get()
+                .path(List.of("info"))
+                .managementRequest(true)
+                .executeAndDecode(client, ManagementInfoDTO.class);
     }
 }

@@ -22,7 +22,10 @@ import org.junit.jupiter.api.*;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class End2EndTest {
 
-    private static final String FEEDBACK_TEXT = "This is a test feedback. To make it very long, it will just repeated over and over again. ".repeat(30).trim();
+    private static final String FEEDBACK_TEXT =
+            "This is a test feedback. To make it very long, it will just repeated over and over again. "
+                    .repeat(30)
+                    .trim();
 
     // Configure a simple Programming exercise (Sorting algorithms in Artemis
     // (Default Template: Package Name: edu.kit.informatik))
@@ -54,16 +57,26 @@ class End2EndTest {
     @BeforeEach
     public void setup() throws ArtemisClientException, IOException {
         this.artemisInstance = new ArtemisInstance(ARTEMIS_URL);
-        this.connection = ArtemisConnection.connectWithUsernamePassword(this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
+        this.connection = ArtemisConnection.connectWithUsernamePassword(
+                this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
 
-        this.course = this.connection.getCourses().stream().filter(c -> c.getId() == Integer.parseInt(COURSE_ID)).findFirst().orElseThrow();
-        this.exercise = this.course.getProgrammingExercises().stream().filter(e -> e.getId() == Long.parseLong(PROGRAMMING_EXERCISE_ID)).findFirst()
+        this.course = this.connection.getCourses().stream()
+                .filter(c -> c.getId() == Integer.parseInt(COURSE_ID))
+                .findFirst()
+                .orElseThrow();
+        this.exercise = this.course.getProgrammingExercises().stream()
+                .filter(e -> e.getId() == Long.parseLong(PROGRAMMING_EXERCISE_ID))
+                .findFirst()
                 .orElseThrow();
 
         var submissions = this.exercise.fetchSubmissions();
-        this.programmingSubmission = submissions.stream().filter(a -> a.getParticipantIdentifier().equals(STUDENT_USER)).findFirst().orElseThrow();
+        this.programmingSubmission = submissions.stream()
+                .filter(a -> a.getParticipantIdentifier().equals(STUDENT_USER))
+                .findFirst()
+                .orElseThrow();
 
-        this.gradingConfig = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), this.exercise);
+        this.gradingConfig = GradingConfig.readFromString(
+                Files.readString(Path.of("src/test/resources/config.json")), this.exercise);
 
         // ensure that the submission is locked
         this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
@@ -87,14 +100,17 @@ class End2EndTest {
         Assertions.assertEquals(13, tests.size());
 
         Assertions.assertEquals(1, this.assessment.getAnnotations().size());
-        Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, this.assessment.getAnnotations().get(0).getSource());
+        Assertions.assertEquals(
+                AnnotationSource.MANUAL_FIRST_ROUND,
+                this.assessment.getAnnotations().get(0).getSource());
     }
 
     @Test
     void testCreationOfCustomAnnotation() throws ArtemisClientException {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("custom");
 
-        this.assessment.addCustomAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, FEEDBACK_TEXT, -2.0);
+        this.assessment.addCustomAnnotation(
+                mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, FEEDBACK_TEXT, -2.0);
         this.assessment.submit();
 
         // Check Assessments
@@ -125,5 +141,34 @@ class End2EndTest {
 
         this.assessment.importAssessment(exportedAssessment);
         Assertions.assertEquals(oldAnnotations, this.assessment.getAnnotations());
+    }
+
+    @Test
+    void testAssessmentFetchesFeedbacks() throws ArtemisClientException {
+        // This test fetches all submissions of an exercise and checks that the
+        // assessment
+        // contains the previously added feedback.
+
+        // Create an annotation (feedback) in the submission:
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
+
+        this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
+        this.assessment.submit();
+
+        ProgrammingSubmission updatedSubmission = null;
+        // find the programming submission that was just assessed in all submissions of
+        // the exercise:
+        for (ProgrammingSubmission submission : this.exercise.fetchSubmissions()) {
+            if (submission.getId() == this.programmingSubmission.getId()) {
+                updatedSubmission = programmingSubmission;
+                break;
+            }
+        }
+
+        Assertions.assertEquals(this.programmingSubmission, updatedSubmission);
+
+        Assessment newAssessment =
+                updatedSubmission.openAssessment(this.gradingConfig).orElseThrow();
+        Assertions.assertEquals(1, newAssessment.getAnnotations().size());
     }
 }

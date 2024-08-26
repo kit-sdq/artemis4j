@@ -14,16 +14,19 @@ import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 final class FeedbackSplitter {
     private static final String LINE_SEPARATOR = "\n";
     private static final int SAFETY_MARGIN = 50;
-    private static final FormatString HEADER_FEEDBACK_ID = new FormatString(new MessageFormat(" (feedback {0,number}/{1,number})"));
+    private static final FormatString HEADER_FEEDBACK_ID =
+            new FormatString(new MessageFormat(" (feedback {0,number}/{1,number})"));
 
-    private FeedbackSplitter() {
+    private FeedbackSplitter() {}
 
-    }
-
-    static List<String> splitLines(Collection<? extends TranslatableString> lines, TranslatableString header, Locale locale) {
-        var translatedLines = lines.stream().map(line -> line.translateTo(locale) + LINE_SEPARATOR).toList();
-        var translatedHeader = header.translateTo(locale); // Not adding the line sep here because may need to add the feedback id to the
-                                                           // line
+    static List<String> splitLines(
+            Collection<? extends TranslatableString> lines, TranslatableString header, Locale locale) {
+        var translatedLines = lines.stream()
+                .map(line -> line.translateTo(locale) + LINE_SEPARATOR)
+                .toList();
+        var translatedHeader = header.translateTo(
+                locale); // Not adding the line sep here because may need to add the feedback id to the
+        // line
 
         int maxFeedbackLength = FeedbackDTO.DETAIL_TEXT_MAX_CHARACTERS - translatedHeader.length() - SAFETY_MARGIN;
         List<List<String>> perFeedbackLines = new ArrayList<>();
@@ -47,7 +50,11 @@ final class FeedbackSplitter {
             // appended to its header
             List<String> feedbacks = new ArrayList<>();
             for (int i = 0; i < perFeedbackLines.size(); i++) {
-                String text = translatedHeader + HEADER_FEEDBACK_ID.format(i + 1, perFeedbackLines.size()).translateTo(locale) + LINE_SEPARATOR
+                String text = translatedHeader
+                        + HEADER_FEEDBACK_ID
+                                .format(i + 1, perFeedbackLines.size())
+                                .translateTo(locale)
+                        + LINE_SEPARATOR
                         + String.join("", perFeedbackLines.get(i));
                 feedbacks.add(text);
             }

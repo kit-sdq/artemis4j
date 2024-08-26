@@ -44,7 +44,8 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
     private final Path testsPath;
     private final Path submissionPath;
 
-    static ClonedProgrammingSubmission cloneSubmission(ProgrammingSubmission submission, Path target, String tokenOverride) throws ArtemisClientException {
+    static ClonedProgrammingSubmission cloneSubmission(
+            ProgrammingSubmission submission, Path target, String tokenOverride) throws ArtemisClientException {
         var connection = submission.getConnection();
 
         // Cache credentials between both clones
@@ -89,7 +90,8 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
         return submissionPath.resolve("src");
     }
 
-    private static CredentialsProvider buildCredentialsProvider(String tokenOverride, ArtemisConnection connection) throws ArtemisNetworkException {
+    private static CredentialsProvider buildCredentialsProvider(String tokenOverride, ArtemisConnection connection)
+            throws ArtemisNetworkException {
         var assessor = connection.getAssessor();
 
         if (tokenOverride == null && assessor.getGitSSHKey().isPresent()) {
@@ -109,33 +111,46 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
         }
     }
 
-    private static void cloneRepositoryInto(String repositoryURL, Path target, CredentialsProvider credentialsProvider, ArtemisConnection connection)
+    private static void cloneRepositoryInto(
+            String repositoryURL, Path target, CredentialsProvider credentialsProvider, ArtemisConnection connection)
             throws ArtemisClientException {
         var assessor = connection.getAssessor();
 
-        CloneCommand cloneCommand = Git.cloneRepository().setDirectory(target.toAbsolutePath().toFile()).setRemote("origin").setURI(repositoryURL)
-                .setCloneAllBranches(true).setCloneSubmodules(false).setCredentialsProvider(credentialsProvider);
+        CloneCommand cloneCommand = Git.cloneRepository()
+                .setDirectory(target.toAbsolutePath().toFile())
+                .setRemote("origin")
+                .setURI(repositoryURL)
+                .setCloneAllBranches(true)
+                .setCloneSubmodules(false)
+                .setCredentialsProvider(credentialsProvider);
 
         try {
             if (assessor.getGitSSHKey().isPresent()) {
                 String sshTemplate = connection.getManagementInfo().sshCloneURLTemplate();
                 if (sshTemplate == null) {
-                    throw new IllegalStateException("SSH key is set, but the Artemis instance does not support SSH cloning");
+                    throw new IllegalStateException(
+                            "SSH key is set, but the Artemis instance does not support SSH cloning");
                 }
 
                 String sshUrl = createSSHUrl(repositoryURL, sshTemplate);
                 log.info("Cloning repository via SSH from {}", sshUrl);
 
-                var sshdFactoryBuilder = new SshdSessionFactoryBuilder().setHomeDirectory(FS.DETECTED.userHome())
-                        .setSshDirectory(new File(FS.DETECTED.userHome(), "/.ssh")).setPreferredAuthentications("publickey");
+                var sshdFactoryBuilder = new SshdSessionFactoryBuilder()
+                        .setHomeDirectory(FS.DETECTED.userHome())
+                        .setSshDirectory(new File(FS.DETECTED.userHome(), "/.ssh"))
+                        .setPreferredAuthentications("publickey");
 
                 try (var sshdFactory = sshdFactoryBuilder.build(null)) {
                     SshSessionFactory.setInstance(sshdFactory);
-                    cloneCommand.setTransportConfigCallback((transport -> {
-                        if (transport instanceof SshTransport sshTransport) {
-                            sshTransport.setSshSessionFactory(sshdFactory);
-                        }
-                    })).setURI(sshUrl).call().close();
+                    cloneCommand
+                            .setTransportConfigCallback((transport -> {
+                                if (transport instanceof SshTransport sshTransport) {
+                                    sshTransport.setSshSessionFactory(sshdFactory);
+                                }
+                            }))
+                            .setURI(sshUrl)
+                            .call()
+                            .close();
                 }
             } else {
                 log.info("Cloning repository via HTTPS from {}", repositoryURL);
@@ -213,17 +228,19 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
         public boolean get(URIish uri, CredentialItem... items) throws UnsupportedCredentialItem {
             for (var item : items) {
                 if (item instanceof CredentialItem.YesNoType yesNoItem) {
-                    int result = JOptionPane.showConfirmDialog(null, yesNoItem.getPromptText(), "Clone via SSH", JOptionPane.YES_NO_CANCEL_OPTION);
+                    int result = JOptionPane.showConfirmDialog(
+                            null, yesNoItem.getPromptText(), "Clone via SSH", JOptionPane.YES_NO_CANCEL_OPTION);
                     switch (result) {
-                    case JOptionPane.YES_OPTION -> yesNoItem.setValue(true);
-                    case JOptionPane.NO_OPTION -> yesNoItem.setValue(false);
-                    case JOptionPane.CANCEL_OPTION -> {
-                        return false;
-                    }
+                        case JOptionPane.YES_OPTION -> yesNoItem.setValue(true);
+                        case JOptionPane.NO_OPTION -> yesNoItem.setValue(false);
+                        case JOptionPane.CANCEL_OPTION -> {
+                            return false;
+                        }
                     }
                 } else if (item instanceof CredentialItem.Password passwordItem) {
                     if (this.passphrase == null) {
-                        this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText()).orElse(null);
+                        this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
+                                .orElse(null);
                     }
 
                     if (this.passphrase != null) {

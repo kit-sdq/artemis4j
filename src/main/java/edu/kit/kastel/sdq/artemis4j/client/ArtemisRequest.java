@@ -46,7 +46,6 @@ public class ArtemisRequest {
      * @param managementRequest whether the request shall be performed against
      *                          Artemis' "normal" API (/api), or against the
      *                          management API (/management)
-     * @return
      */
     public ArtemisRequest managementRequest(boolean managementRequest) {
         this.managementRequest = managementRequest;
@@ -80,7 +79,8 @@ public class ArtemisRequest {
         return client.call(request.build(), resultClass);
     }
 
-    public <R> Optional<R> executeAndDecodeMaybe(ArtemisClient client, Class<R> resultClass) throws ArtemisNetworkException {
+    public <R> Optional<R> executeAndDecodeMaybe(ArtemisClient client, Class<R> resultClass)
+            throws ArtemisNetworkException {
         // Empty response == failure, so first parse as string and only convert if not
         // blank/empty
         String response = this.executeAndDecode(client, String.class);

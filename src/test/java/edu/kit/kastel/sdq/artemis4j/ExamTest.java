@@ -22,7 +22,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import org.junit.jupiter.api.Test;
 
-public class ExamTest {
+class ExamTest {
     private static final String ROUND_ONE_FEEDBACK = "feedback round 1";
     private static final String ROUND_TWO_FEEDBACK = "feedback round 2";
 
@@ -38,35 +38,55 @@ public class ExamTest {
     @Test
     void testExamAssessment() throws ArtemisClientException, IOException {
         ArtemisInstance artemis = new ArtemisInstance(ARTEMIS_URL);
-        ArtemisConnection connection = ArtemisConnection.connectWithUsernamePassword(artemis, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
+        ArtemisConnection connection =
+                ArtemisConnection.connectWithUsernamePassword(artemis, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
         Course course = connection.getCourseById(Integer.parseInt(COURSE_ID));
         Exam exam = course.getExamById(Integer.parseInt(EXAM_ID));
         ExamExerciseGroup exerciseGroup = exam.getExerciseGroupById(Integer.parseInt(EXERCISE_GROUP_ID));
-        ProgrammingExercise exercise = exerciseGroup.getProgrammingExerciseById(Integer.parseInt(PROGRAMMING_EXERCISE_ID));
+        ProgrammingExercise exercise =
+                exerciseGroup.getProgrammingExerciseById(Integer.parseInt(PROGRAMMING_EXERCISE_ID));
 
-        GradingConfig config = GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), exercise);
+        GradingConfig config =
+                GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), exercise);
 
         ProgrammingSubmission roundOneSubmission = findSubmission(exercise.fetchSubmissions(0), STUDENT_USER);
         Assessment roundOneAssessment = roundOneSubmission.tryLock(config).orElseThrow();
         roundOneAssessment.clearAnnotations();
-        roundOneAssessment.addCustomAnnotation(config.getMistakeTypeById("custom"), "src/edu/kit/informatik/BubbleSort.java", 1, 2, ROUND_ONE_FEEDBACK, -2.0);
+        roundOneAssessment.addCustomAnnotation(
+                config.getMistakeTypeById("custom"),
+                "src/edu/kit/informatik/BubbleSort.java",
+                1,
+                2,
+                ROUND_ONE_FEEDBACK,
+                -2.0);
         roundOneAssessment.submit();
 
         ProgrammingSubmission roundTwoSubmission = findSubmission(exercise.fetchSubmissions(1), STUDENT_USER);
         Assessment roundTwoAssessment = roundTwoSubmission.tryLock(config).orElseThrow();
-        roundTwoAssessment.addCustomAnnotation(config.getMistakeTypeById("custom"), "src/edu/kit/informatik/BubbleSort.java", 2, 3, ROUND_TWO_FEEDBACK, -1.0);
+        roundTwoAssessment.addCustomAnnotation(
+                config.getMistakeTypeById("custom"),
+                "src/edu/kit/informatik/BubbleSort.java",
+                2,
+                3,
+                ROUND_TWO_FEEDBACK,
+                -1.0);
 
         var annotations = roundTwoAssessment.getAnnotations();
         assertEquals(2, annotations.size());
         assertTrue(annotations.stream()
-                .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_FIRST_ROUND && a.getCustomMessage().equals(Optional.of(ROUND_ONE_FEEDBACK))));
+                .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_FIRST_ROUND
+                        && a.getCustomMessage().equals(Optional.of(ROUND_ONE_FEEDBACK))));
         assertTrue(annotations.stream()
-                .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_SECOND_ROUND && a.getCustomMessage().equals(Optional.of(ROUND_TWO_FEEDBACK))));
+                .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_SECOND_ROUND
+                        && a.getCustomMessage().equals(Optional.of(ROUND_TWO_FEEDBACK))));
 
         roundTwoAssessment.submit();
     }
 
     private ProgrammingSubmission findSubmission(List<ProgrammingSubmission> submissions, String student) {
-        return submissions.stream().filter(submission -> submission.getParticipantIdentifier().equals(student)).findFirst().orElseThrow();
+        return submissions.stream()
+                .filter(submission -> submission.getParticipantIdentifier().equals(student))
+                .findFirst()
+                .orElseThrow();
     }
 }
