@@ -173,7 +173,7 @@
           <!-- define a language-specific format -->
           <java>
             <palantirJavaFormat>
-              <version>2.39.0</version>
+              <version>2.50.0</version>
               <style>PALANTIR</style>
               <formatJavadoc>false</formatJavadoc>
             </palantirJavaFormat>
