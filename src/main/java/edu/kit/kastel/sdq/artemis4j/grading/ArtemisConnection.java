@@ -52,6 +52,11 @@ public final class ArtemisConnection {
         return assessor.get();
     }
 
+    public User refreshAssessor() throws ArtemisNetworkException {
+        assessor.invalidate();
+        return getAssessor();
+    }
+
     public List<Course> getCourses() throws ArtemisNetworkException {
         return Collections.unmodifiableList(courses.get());
     }

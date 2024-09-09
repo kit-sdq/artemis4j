@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
+import java.time.ZonedDateTime;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -19,6 +20,7 @@ public record UserDTO(
         @JsonProperty String participantIdentifier,
         @JsonProperty List<String> groups,
         @JsonProperty String vcsAccessToken,
+        @JsonProperty ZonedDateTime vcsAccessTokenExpiryDate,
         @JsonProperty String sshPublicKey) {
     public UserDTO {
         if (groups == null) {
@@ -31,5 +33,12 @@ public record UserDTO(
 
     public static UserDTO getAssessingUser(ArtemisClient client) throws ArtemisNetworkException {
         return ArtemisRequest.get().path(List.of("public", "account")).executeAndDecode(client, UserDTO.class);
+    }
+
+    public static void createVCSToken(ZonedDateTime expiryDate, ArtemisClient client) throws ArtemisNetworkException {
+        ArtemisRequest.put()
+                .path(List.of("account", "user-vcs-access-token"))
+                .param("expiryDate", expiryDate)
+                .execute(client);
     }
 }
