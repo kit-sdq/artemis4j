@@ -78,7 +78,7 @@ class APIExampleTest {
         // The try-with-resource deletes the cloned submission from the local filesystem
         // on close
         var submissionPath = Path.of("test_content");
-        try (var clonedSubmission = assessment.getSubmission().cloneInto(submissionPath, null)) {
+        try (var clonedSubmission = assessment.getSubmission().cloneViaVCSTokenInto(submissionPath, null)) {
             // Execute the autograder on the cloned submission
             var autograderResult = AutograderRunner.runAutograder(
                     assessment,

@@ -83,14 +83,26 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
     /**
      * Clones the submission, including the test repository, into the given path,
-     * and checks out the submitted commit.
+     * and checks out the submitted commit. This method uses the user's VCS access token, potentially creating a new one.
      *
      * @param target        The path to clone into
-     * @param tokenOverride (optional) The git password to use for cloning
+     * @param tokenOverride (optional) The git password to use for cloning. If not set, the PAT is used (and created if necessary)
      * @return The path to the actual submission within the target location
      */
-    public ClonedProgrammingSubmission cloneInto(Path target, String tokenOverride) throws ArtemisClientException {
-        return ClonedProgrammingSubmission.cloneSubmission(this, target, tokenOverride);
+    public ClonedProgrammingSubmission cloneViaVCSTokenInto(Path target, String tokenOverride)
+            throws ArtemisClientException {
+        return ClonedProgrammingSubmission.cloneSubmissionViaVCSToken(this, target, tokenOverride);
+    }
+
+    /**
+     * Clones the submission, including the test repository, into the given path,
+     * and checks out the submitted commit. This method uses the user's SSH key, and may interactively prompt the user for their SSH key passphrase.
+     *
+     * @param target        The path to clone into
+     * @return The path to the actual submission within the target location
+     */
+    public ClonedProgrammingSubmission cloneViaSSHInto(Path target) throws ArtemisClientException {
+        return ClonedProgrammingSubmission.cloneSubmissionViaSSH(this, target);
     }
 
     /**

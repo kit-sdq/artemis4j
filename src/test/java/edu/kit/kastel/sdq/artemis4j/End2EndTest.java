@@ -171,4 +171,14 @@ class End2EndTest {
                 updatedSubmission.openAssessment(this.gradingConfig).orElseThrow();
         Assertions.assertEquals(1, newAssessment.getAnnotations().size());
     }
+
+    @Test
+    void testCloningViaVCSToken() throws ArtemisClientException {
+        var targetPath = Path.of("cloned_code");
+
+        try (var clonedSubmission = this.assessment.getSubmission().cloneViaVCSTokenInto(targetPath, null)) {
+            Assertions.assertTrue(Files.exists(targetPath));
+        }
+        Assertions.assertFalse(Files.exists(targetPath));
+    }
 }
