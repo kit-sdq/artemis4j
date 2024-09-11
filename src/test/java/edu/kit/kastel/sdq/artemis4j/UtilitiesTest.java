@@ -8,6 +8,7 @@ import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.client.StudentExamDTO;
@@ -85,28 +86,36 @@ class UtilitiesTest {
                 .toList();
         for (var exercise : exercises) {
             System.out.println("Exercise: " + exercise.title());
-            var submissions = new ArrayList<>(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), 0, false));
+            markMandatoryFailedAsFailedForCorrectionRound(exercise, 0);
             if (exercise.secondCorrectionEnabled()) {
-                submissions.addAll(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), 1, false));
+                markMandatoryFailedAsFailedForCorrectionRound(exercise, 1);
+            }
+        }
+    }
+
+    private void markMandatoryFailedAsFailedForCorrectionRound(ProgrammingExerciseDTO exercise, int correctionRound)
+            throws ArtemisNetworkException {
+        var submissions =
+                new ArrayList<>(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), correctionRound, false));
+        for (var submission : submissions) {
+            var latestResult = submission.results().get(submission.results().size() - 1);
+            if (latestResult == null) {
+                log.warn("No result for submission {}", submission.id());
+                continue;
             }
 
-            for (var submission : submissions) {
-                var latestResult = submission.results().get(submission.results().size() - 1);
-                if (latestResult == null) {
-                    log.warn("No result for submission {}", submission.id());
-                    continue;
-                }
-
-                boolean mandatoryFailed = latestResult.score() == 0.0;
-                if (mandatoryFailed) {
-                    log.info(
-                            "Student {} failed mandatory tests",
-                            submission.participation().participantIdentifier());
-                    var newResult = ResultDTO.forAssessmentSubmission(
-                            submission.id(), 0.0, latestResult.feedbacks(), latestResult.assessor());
-                    ProgrammingSubmissionDTO.saveAssessment(
-                            client, submission.participation().id(), true, newResult);
-                }
+            boolean mandatoryFailed = latestResult.score() == 0.0;
+            if (mandatoryFailed) {
+                log.info(
+                        "Student {} failed mandatory tests",
+                        submission.participation().participantIdentifier());
+                var lockingResult = ProgrammingSubmissionDTO.lock(client, submission.id(), correctionRound)
+                        .results()
+                        .get(0);
+                var newResult = ResultDTO.forAssessmentSubmission(
+                        submission.id(), 0.0, lockingResult.feedbacks(), lockingResult);
+                ProgrammingSubmissionDTO.saveAssessment(
+                        client, submission.participation().id(), true, newResult);
             }
         }
     }
