@@ -29,11 +29,29 @@ public record ResultDTO(
         @JsonProperty Boolean rated,
         @JsonProperty List<FeedbackDTO> feedbacks,
         @JsonProperty UserDTO assessor,
-        @JsonProperty AssessmentType assessmentType) {
+        @JsonProperty AssessmentType assessmentType,
+        @JsonProperty int testCaseCount,
+        @JsonProperty int passedTestCaseCount,
+        @JsonProperty int codeIssueCount) {
 
+    /**
+     * BE WARNED: This method takes the (passed) test case count from the lockingResult. It does NOT recalculate it from the feedbacks!
+     * Should you for any reason change the test result, DO NOT USE THIS METHOD!
+     */
     public static ResultDTO forAssessmentSubmission(
-            long submissionId, double score, List<FeedbackDTO> feedbacks, UserDTO assessor) {
-        return new ResultDTO(submissionId, null, true, score, true, feedbacks, assessor, AssessmentType.SEMI_AUTOMATIC);
+            long submissionId, double score, List<FeedbackDTO> feedbacks, ResultDTO lockingResult) {
+        return new ResultDTO(
+                submissionId,
+                null,
+                true,
+                score,
+                true,
+                feedbacks,
+                lockingResult.assessor(),
+                AssessmentType.SEMI_AUTOMATIC,
+                lockingResult.testCaseCount(),
+                lockingResult.passedTestCaseCount(),
+                lockingResult.codeIssueCount());
     }
 
     private static List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long resultId, long participationId)

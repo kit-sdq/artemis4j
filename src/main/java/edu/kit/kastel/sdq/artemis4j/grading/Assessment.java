@@ -53,6 +53,7 @@ public class Assessment extends ArtemisConnectionHolder {
             new MessageFormat("    * Note:" + " The sum of penalties hit the limits for this rating group."));
     private static final FormatString NO_FEEDBACK_DUMMY = new FormatString("The tutor has made no annotations.");
 
+    private final ResultDTO lockingResult;
     private final List<Annotation> annotations;
     private final List<TestResult> testResults;
     private final ProgrammingSubmission programmingSubmission;
@@ -74,6 +75,7 @@ public class Assessment extends ArtemisConnectionHolder {
             Locale studentLocale)
             throws AnnotationMappingException, ArtemisNetworkException {
         super(programmingSubmission);
+        this.lockingResult = result;
         this.programmingSubmission = programmingSubmission;
         this.config = config;
         this.correctionRound = correctionRound;
@@ -357,10 +359,7 @@ public class Assessment extends ArtemisConnectionHolder {
         double absoluteScore = this.calculateTotalPoints();
         double relativeScore = absoluteScore / this.getMaxPoints() * 100.0;
         ResultDTO result = ResultDTO.forAssessmentSubmission(
-                this.programmingSubmission.getId(),
-                relativeScore,
-                feedbacks,
-                this.getConnection().getAssessor().toDTO());
+                this.programmingSubmission.getId(), relativeScore, feedbacks, this.lockingResult);
 
         // Sanity check
         double feedbackPoints = Math.min(
