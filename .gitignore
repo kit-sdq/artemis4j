@@ -38,3 +38,6 @@ build/
 
 /.autograder-tmp
 /test_content
+
+env
+.env
