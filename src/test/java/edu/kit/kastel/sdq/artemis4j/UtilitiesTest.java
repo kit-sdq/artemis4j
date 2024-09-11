@@ -56,6 +56,9 @@ class UtilitiesTest {
         int toggleSucceeded = 0;
         List<String> toggleFailed = new ArrayList<>();
         for (var studentExam : studentExams) {
+            if (studentExam.submitted()) {
+                continue;
+            }
             try {
                 StudentExamDTO.toggleToSubmitted(client, courseId, examId, studentExam.id());
                 toggleSucceeded++;
