@@ -28,16 +28,14 @@ public class VCSTokenCloningStrategy implements CloningStrategy {
         if (tokenOverride != null) {
             token = tokenOverride;
         } else if (assessor.getGitToken().isPresent()) {
-            token = assessor.getGitToken().get();
+            if (assessor.getGitTokenExpiryDate().get().isBefore(ZonedDateTime.now().plusDays(2))) {
+                token = generateNewToken(connection);
+            } else {
+                token = assessor.getGitToken().get();
+            }
         } else {
             // The user has not set a token, so create one for him with a default expiration time
-            log.info("Creating new VCS access token");
-            var expiryDate = ZonedDateTime.now().plusDays(5);
-            UserDTO.createVCSToken(expiryDate, connection.getClient());
-
-            // Refresh the assessor to get the new token
-            assessor = connection.refreshAssessor();
-            token = assessor.getGitToken().orElseThrow(() -> new IllegalStateException("No VCS token created"));
+            token = generateNewToken(connection);
         }
 
         this.credentialsProvider = new UsernamePasswordCredentialsProvider(assessor.getLogin(), token);
@@ -51,5 +49,15 @@ public class VCSTokenCloningStrategy implements CloningStrategy {
                 .setCredentialsProvider(this.credentialsProvider)
                 .call()
                 .close();
+    }
+
+    private String generateNewToken(ArtemisConnection connection) throws ArtemisNetworkException {
+        log.info("Generating new VCS access token");
+        var assessor = connection.getAssessor();
+        // The max expiration date is (today + 1 year), see https://github.com/ls1intum/Artemis/blob/921b1884fb1a3028512e61023f254f1365fec14b/src/main/java/de/tum/in/www1/artemis/web/rest/AccountResource.java#L175
+        var expiryDate = ZonedDateTime.now().plusMonths(6);
+        UserDTO.createVCSToken(expiryDate, connection.getClient());
+        assessor = connection.refreshAssessor();
+        return assessor.getGitToken().orElseThrow(() -> new IllegalStateException("No VCS token created"));
     }
 }
