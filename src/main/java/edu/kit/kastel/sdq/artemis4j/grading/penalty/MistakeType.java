@@ -71,6 +71,10 @@ public final class MistakeType {
         return this.rule instanceof CustomPenaltyRule;
     }
 
+    public MistakeReportingState getReporting() {
+        return reporting;
+    }
+
     public List<String> getAutograderProblemTypes() {
         return Collections.unmodifiableList(autograderProblemTypes);
     }
