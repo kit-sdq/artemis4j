@@ -2,6 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.nio.file.Path;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
@@ -79,6 +80,18 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
     public int getCorrectionRound() {
         return this.correctionRound;
+    }
+
+    public ZonedDateTime getSubmissionDate() {
+        return this.dto.submissionDate();
+    }
+
+    public Optional<ResultDTO> getLatestResult() {
+        if (!this.dto.results().isEmpty()) {
+            return Optional.of(this.dto.results().get(this.dto.results().size() - 1));
+        } else {
+            return Optional.empty();
+        }
     }
 
     /**
