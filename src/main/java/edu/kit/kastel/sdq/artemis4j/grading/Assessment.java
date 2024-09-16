@@ -90,7 +90,7 @@ public class Assessment extends ArtemisConnectionHolder {
                 result.feedbacks());
 
         // Unpack the result
-        this.annotations = MetaFeedbackMapper.parseMetaFeedbacks(feedbacks, config);
+        this.annotations = Collections.synchronizedList(MetaFeedbackMapper.parseMetaFeedbacks(feedbacks, config));
         this.testResults = feedbacks.stream()
                 .filter(f -> f.type() == FeedbackType.AUTOMATIC)
                 .map(TestResult::new)
