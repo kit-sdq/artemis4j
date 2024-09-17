@@ -70,9 +70,9 @@ public final class AutograderRunner {
                 var position = problem.getPosition();
                 assessment.addAutograderAnnotation(
                         mistakeType,
-                        position.path().toString(),
-                        position.startLine(),
-                        position.endLine(),
+                        "src/" + position.path().toString(),
+                        position.startLine() - 1,
+                        position.endLine() - 1,
                         autograder.translateMessage(problem.getExplanation()));
             }
 
