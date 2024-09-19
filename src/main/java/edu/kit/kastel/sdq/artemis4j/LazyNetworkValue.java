@@ -20,8 +20,8 @@ public class LazyNetworkValue<T> {
                 // Second synchronized check to avoid double initialization
                 if (this.value == null) {
                     this.value = this.supplier.get();
-                    localValue = this.value;
                 }
+                localValue = this.value;
             }
         }
 

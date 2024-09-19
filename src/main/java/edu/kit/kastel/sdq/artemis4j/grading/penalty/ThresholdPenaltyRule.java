@@ -26,4 +26,8 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
         }
         return new Points(0.0, false);
     }
+
+    public int getThreshold() {
+        return threshold;
+    }
 }
