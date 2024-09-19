@@ -21,9 +21,9 @@ public final class Annotation {
     private final String filePath;
     private final int startLine;
     private final int endLine;
-    private final String customMessage;
-    private final Double customScore;
     private final AnnotationSource source;
+    private String customMessage;
+    private Double customScore;
 
     /**
      * Deserializes an annotation from its metajson format
@@ -34,9 +34,9 @@ public final class Annotation {
         this.filePath = dto.classFilePath();
         this.startLine = dto.startLine();
         this.endLine = dto.endLine();
+        this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
         this.customMessage = dto.customMessageForJSON();
         this.customScore = dto.customPenaltyForJSON();
-        this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
     }
 
     Annotation(
@@ -126,12 +126,31 @@ public final class Annotation {
         return Optional.ofNullable(customMessage);
     }
 
+    public void setCustomMessage(String message) {
+        if (this.type.isCustomAnnotation() && message == null) {
+            throw new IllegalArgumentException("A custom message is required for custom annotation types.");
+        }
+
+        this.customMessage = message;
+    }
+
     /**
      * The custom score associated with this message, if any. Is always empty for
      * predefined annotations, and never empty for custom annotations.
      */
     public Optional<Double> getCustomScore() {
         return Optional.ofNullable(customScore);
+    }
+
+    public void setCustomScore(Double score) {
+        if (!this.type.isCustomAnnotation() && score != null) {
+            throw new IllegalArgumentException("A custom score is not allowed for non-custom annotation types.");
+        }
+        if (this.type.isCustomAnnotation() && score == null) {
+            throw new IllegalArgumentException("A custom score is required for custom annotation types.");
+        }
+
+        this.customScore = score;
     }
 
     public AnnotationSource getSource() {
