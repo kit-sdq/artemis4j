@@ -39,6 +39,10 @@ public class TestResult {
         return Optional.ofNullable(this.dto.positive());
     }
 
+    public Optional<String> getDetailText() {
+        return Optional.ofNullable(this.dto.detailText());
+    }
+
     @Override
     public String toString() {
         return "%s: %.3fP".formatted(this.getTestName(), this.getPoints());
