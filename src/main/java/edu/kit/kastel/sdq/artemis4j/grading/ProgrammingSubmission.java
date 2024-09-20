@@ -188,16 +188,18 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     private Optional<ResultDTO> getRelevantResult() {
-        if (this.dto.results().isEmpty()) {
+        var results = this.dto.nonAutomaticResults();
+
+        if (results.isEmpty()) {
             return Optional.empty();
-        } else if (this.dto.results().size() == 1) {
+        } else if (results.size() == 1) {
             // We only have one result, so the submission has
             // probably been created for a specific correction round,
             // or we only have one correction round
-            return Optional.of(this.dto.results().get(0));
+            return Optional.of(results.get(0));
         } else {
             // More than one result, so probably multiple correction rounds
-            return Optional.of(this.dto.nonAutomaticResults().get(this.correctionRound));
+            return Optional.of(results.get(this.correctionRound));
         }
     }
 }
