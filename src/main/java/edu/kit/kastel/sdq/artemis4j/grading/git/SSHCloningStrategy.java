@@ -2,14 +2,10 @@
 package edu.kit.kastel.sdq.artemis4j.grading.git;
 
 import java.io.File;
+import java.lang.reflect.InvocationTargetException;
 import java.util.Optional;
 
-import javax.swing.BoxLayout;
-import javax.swing.JDialog;
-import javax.swing.JLabel;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JPasswordField;
+import javax.swing.*;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
@@ -136,8 +132,14 @@ public class SSHCloningStrategy implements CloningStrategy {
                     }
                 } else if (item instanceof CredentialItem.Password passwordItem) {
                     if (this.passphrase == null) {
-                        this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
-                                .orElse(null);
+                        try {
+                            SwingUtilities.invokeAndWait(() -> {
+                                this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
+                                        .orElse(null);
+                            });
+                        } catch (InterruptedException | InvocationTargetException e) {
+                            throw new RuntimeException(e);
+                        }
                     }
 
                     if (this.passphrase != null) {
