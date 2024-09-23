@@ -132,17 +132,7 @@ public class SSHCloningStrategy implements CloningStrategy {
                     }
                 } else if (item instanceof CredentialItem.Password passwordItem) {
                     if (this.passphrase == null) {
-                        try {
-                            SwingUtilities.invokeAndWait(() -> {
-                                this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
-                                        .orElse(null);
-                            });
-                        } catch (InterruptedException e) {
-                            Thread.currentThread().interrupt();
-                            throw new RuntimeException(e);
-                        } catch (InvocationTargetException e) {
-                            throw new RuntimeException(e);
-                        }
+                        this.askForPassword(passwordItem);
                     }
 
                     if (this.passphrase != null) {
@@ -153,6 +143,20 @@ public class SSHCloningStrategy implements CloningStrategy {
                 }
             }
             return true;
+        }
+
+        private void askForPassword(CredentialItem.Password passwordItem) {
+            try {
+                SwingUtilities.invokeAndWait(() -> {
+                    this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
+                            .orElse(null);
+                });
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+                throw new RuntimeException(e);
+            } catch (InvocationTargetException e) {
+                throw new RuntimeException(e);
+            }
         }
     }
 }
