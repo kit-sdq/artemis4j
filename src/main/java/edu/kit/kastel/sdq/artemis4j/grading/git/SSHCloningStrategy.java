@@ -137,7 +137,10 @@ public class SSHCloningStrategy implements CloningStrategy {
                                 this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
                                         .orElse(null);
                             });
-                        } catch (InterruptedException | InvocationTargetException e) {
+                        } catch (InterruptedException e) {
+                            Thread.currentThread().interrupt();
+                            throw new RuntimeException(e);
+                        } catch (InvocationTargetException e) {
                             throw new RuntimeException(e);
                         }
                     }
