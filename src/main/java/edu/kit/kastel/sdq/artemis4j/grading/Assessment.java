@@ -34,6 +34,8 @@ import org.slf4j.Logger;
 public class Assessment extends ArtemisConnectionHolder {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Assessment.class);
 
+    // TODO: should this be exposed/configurable by artemis4j users?
+    private static final int DEFAULT_ANNOTATION_LIMIT = 8;
     private static final FormatString MANUAL_FEEDBACK = new FormatString(new MessageFormat("[{0}:{1}] {2}"));
     private static final FormatString MANUAL_FEEDBACK_CUSTOM_EXP =
             new FormatString(new MessageFormat("[{0}:{1}] " + "{2}\nExplanation: {3}"));
@@ -187,10 +189,25 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     public Annotation addAutograderAnnotation(
-            MistakeType mistakeType, String filePath, int startLine, int endLine, String explanation) {
+            MistakeType mistakeType,
+            String filePath,
+            int startLine,
+            int endLine,
+            String explanation,
+            String checkName,
+            String problemType,
+            Integer annotationLimit) {
         Double customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
         var annotation = new Annotation(
-                mistakeType, filePath, startLine, endLine, explanation, customScore, AnnotationSource.AUTOGRADER);
+                mistakeType,
+                filePath,
+                startLine,
+                endLine,
+                explanation,
+                customScore,
+                AnnotationSource.AUTOGRADER,
+                List.of(checkName, problemType),
+                annotationLimit);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -308,7 +325,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * Calculates the points from all annotations of a specific mistake type.
      *
      * @return Empty, if no annotations of this type are present. Otherwise, the
-     *         total points for the annotations.
+     * total points for the annotations.
      */
     public Optional<Points> calculatePointsForMistakeType(MistakeType mistakeType) {
         var annotationsWithType = this.getAnnotations(mistakeType);
@@ -386,11 +403,19 @@ public class Assessment extends ArtemisConnectionHolder {
         List<FeedbackDTO> feedbacks = new ArrayList<>(
                 this.testResults.stream().map(TestResult::getDto).toList());
 
+        // The autograder creates many annotations, because it highlights every single violation.
+        // For Artemis, we want to group these annotations if they are more than a certain number.
+        //
+        // The code is mainly intended to group annotations created by the autograder, but will work
+        // for any annotation that has the classifiers set.
+        List<Annotation> allAnnotations =
+                AnnotationMerger.mergeAnnotations(this.annotations, DEFAULT_ANNOTATION_LIMIT, this.studentLocale);
+
         // For each annotation we have a manual feedback at the respective line
         // These feedbacks deduct no points. They are just for the student to see in the
         // Artemis code viewer
         // We group annotations by file and line to have at most one annotation per line
-        feedbacks.addAll(this.annotations.stream()
+        feedbacks.addAll(allAnnotations.stream()
                 .collect(
                         Collectors.groupingBy(Annotation::getFilePath, Collectors.groupingBy(Annotation::getStartLine)))
                 .entrySet()

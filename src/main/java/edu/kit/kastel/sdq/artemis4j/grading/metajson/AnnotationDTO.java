@@ -1,6 +1,8 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading.metajson;
 
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 
@@ -16,4 +18,6 @@ public record AnnotationDTO(
         @JsonProperty String classFilePath,
         @JsonProperty String customMessageForJSON,
         @JsonProperty Double customPenaltyForJSON,
-        @JsonProperty AnnotationSource source) {}
+        @JsonProperty AnnotationSource source,
+        @JsonProperty List<String> classifiers,
+        @JsonProperty Integer annotationLimit) {}

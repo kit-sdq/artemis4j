@@ -187,7 +187,13 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         return Objects.hashCode(this.getId());
     }
 
-    private Optional<ResultDTO> getRelevantResult() {
+    // TODO: Can I replace getLatestResult with getRelevantResult?
+    /**
+     * Returns the relevant result for this submission (should be the latest result).
+     *
+     * @return the relevant result, if present
+     */
+    public Optional<ResultDTO> getRelevantResult() {
         var results = this.dto.nonAutomaticResults();
 
         if (results.isEmpty()) {
