@@ -43,7 +43,8 @@ final class AnnotationMerger {
         // first group all problems by the first classifier:
         Map<String, List<Annotation>> groupedAnnotations = unreducedAnnotations.stream()
                 .collect(Collectors.groupingBy(
-                        annotation -> annotation.getClassifiers().stream().findFirst().orElse(annotation.getUUID()),
+                        annotation ->
+                                annotation.getClassifiers().stream().findFirst().orElse(annotation.getUUID()),
                         LinkedHashMap::new,
                         Collectors.toList()));
 
