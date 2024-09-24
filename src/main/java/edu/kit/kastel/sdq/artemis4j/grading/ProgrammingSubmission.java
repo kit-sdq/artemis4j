@@ -187,7 +187,17 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         return Objects.hashCode(this.getId());
     }
 
-    private Optional<ResultDTO> getRelevantResult() {
+    /**
+     * Returns the relevant result for this submission.
+     * <p>
+     * The difference between this method and {@link #getLatestResult()} is that
+     * when a submission has multiple results from different correction rounds, this
+     * method will return the result for the current correction round. If you want the
+     * latest result regardless of the correction round, use {@link #getLatestResult()}.
+     *
+     * @return the relevant result, if present
+     */
+    public Optional<ResultDTO> getRelevantResult() {
         var results = this.dto.nonAutomaticResults();
 
         if (results.isEmpty()) {

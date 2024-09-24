@@ -17,7 +17,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class MetaFeedbackMapper {
+public final class MetaFeedbackMapper {
     private static final Logger log = LoggerFactory.getLogger(MetaFeedbackMapper.class);
     private static final String METAJSON_TEXT = "CLIENT_DATA";
 
