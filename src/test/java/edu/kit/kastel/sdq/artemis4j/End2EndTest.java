@@ -4,11 +4,16 @@ package edu.kit.kastel.sdq.artemis4j;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
+import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
+import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
+import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
@@ -180,5 +185,171 @@ class End2EndTest {
             Assertions.assertTrue(Files.exists(targetPath));
         }
         Assertions.assertFalse(Files.exists(targetPath));
+    }
+
+    @Test
+    void testMergingNotObservableInAssessments() throws ArtemisClientException {
+        // This test checks that the annotation merging is not observable.
+        // The annotations are created separately, then merged before submission and when the assessment is reloaded,
+        // the annotations will still be there (one should not be able to see the merged annotations).
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("custom");
+
+        String defaultFeedbackText = "This is annotation %d";
+        for (int i = 0; i < 10; i++) {
+            // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
+            this.assessment.addAutograderAnnotation(
+                    mistakeType,
+                    "src/edu/kit/informatik/BubbleSort.java",
+                    i + 1,
+                    i + 2,
+                    defaultFeedbackText.formatted(i),
+                    "FirstCheck",
+                    "FIRST_PROBLEM_TYPE",
+                    3);
+        }
+
+        // create a copy of all annotations before submitting (which will merge them)
+        List<Annotation> currentAnnotations = new ArrayList<>(this.assessment.getAnnotations());
+        this.assessment.submit();
+
+        // Check Assessments
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+
+        for (Annotation annotation : this.assessment.getAnnotations()) {
+            Assertions.assertTrue(
+                    currentAnnotations.contains(annotation),
+                    "Annotation \"%s\" is missing after submission".formatted(annotation));
+            currentAnnotations.remove(annotation);
+        }
+
+        Assertions.assertTrue(
+                currentAnnotations.isEmpty(),
+                "There are annotations that were lost after submission: %s".formatted(currentAnnotations));
+    }
+
+    @Test
+    void testAnnotationMerging() throws ArtemisClientException {
+        // This test checks that the annotations are merged and displayed correctly for the student.
+        MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("custom");
+        MistakeType nonCustomMistakeType = this.gradingConfig.getMistakeTypes().get(1);
+
+        String defaultFeedbackText = "This is annotation %d";
+        for (int i = 0; i < 10; i++) {
+            // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
+            this.assessment.addAutograderAnnotation(
+                    mistakeType,
+                    "src/edu/kit/informatik/BubbleSort.java",
+                    i + 1,
+                    i + 2,
+                    defaultFeedbackText.formatted(i),
+                    "FirstCheck",
+                    "FIRST_PROBLEM_TYPE",
+                    3);
+        }
+
+        String otherFeedbackText = "Other Feedback %d";
+        for (int i = 0; i < 5; i++) {
+            this.assessment.addAutograderAnnotation(
+                    mistakeType,
+                    "src/edu/kit/informatik/MergeSort.java",
+                    i + 1,
+                    i + 2,
+                    otherFeedbackText.formatted(i),
+                    "FirstCheck",
+                    "SECOND_PROBLEM_TYPE",
+                    3);
+        }
+
+        for (int i = 0; i < 5; i++) {
+            this.assessment.addAutograderAnnotation(
+                    mistakeType,
+                    "src/edu/kit/informatik/Client.java",
+                    i + 1,
+                    i + 2,
+                    otherFeedbackText.formatted(i),
+                    "FirstCheck",
+                    "SECOND_PROBLEM_TYPE",
+                    3);
+        }
+
+        // add four annotations without custom messages:
+        for (int i = 5; i < 9; i++) {
+            this.assessment.addAutograderAnnotation(
+                    nonCustomMistakeType,
+                    "src/edu/kit/informatik/Client.java",
+                    i + 1,
+                    i + 2,
+                    null,
+                    "SecondCheck",
+                    "THIRD_PROBLEM_TYPE",
+                    3);
+        }
+
+        // add four annotations where only the last has a custom message:
+        for (int i = 9; i < 12; i++) {
+            this.assessment.addAutograderAnnotation(
+                    nonCustomMistakeType,
+                    "src/edu/kit/informatik/Client.java",
+                    i + 1,
+                    i + 2,
+                    null,
+                    "ThirdCheck",
+                    "THIRD_PROBLEM_TYPE",
+                    3);
+        }
+
+        this.assessment.addAutograderAnnotation(
+                nonCustomMistakeType,
+                "src/edu/kit/informatik/Client.java",
+                13,
+                14,
+                "Has used last annotation for message",
+                "ThirdCheck",
+                "THIRD_PROBLEM_TYPE",
+                3);
+
+        // submit the assessment (will merge the annotations)
+        this.assessment.submit();
+
+        // the assessment will not show the merged annotations (it will unmerge them after loading)
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+
+        // so we need to check the submission itself:
+
+        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        var feedbacks = ResultDTO.fetchDetailedFeedbacks(
+                this.connection.getClient(),
+                resultDTO.id(),
+                this.programmingSubmission.getParticipationId(),
+                resultDTO.feedbacks());
+
+        List<String> feedbackTexts = new ArrayList<>();
+        for (FeedbackDTO feedbackDTO : feedbacks) {
+            if (feedbackDTO.type() != FeedbackType.MANUAL) {
+                continue;
+            }
+
+            feedbackTexts.add(feedbackDTO.detailText());
+        }
+
+        Assertions.assertEquals(
+                List.of(
+                        // other feedback is 5 annotations in MergeSort and 5 in Client that should be merged
+                        "[Funktionalität:Custom Penalty] Other Feedback 0 (0P)",
+                        "[Funktionalität:Custom Penalty] Other Feedback 1 (0P)",
+                        "[Funktionalität:Custom Penalty] Other Feedback 2. Weitere Probleme in MergeSort:(L4, L5), Client:(L1, L2, L3, L4, L5). (0P)",
+                        // all feedbacks in the same file
+                        "[Funktionalität:Custom Penalty] This is annotation 0 (0P)",
+                        "[Funktionalität:Custom Penalty] This is annotation 1 (0P)",
+                        "[Funktionalität:Custom Penalty] This is annotation 2. Weitere Probleme in L4, L5, L6, L7, L8, L9, L10. (0P)",
+                        // feedbacks without messages:
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Weitere Probleme in L9.",
+                        // feedbacks where only the last has a message:
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Has used last annotation for message. Weitere Probleme in L12."),
+                feedbackTexts);
     }
 }

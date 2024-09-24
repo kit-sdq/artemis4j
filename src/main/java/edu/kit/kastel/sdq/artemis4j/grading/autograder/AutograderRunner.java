@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.LinterException;
@@ -65,7 +66,7 @@ public final class AutograderRunner {
                     checkConfiguration,
                     statusConsumerWrapper);
 
-            for (var problem : problems) {
+            for (AbstractProblem problem : problems) {
                 var mistakeType = problemTypesMap.get(problem.getType());
                 var position = problem.getPosition();
                 assessment.addAutograderAnnotation(
@@ -73,7 +74,10 @@ public final class AutograderRunner {
                         "src/" + position.path().toString(),
                         position.startLine() - 1,
                         position.endLine() - 1,
-                        autograder.translateMessage(problem.getExplanation()));
+                        autograder.translateMessage(problem.getExplanation()),
+                        problem.getCheckName(),
+                        problem.getType(),
+                        problem.getMaximumProblemsForCheck().orElse(null));
             }
 
             return new AutograderStats(problems.size());
