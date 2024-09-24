@@ -337,19 +337,19 @@ class End2EndTest {
                         // other feedback is 5 annotations in MergeSort and 5 in Client that should be merged
                         "[Funktionalität:Custom Penalty] Other Feedback 0 (0P)",
                         "[Funktionalität:Custom Penalty] Other Feedback 1 (0P)",
-                        "[Funktionalität:Custom Penalty] Other Feedback 2. Other problems in MergeSort:(L4, L5), Client:(L1, L2, L3, L4, L5). (0P)",
+                        "[Funktionalität:Custom Penalty] Other Feedback 2. Weitere Probleme in MergeSort:(L4, L5), Client:(L1, L2, L3, L4, L5). (0P)",
                         // all feedbacks in the same file
                         "[Funktionalität:Custom Penalty] This is annotation 0 (0P)",
                         "[Funktionalität:Custom Penalty] This is annotation 1 (0P)",
-                        "[Funktionalität:Custom Penalty] This is annotation 2. Other problems in L4, L5, L6, L7, L8, L9, L10. (0P)",
+                        "[Funktionalität:Custom Penalty] This is annotation 2. Weitere Probleme in L4, L5, L6, L7, L8, L9, L10. (0P)",
                         // feedbacks without messages:
                         "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
                         "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
-                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Other problems in L9.",
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Weitere Probleme in L9.",
                         // feedbacks where only the last has a message:
                         "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
                         "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
-                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Has used last annotation for message. Other problems in L12."),
+                        "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Has used last annotation for message. Weitere Probleme in L12."),
                 feedbackTexts);
     }
 }

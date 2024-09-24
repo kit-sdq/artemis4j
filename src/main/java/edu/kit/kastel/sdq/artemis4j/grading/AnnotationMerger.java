@@ -17,11 +17,9 @@ import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
  * Merges annotations based on their classifiers.
  */
 final class AnnotationMerger {
-    // TODO: where should the translations be stored?
     private static final FormatString MERGED_ANNOTATIONS_FORMAT = new FormatString(
-            // TODO: should default locale be English or German?
-            new MessageFormat("{0}Other problems in {1}.", Locale.ENGLISH),
-            Map.of(Locale.GERMAN, new MessageFormat("{0}Weitere Probleme in {1}.", Locale.GERMAN)));
+            new MessageFormat("{0}Weitere Probleme in {1}.", Locale.GERMAN),
+            Map.of(Locale.ENGLISH, new MessageFormat("{0}Other problems in {1}.", Locale.ENGLISH)));
 
     private AnnotationMerger() {}
 
@@ -45,15 +43,7 @@ final class AnnotationMerger {
         // first group all problems by the first classifier:
         Map<String, List<Annotation>> groupedAnnotations = unreducedAnnotations.stream()
                 .collect(Collectors.groupingBy(
-                        annotation -> {
-                            List<String> classifiers = annotation.getClassifiers();
-                            if (classifiers.isEmpty()) {
-                                // do not merge annotations without a classifier:
-                                return annotation.getUUID();
-                            } else {
-                                return classifiers.get(0);
-                            }
-                        },
+                        annotation -> annotation.getClassifiers().stream().findFirst().orElse(annotation.getUUID()),
                         LinkedHashMap::new,
                         Collectors.toList()));
 

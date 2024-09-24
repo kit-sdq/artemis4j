@@ -36,7 +36,7 @@ public final class Annotation {
     // with the classifier "a", it would merge all annotations with the classifiers ["a", "b"]
     // and all annotations with the classifiers ["a", "c"].
     private final List<String> classifiers;
-    private final Optional<Integer> annotationLimit;
+    private final Integer annotationLimit;
 
     /**
      * Deserializes an annotation from its metajson format
@@ -51,7 +51,7 @@ public final class Annotation {
         this.customMessage = dto.customMessageForJSON();
         this.customScore = dto.customPenaltyForJSON();
         this.classifiers = dto.classifiers();
-        this.annotationLimit = Optional.ofNullable(dto.annotationLimit());
+        this.annotationLimit = dto.annotationLimit();
     }
 
     Annotation(
@@ -96,7 +96,7 @@ public final class Annotation {
         this.customScore = customScore;
         this.source = source;
         this.classifiers = new ArrayList<>(classifiers);
-        this.annotationLimit = Optional.ofNullable(annotationLimit);
+        this.annotationLimit = annotationLimit;
     }
 
     /**
@@ -181,7 +181,7 @@ public final class Annotation {
      * @return the maximum number of annotations that should be displayed
      */
     public Optional<Integer> getAnnotationLimit() {
-        return this.annotationLimit;
+        return Optional.ofNullable(this.annotationLimit);
     }
 
     /**
@@ -221,7 +221,7 @@ public final class Annotation {
                 customScore,
                 source,
                 classifiers,
-                annotationLimit.orElse(null));
+                annotationLimit);
     }
 
     @Override
