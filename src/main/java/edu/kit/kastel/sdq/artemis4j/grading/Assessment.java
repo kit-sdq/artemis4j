@@ -35,7 +35,7 @@ public class Assessment extends ArtemisConnectionHolder {
     private static final Logger log = org.slf4j.LoggerFactory.getLogger(Assessment.class);
 
     // TODO: should this be exposed/configurable by artemis4j users?
-    private static final int DEFAULT_ANNOTATION_LIMIT = 8;
+    private static final int DEFAULT_ANNOTATION_LIMIT = 12;
     private static final FormatString MANUAL_FEEDBACK = new FormatString(new MessageFormat("[{0}:{1}] {2}"));
     private static final FormatString MANUAL_FEEDBACK_CUSTOM_EXP =
             new FormatString(new MessageFormat("[{0}:{1}] " + "{2}\nExplanation: {3}"));
