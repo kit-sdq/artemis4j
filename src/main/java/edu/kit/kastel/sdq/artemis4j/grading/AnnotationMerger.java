@@ -62,7 +62,7 @@ final class AnnotationMerger {
             }
 
             // Further partition the annotations by their remaining classifiers:
-            annotationsForClassifier.stream()
+            Map<String, List<Annotation>> map = annotationsForClassifier.stream()
                     .collect(Collectors.groupingBy(
                             annotation -> {
                                 List<String> classifiers = annotation.getClassifiers();
@@ -75,11 +75,11 @@ final class AnnotationMerger {
                                 }
                             },
                             LinkedHashMap::new,
-                            Collectors.toList()))
-                    .values()
-                    .stream()
-                    .flatMap(list -> merge(list, targetNumberOfAnnotations, locale).stream())
-                    .forEach(result::add);
+                            Collectors.toList()));
+
+            for (List<Annotation> list : map.values()) {
+                result.addAll(merge(list, targetNumberOfAnnotations, locale));
+            }
         }
 
         return result;

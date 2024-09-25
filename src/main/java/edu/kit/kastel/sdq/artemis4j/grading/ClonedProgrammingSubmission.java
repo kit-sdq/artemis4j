@@ -1,7 +1,6 @@
 /* Licensed under EPL-2.0 2024. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -112,7 +111,13 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
 
     private static void deleteDirectory(Path path) throws IOException {
         try (var dirStream = Files.walk(path)) {
-            dirStream.map(Path::toFile).sorted(Comparator.reverseOrder()).forEach(File::delete);
+            var filesInDirectory = dirStream
+                    .map(Path::toFile)
+                    .sorted(Comparator.reverseOrder())
+                    .toList();
+            for (var file : filesInDirectory) {
+                file.delete();
+            }
         }
     }
 }
