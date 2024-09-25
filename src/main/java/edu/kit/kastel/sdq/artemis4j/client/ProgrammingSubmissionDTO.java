@@ -75,7 +75,7 @@ public record ProgrammingSubmissionDTO(
 
     public List<ResultDTO> nonAutomaticResults() {
         return this.results().stream()
-                .filter(r -> r.assessmentType() != AssessmentType.AUTOMATIC)
+                .filter(r -> r != null && r.assessmentType() != AssessmentType.AUTOMATIC)
                 .toList();
     }
 }
