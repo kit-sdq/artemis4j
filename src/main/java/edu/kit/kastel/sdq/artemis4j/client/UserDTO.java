@@ -41,4 +41,19 @@ public record UserDTO(
                 .param("expiryDate", expiryDate)
                 .execute(client);
     }
+
+    public static List<String> getUnenrolledUsers(ArtemisClient client) throws ArtemisNetworkException {
+        var unenrolledUsers = ArtemisRequest.get()
+                .path(List.of("admin", "users", "not-enrolled"))
+                .executeAndDecodeMaybe(client, String[].class)
+                .orElseThrow();
+        return List.of(unenrolledUsers);
+    }
+
+    public static void deleteUser(ArtemisClient client, String username) throws ArtemisNetworkException {
+        ArtemisRequest.delete()
+                .path(List.of("admin", "users"))
+                .param("login", username)
+                .execute(client);
+    }
 }

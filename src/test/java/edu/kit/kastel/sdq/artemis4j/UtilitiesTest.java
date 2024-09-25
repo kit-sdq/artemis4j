@@ -4,14 +4,7 @@ package edu.kit.kastel.sdq.artemis4j;
 import java.util.ArrayList;
 import java.util.List;
 
-import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
-import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
-import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
-import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
-import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
-import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
-import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
-import edu.kit.kastel.sdq.artemis4j.client.StudentExamDTO;
+import edu.kit.kastel.sdq.artemis4j.client.*;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Disabled;
@@ -130,6 +123,19 @@ class UtilitiesTest {
         var tutors = CourseDTO.fetchAllTutors(client, courseId);
         for (var tutor : tutors) {
             CourseDTO.removeTutor(client, courseId, tutor.login());
+        }
+    }
+
+    @Test
+    void removeUnenrolledUsers() throws ArtemisClientException {
+        Assertions.assertNotNull(username);
+        Assertions.assertNotNull(password);
+
+        var unenrolledUsers = UserDTO.getUnenrolledUsers(client);
+        System.out.println("Unenrolled users: " + unenrolledUsers.size());
+        for (var user : unenrolledUsers) {
+            System.out.println("Deleting user: " + user);
+            UserDTO.deleteUser(client, user);
         }
     }
 }
