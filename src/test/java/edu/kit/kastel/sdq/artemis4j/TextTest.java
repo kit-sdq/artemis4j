@@ -47,7 +47,7 @@ class TextTest {
     }
 
     @BeforeEach
-    public void setup() throws ArtemisClientException, IOException {
+    public void setup() throws ArtemisClientException {
         this.artemisInstance = new ArtemisInstance(ARTEMIS_URL);
         this.connection = ArtemisConnection.connectWithUsernamePassword(
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
