@@ -1,7 +1,6 @@
 /* Licensed under EPL-2.0 2023-2024. */
 package edu.kit.kastel.sdq.artemis4j;
 
-import java.io.IOException;
 import java.util.List;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
