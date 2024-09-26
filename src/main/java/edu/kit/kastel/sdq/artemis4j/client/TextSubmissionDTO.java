@@ -4,8 +4,8 @@ package edu.kit.kastel.sdq.artemis4j.client;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -111,7 +111,6 @@ public record TextSubmissionDTO(
      * @param textBlocks the text blocks to include in the assessment
      * @throws ArtemisNetworkException if the request fails
      */
-    @SuppressWarnings({"java:S1171", "java:S3599"})
     public static void submitAssessment(
             ArtemisClient client,
             long participationId,
@@ -121,12 +120,9 @@ public record TextSubmissionDTO(
             throws ArtemisNetworkException {
         ArtemisRequest.post()
                 .path(List.of("participations", participationId, "results", resultId, "submit-text-assessment"))
-                .body(new HashMap<>() {
-                    {
-                        this.put("feedbacks", feedbacks);
-                        this.put("textBlocks", textBlocks);
-                    }
-                })
+                .body(Map.of(
+                        "feedbacks", feedbacks,
+                        "textBlocks", textBlocks))
                 .execute(client);
     }
 }
