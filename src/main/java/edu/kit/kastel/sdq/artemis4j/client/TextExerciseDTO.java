@@ -42,6 +42,5 @@ public record TextExerciseDTO(
      * specific course with the exercises attached. We don't care about the course
      * here, so this wrapper class exists.
      */
-    private record ExerciseWrapperDTO(List<TextExerciseDTO> exercises) {
-    }
+    private record ExerciseWrapperDTO(List<TextExerciseDTO> exercises) {}
 }

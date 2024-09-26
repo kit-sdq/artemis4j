@@ -2,7 +2,6 @@
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -38,6 +37,5 @@ public record ProgrammingExerciseDTO(
      *
      * @param exercises
      */
-    private record ExerciseWrapperDTO(List<ProgrammingExerciseDTO> exercises) {
-    }
+    private record ExerciseWrapperDTO(List<ProgrammingExerciseDTO> exercises) {}
 }

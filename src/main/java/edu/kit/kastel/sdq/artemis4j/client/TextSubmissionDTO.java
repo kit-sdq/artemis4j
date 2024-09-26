@@ -111,7 +111,7 @@ public record TextSubmissionDTO(
      * @param textBlocks the text blocks to include in the assessment
      * @throws ArtemisNetworkException if the request fails
      */
-    @SuppressWarnings("java:S1171")
+    @SuppressWarnings({"java:S1171", "java:S3599"})
     public static void submitAssessment(
             ArtemisClient client,
             long participationId,
