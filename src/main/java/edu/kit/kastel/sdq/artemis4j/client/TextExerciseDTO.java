@@ -2,7 +2,6 @@
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
-import java.util.Arrays;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -33,7 +32,7 @@ public record TextExerciseDTO(
                 .path(List.of("courses", courseId, "with-exercises"))
                 .executeAndDecode(client, ExerciseWrapperDTO.class);
         // Remove all non-text exercises
-        return Arrays.stream(exercises.exercises())
+        return exercises.exercises().stream()
                 .filter(e -> e.exerciseType().equals("TEXT"))
                 .toList();
     }
@@ -43,23 +42,6 @@ public record TextExerciseDTO(
      * specific course with the exercises attached. We don't care about the course
      * here, so this wrapper class exists.
      */
-    private record ExerciseWrapperDTO(TextExerciseDTO[] exercises) {
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) {
-                return true;
-            }
-            if (o == null || getClass() != o.getClass()) {
-                return false;
-            }
-
-            ExerciseWrapperDTO that = (ExerciseWrapperDTO) o;
-            return Arrays.equals(exercises, that.exercises);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(exercises);
-        }
+    private record ExerciseWrapperDTO(List<TextExerciseDTO> exercises) {
     }
 }

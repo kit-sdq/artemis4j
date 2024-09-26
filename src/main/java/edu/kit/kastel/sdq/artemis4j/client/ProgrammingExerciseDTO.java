@@ -26,7 +26,7 @@ public record ProgrammingExerciseDTO(
                 .path(List.of("courses", courseId, "with-exercises"))
                 .executeAndDecode(client, ExerciseWrapperDTO.class);
         // Remove all non-programming exercises
-        return Arrays.stream(exercises.exercises())
+        return exercises.exercises().stream()
                 .filter(e -> e.exerciseType().equals("PROGRAMMING"))
                 .toList();
     }
@@ -38,19 +38,6 @@ public record ProgrammingExerciseDTO(
      *
      * @param exercises
      */
-    private record ExerciseWrapperDTO(ProgrammingExerciseDTO[] exercises) {
-        @Override
-        public boolean equals(Object o) {
-            if (this == o) return true;
-            if (o == null || getClass() != o.getClass()) return false;
-
-            ExerciseWrapperDTO that = (ExerciseWrapperDTO) o;
-            return Arrays.equals(exercises, that.exercises);
-        }
-
-        @Override
-        public int hashCode() {
-            return Arrays.hashCode(exercises);
-        }
+    private record ExerciseWrapperDTO(List<ProgrammingExerciseDTO> exercises) {
     }
 }
