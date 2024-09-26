@@ -9,6 +9,7 @@ import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
 
 /**
  * A course, containing exercises.
@@ -22,10 +23,18 @@ public class Course extends ArtemisConnectionHolder {
         super(connection);
 
         this.dto = dto;
-        this.exercises = new LazyNetworkValue<>(
-                () -> new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
-                        .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this))
-                        .toList()));
+        this.exercises = new LazyNetworkValue<>(() -> {
+            List<Exercise> result =
+                    new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
+                            .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this))
+                            .toList());
+
+            result.addAll(TextExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
+                    .map(exerciseDTO -> new TextExercise(exerciseDTO, this))
+                    .toList());
+
+            return result;
+        });
         this.exams = new LazyNetworkValue<>(() -> ExamDTO.fetchAll(connection.getClient(), dto.id()).stream()
                 .map(examDTO -> new Exam(examDTO, this))
                 .toList());
@@ -61,6 +70,17 @@ public class Course extends ArtemisConnectionHolder {
         return this.exercises.get().stream()
                 .filter(ProgrammingExercise.class::isInstance)
                 .map(ProgrammingExercise.class::cast)
+                .toList();
+    }
+
+    /**
+     * Gets all text exercises of this course. The result is fetched lazily
+     * and then cached.
+     */
+    public List<TextExercise> getTextExercises() throws ArtemisNetworkException {
+        return this.exercises.get().stream()
+                .filter(TextExercise.class::isInstance)
+                .map(TextExercise.class::cast)
                 .toList();
     }
 
