@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextSubmissionDTO;
 
@@ -48,6 +49,12 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
     @Override
     public Course getCourse() {
         return this.course;
+    }
+
+    @Override
+    public AssessmentStatsDTO fetchAssessmentStats() throws ArtemisNetworkException {
+        // TODO Implement this
+        throw new UnsupportedOperationException("Not implemented yet");
     }
 
     /**
