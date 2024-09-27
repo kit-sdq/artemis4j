@@ -23,6 +23,7 @@ env:
   EXAM_ID: "5"
   EXAM_EXERCISE_GROUP_ID: "6"
   EXAM_PROGRAMMING_EXERCISE_ID: "48"
+  TEXT_EXERCISE_ID: "57"
 
 concurrency:
   group: artemis-test-system
