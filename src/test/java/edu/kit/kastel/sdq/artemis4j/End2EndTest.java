@@ -91,6 +91,12 @@ class End2EndTest {
     }
 
     @Test
+    void testStats() throws ArtemisClientException {
+        var stats = this.exercise.fetchAssessmentStats();
+        Assertions.assertNotNull(stats);
+    }
+
+    @Test
     void testCreationOfSimpleAnnotations() throws ArtemisClientException {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 

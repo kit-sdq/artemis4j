@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
@@ -61,6 +62,11 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
     @Override
     public Course getCourse() {
         return this.course;
+    }
+
+    @Override
+    public AssessmentStatsDTO fetchAssessmentStats() throws ArtemisNetworkException {
+        return AssessmentStatsDTO.fetch(this.getConnection().getClient(), this.getId());
     }
 
     public boolean hasSecondCorrectionRound() {
