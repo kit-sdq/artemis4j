@@ -47,6 +47,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v4
+      with:
+        fetch-depth: 0
 
     - uses: joshlong/java-version-export-github-action@v28
       id: jve
@@ -60,6 +62,4 @@ jobs:
 
     - name: Maven Verify
       shell: bash
-      run: |
-        git fetch origin main # necessary for spotless
-        mvn -U -B verify
+      run: mvn -U -B verify
