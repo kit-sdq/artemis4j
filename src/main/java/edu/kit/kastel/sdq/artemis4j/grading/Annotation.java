@@ -44,7 +44,7 @@ public final class Annotation {
     public Annotation(AnnotationDTO dto, MistakeType mistakeType) {
         this.uuid = dto.uuid();
         this.type = mistakeType;
-        this.filePath = dto.classFilePath();
+        this.filePath = dto.classFilePath().replace("\\", "/");
         this.startLine = dto.startLine();
         this.endLine = dto.endLine();
         this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
