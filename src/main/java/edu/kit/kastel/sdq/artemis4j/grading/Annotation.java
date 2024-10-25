@@ -50,7 +50,7 @@ public final class Annotation {
         this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
         this.customMessage = dto.customMessageForJSON();
         this.customScore = dto.customPenaltyForJSON();
-        this.classifiers = dto.classifiers();
+        this.classifiers = dto.classifiers() != null ? dto.classifiers() : List.of();
         this.annotationLimit = dto.annotationLimit();
     }
 

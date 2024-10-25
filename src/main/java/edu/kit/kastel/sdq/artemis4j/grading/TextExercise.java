@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextSubmissionDTO;
 
@@ -152,14 +153,20 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
         }
         var result = locked.results().get(0);
 
-        // Locking was successful if we are the assessor
-        // The webui of Artemis does the same check
-        if (result.assessor() == null
-                || result.assessor().id() != this.getConnection().getAssessor().getId()) {
+        if (this.canAssess(result)) {
             return Optional.empty();
         }
 
         var submission = new TextSubmission(locked, this, correctionRound);
         return Optional.of(new TextAssessment(result, submission, correctionRound));
+    }
+
+    private boolean canAssess(ResultDTO result) throws ArtemisNetworkException {
+        // We can assess if either no assessor is set, we are the assessor,
+        // or if we are an instructor (who can overwrite any assessment)
+        var assessor = this.getConnection().getAssessor();
+        return result.assessor() == null
+                || result.assessor().id() != assessor.getId()
+                || this.getCourse().isInstructor(assessor);
     }
 }

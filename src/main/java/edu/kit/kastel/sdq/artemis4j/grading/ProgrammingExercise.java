@@ -10,6 +10,7 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 
@@ -100,7 +101,6 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
     /**
      * Fetches all submissions from correction round 1 and 2 (if enabled).
-     *
      */
     public List<ProgrammingSubmission> fetchSubmissions() throws ArtemisNetworkException {
         List<ProgrammingSubmission> submissions = new ArrayList<>(this.fetchSubmissions(0));
@@ -116,7 +116,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * the assessment.
      *
      * @return An empty optional if no submission was available to lock, otherwise
-     *         the assessment
+     * the assessment
      */
     public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig)
             throws AnnotationMappingException, ArtemisNetworkException {
@@ -146,7 +146,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * i.e. a single user may lock the same submission multiple times.
      *
      * @return An empty optional if a *different* user has already locked the
-     *         submission, otherwise the assessment
+     * submission, otherwise the assessment
      * @throws AnnotationMappingException    If the annotations that were already
      *                                       present could not be mapped given the
      *                                       gradingConfig
@@ -180,10 +180,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         }
         var result = locked.results().get(0);
 
-        // Locking was successful if we are the assessor
-        // The webui of Artemis does the same check
-        if (result.assessor() == null
-                || result.assessor().id() != this.getConnection().getAssessor().getId()) {
+        if (!this.canAssess(result)) {
             return Optional.empty();
         }
 
@@ -210,5 +207,14 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         if (!gradingConfig.isValidForExercise(this)) {
             throw new IllegalArgumentException("Grading config is not valid for this exercise");
         }
+    }
+
+    private boolean canAssess(ResultDTO result) throws ArtemisNetworkException {
+        // We can assess if either no assessor is set, we are the assessor,
+        // or if we are an instructor (who can overwrite any assessment)
+        var assessor = this.getConnection().getAssessor();
+        return result.assessor() == null
+                || result.assessor().id() != assessor.getId()
+                || this.getCourse().isInstructor(assessor);
     }
 }
