@@ -72,6 +72,14 @@ public class FormatString {
         }
     }
 
+    /**
+     * The default pattern used by the format string.
+     * @return the default pattern
+     */
+    public String getDefaultTranslationPattern() {
+        return this.defaultTranslation.toPattern();
+    }
+
     @Override
     public String toString() {
         throw new IllegalStateException("Format & translate this string before using it.");
