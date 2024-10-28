@@ -92,6 +92,18 @@ public final class MistakeType {
         return Objects.hashCode(id);
     }
 
+    @Override
+    public String toString() {
+        return "MistakeType{" + "id='"
+                + id + '\'' + ", rule="
+                + rule + ", ratingGroup="
+                + ratingGroup + ", message="
+                + message.getDefaultTranslationPattern() + ", buttonTexts="
+                + buttonTexts.getDefaultTranslationPattern() + ", reporting="
+                + reporting + ", autograderProblemTypes="
+                + autograderProblemTypes + '}';
+    }
+
     record MistakeTypeDTO(
             String shortName,
             String message,
