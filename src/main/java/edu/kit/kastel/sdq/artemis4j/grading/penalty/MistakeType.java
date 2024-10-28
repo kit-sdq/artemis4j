@@ -94,15 +94,14 @@ public final class MistakeType {
 
     @Override
     public String toString() {
-        return "MistakeType{" +
-            "id='" + id + '\'' +
-            ", rule=" + rule +
-            ", ratingGroup=" + ratingGroup +
-            ", message=" + message.getDefaultTranslationPattern() +
-            ", buttonTexts=" + buttonTexts.getDefaultTranslationPattern() +
-            ", reporting=" + reporting +
-            ", autograderProblemTypes=" + autograderProblemTypes +
-            '}';
+        return "MistakeType{" + "id='"
+                + id + '\'' + ", rule="
+                + rule + ", ratingGroup="
+                + ratingGroup + ", message="
+                + message.getDefaultTranslationPattern() + ", buttonTexts="
+                + buttonTexts.getDefaultTranslationPattern() + ", reporting="
+                + reporting + ", autograderProblemTypes="
+                + autograderProblemTypes + '}';
     }
 
     record MistakeTypeDTO(

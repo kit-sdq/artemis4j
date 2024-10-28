@@ -80,8 +80,9 @@ public final class RatingGroup {
 
     @Override
     public String toString() {
-        return "RatingGroup[" + "id=" + id + ", " + "displayName=" + displayName.getDefaultTranslationPattern() + ", " + "minPenalty=" + minPenalty
-                + ", " + "getMaxPenalty=" + maxPenalty + ", " + "mistakeTypes=" + mistakeTypes + ']';
+        return "RatingGroup[" + "id=" + id + ", " + "displayName=" + displayName.getDefaultTranslationPattern() + ", "
+                + "minPenalty=" + minPenalty + ", " + "getMaxPenalty=" + maxPenalty + ", " + "mistakeTypes="
+                + mistakeTypes + ']';
     }
 
     record RatingGroupDTO(
