@@ -37,5 +37,11 @@ public record ProgrammingExerciseDTO(
      *
      * @param exercises
      */
-    private record ExerciseWrapperDTO(List<ProgrammingExerciseDTO> exercises) {}
+    private record ExerciseWrapperDTO(List<ProgrammingExerciseDTO> exercises) {
+        private ExerciseWrapperDTO {
+            if (exercises == null) {
+                exercises = List.of();
+            }
+        }
+    }
 }
