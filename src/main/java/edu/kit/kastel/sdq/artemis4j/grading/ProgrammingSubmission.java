@@ -95,6 +95,17 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     /**
+     * Get the assessor of this assessment.
+     * <p>
+     * This is the user who has locked the submission.
+     *
+     * @return the assessor or empty if the submission has not been assessed
+     */
+    public Optional<User> getAssessor() {
+        return this.getRelevantResult().map(ResultDTO::assessor).map(User::new);
+    }
+
+    /**
      * Clones the submission, including the test repository, into the given path,
      * and checks out the submitted commit. This method uses the user's VCS access token, potentially creating a new one.
      *
