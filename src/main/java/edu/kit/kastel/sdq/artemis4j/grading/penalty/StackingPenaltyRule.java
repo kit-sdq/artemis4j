@@ -23,6 +23,6 @@ public final class StackingPenaltyRule implements PenaltyRule {
     public Points calculatePoints(List<Annotation> annotations) {
         int multiplier = this.maxUses == null ? annotations.size() : Math.min(annotations.size(), this.maxUses);
         double penaltyPoints = multiplier * -this.penalty;
-        return new Points(penaltyPoints, this.maxUses != null && annotations.size() >= this.maxUses);
+        return new Points(penaltyPoints, this.maxUses != null && annotations.size() > this.maxUses);
     }
 }
