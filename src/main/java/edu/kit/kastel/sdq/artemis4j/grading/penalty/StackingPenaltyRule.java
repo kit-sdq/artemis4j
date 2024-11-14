@@ -24,4 +24,8 @@ public final class StackingPenaltyRule implements PenaltyRule {
         double penaltyPoints = multiplier * -this.penalty;
         return new Points(penaltyPoints, this.maxUses != null && annotations.size() > this.maxUses);
     }
+
+    public int getMaxUses() {
+        return maxUses;
+    }
 }

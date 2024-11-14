@@ -82,7 +82,7 @@ public class FormatString {
 
     @Override
     public String toString() {
-        throw new IllegalStateException("Format & translate this string before using it.");
+        return "!!!Format & translate this string before using it!!!";
     }
 
     private static MessageFormat escapeStringForMessageFormat(String string, Locale locale) {

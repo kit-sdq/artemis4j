@@ -214,7 +214,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         // or if we are an instructor (who can overwrite any assessment)
         var assessor = this.getConnection().getAssessor();
         return result.assessor() == null
-                || result.assessor().id() != assessor.getId()
+                || result.assessor().id() == assessor.getId()
                 || this.getCourse().isInstructor(assessor);
     }
 }
