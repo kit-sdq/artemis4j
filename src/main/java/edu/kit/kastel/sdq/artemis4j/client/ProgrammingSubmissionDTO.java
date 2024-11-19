@@ -74,6 +74,10 @@ public record ProgrammingSubmissionDTO(
     }
 
     public List<ResultDTO> nonAutomaticResults() {
+        if (this.results == null) {
+            return List.of();
+        }
+
         return this.results().stream()
                 .filter(r -> r != null && r.assessmentType() != AssessmentType.AUTOMATIC)
                 .toList();
