@@ -87,7 +87,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     public Optional<ResultDTO> getLatestResult() {
-        if (!this.dto.results().isEmpty()) {
+        if (this.dto.results() != null && !this.dto.results().isEmpty()) {
             return Optional.of(this.dto.results().get(this.dto.results().size() - 1));
         } else {
             return Optional.empty();
