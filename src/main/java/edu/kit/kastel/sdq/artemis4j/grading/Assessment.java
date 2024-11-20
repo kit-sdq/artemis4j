@@ -513,7 +513,7 @@ public class Assessment extends ArtemisConnectionHolder {
             if (mistakePoints.isPresent()) {
 
                 // Header per mistake type
-                if (ratingGroup.isScoringGroup()) {
+                if (ratingGroup.isScoringGroup() && mistakeType.shouldScore()) {
                     lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(
                             mistakeType.getButtonText(), mistakePoints.get().score()));
                 } else {
