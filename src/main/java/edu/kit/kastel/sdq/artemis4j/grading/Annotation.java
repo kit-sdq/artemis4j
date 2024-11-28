@@ -20,7 +20,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 public final class Annotation {
     private final String uuid;
     private final MistakeType type;
-    private final String filePath;
+    private final ArtemisPath filePath;
     private final int startLine;
     private final int endLine;
     private final AnnotationSource source;
@@ -44,7 +44,7 @@ public final class Annotation {
     public Annotation(AnnotationDTO dto, MistakeType mistakeType) {
         this.uuid = dto.uuid();
         this.type = mistakeType;
-        this.filePath = dto.classFilePath().replace("\\", "/");
+        this.filePath = new ArtemisPath(dto.classFilePath());
         this.startLine = dto.startLine();
         this.endLine = dto.endLine();
         this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
@@ -89,7 +89,7 @@ public final class Annotation {
 
         this.uuid = generateUUID();
         this.type = mistakeType;
-        this.filePath = filePath;
+        this.filePath = new ArtemisPath(filePath);
         this.startLine = startLine;
         this.endLine = endLine;
         this.customMessage = customMessage;
@@ -115,7 +115,7 @@ public final class Annotation {
      * ending
      */
     public String getFilePath() {
-        return filePath;
+        return this.filePath.toString();
     }
 
     /**
@@ -123,7 +123,7 @@ public final class Annotation {
      * ending
      */
     public String getFilePathWithoutType() {
-        return this.filePath.replace(".java", "");
+        return this.filePath.toString().replace(".java", "");
     }
 
     /**
@@ -216,7 +216,7 @@ public final class Annotation {
                 type.getId(),
                 startLine,
                 endLine,
-                filePath,
+                filePath.toString(),
                 customMessage,
                 customScore,
                 source,
@@ -239,5 +239,23 @@ public final class Annotation {
 
     private static String generateUUID() {
         return UUID.randomUUID().toString();
+    }
+
+    /**
+     * A wrapper class that helps to ensure that paths are in the format that artemis expects.
+     * <p>
+     * In the past there were problems with paths that contained backslashes. This class ensures that this will never happen again.
+     *
+     * @param path the path
+     */
+    private record ArtemisPath(String path) {
+        private ArtemisPath {
+            path = path.replace("\\", "/");
+        }
+
+        @Override
+        public String toString() {
+            return this.path;
+        }
     }
 }
