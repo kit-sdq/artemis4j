@@ -84,16 +84,29 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * @return a list of submissions
      * @throws ArtemisNetworkException if the request fails
      */
-    public List<ProgrammingSubmission> fetchSubmissions(int correctionRound, boolean filterAssessedByTutor)
+    public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound, boolean filterAssessedByTutor)
             throws ArtemisNetworkException {
+
+        if (correctionRound == CorrectionRound.SECOND && !this.hasSecondCorrectionRound()) {
+            throw new IllegalArgumentException("This exercise does not have a second correction round");
+        }
+
+        if (correctionRound == CorrectionRound.REVIEW) {
+            throw new IllegalArgumentException("Can't fetch submissions for the review 'round'");
+        }
+
         return ProgrammingSubmissionDTO.fetchAll(
-                        this.getConnection().getClient(), this.getId(), correctionRound, filterAssessedByTutor)
+                        this.getConnection().getClient(),
+                        this.getId(),
+                        correctionRound.toArtemis(),
+                        filterAssessedByTutor)
                 .stream()
                 .map(submissionDto -> new ProgrammingSubmission(submissionDto, this, correctionRound))
                 .toList();
     }
 
-    public List<ProgrammingSubmission> fetchSubmissions(int correctionRound) throws ArtemisNetworkException {
+    public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound)
+            throws ArtemisNetworkException {
         return this.fetchSubmissions(
                 correctionRound,
                 !this.getCourse().isInstructor(this.getConnection().getAssessor()));
@@ -103,9 +116,9 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * Fetches all submissions from correction round 1 and 2 (if enabled).
      */
     public List<ProgrammingSubmission> fetchSubmissions() throws ArtemisNetworkException {
-        List<ProgrammingSubmission> submissions = new ArrayList<>(this.fetchSubmissions(0));
+        List<ProgrammingSubmission> submissions = new ArrayList<>(this.fetchSubmissions(CorrectionRound.FIRST));
         if (this.hasSecondCorrectionRound()) {
-            submissions.addAll(this.fetchSubmissions(1));
+            submissions.addAll(this.fetchSubmissions(CorrectionRound.SECOND));
         }
 
         return submissions;
@@ -118,14 +131,14 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      * @return An empty optional if no submission was available to lock, otherwise
      * the assessment
      */
-    public Optional<Assessment> tryLockNextSubmission(int correctionRound, GradingConfig gradingConfig)
+    public Optional<Assessment> tryLockNextSubmission(CorrectionRound correctionRound, GradingConfig gradingConfig)
             throws AnnotationMappingException, ArtemisNetworkException {
         this.assertGradingConfigValid(gradingConfig);
 
         // This line already locks the submission, but doesn't tell us what the relevant
         // ResultDTO is
         var nextSubmissionDto = ProgrammingSubmissionDTO.lockNextSubmission(
-                this.getConnection().getClient(), this.getId(), correctionRound);
+                this.getConnection().getClient(), this.getId(), correctionRound.toArtemis());
         if (nextSubmissionDto.isEmpty()) {
             return Optional.empty();
         }
@@ -156,11 +169,13 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
      *                                       corresponding student (i.e.
      *                                       participation)
      */
-    public Optional<Assessment> tryLockSubmission(long submissionId, int correctionRound, GradingConfig gradingConfig)
+    public Optional<Assessment> tryLockSubmission(
+            long submissionId, CorrectionRound correctionRound, GradingConfig gradingConfig)
             throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {
         this.assertGradingConfigValid(gradingConfig);
 
-        var locked = ProgrammingSubmissionDTO.lock(this.getConnection().getClient(), submissionId, correctionRound);
+        var locked = ProgrammingSubmissionDTO.lock(
+                this.getConnection().getClient(), submissionId, correctionRound.toArtemis());
 
         if (locked.id() != submissionId) {
             // Artemis automatically returns the most recent submission associated with the
@@ -188,11 +203,11 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
     }
 
-    public int fetchOwnSubmissionCount(int correctionRound) throws ArtemisNetworkException {
+    public int fetchOwnSubmissionCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
         return this.fetchSubmissions(correctionRound, true).size();
     }
 
-    public int fetchLockedSubmissionCount(int correctionRound) throws ArtemisNetworkException {
+    public int fetchLockedSubmissionCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
         return (int) this.fetchSubmissions(correctionRound, true).stream()
                 .filter(s -> !s.isSubmitted())
                 .count();

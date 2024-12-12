@@ -14,6 +14,7 @@ import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
+import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.Exam;
 import edu.kit.kastel.sdq.artemis4j.grading.ExamExerciseGroup;
@@ -49,7 +50,8 @@ class ExamTest {
         GradingConfig config =
                 GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), exercise);
 
-        ProgrammingSubmission roundOneSubmission = findSubmission(exercise.fetchSubmissions(0), STUDENT_USER);
+        ProgrammingSubmission roundOneSubmission =
+                findSubmission(exercise.fetchSubmissions(CorrectionRound.FIRST), STUDENT_USER);
         Assessment roundOneAssessment = roundOneSubmission.tryLock(config).orElseThrow();
         roundOneAssessment.clearAnnotations();
         roundOneAssessment.addCustomAnnotation(
@@ -61,7 +63,8 @@ class ExamTest {
                 -2.0);
         roundOneAssessment.submit();
 
-        ProgrammingSubmission roundTwoSubmission = findSubmission(exercise.fetchSubmissions(1), STUDENT_USER);
+        ProgrammingSubmission roundTwoSubmission =
+                findSubmission(exercise.fetchSubmissions(CorrectionRound.SECOND), STUDENT_USER);
         Assessment roundTwoAssessment = roundTwoSubmission.tryLock(config).orElseThrow();
         roundTwoAssessment.addCustomAnnotation(
                 config.getMistakeTypeById("custom"),

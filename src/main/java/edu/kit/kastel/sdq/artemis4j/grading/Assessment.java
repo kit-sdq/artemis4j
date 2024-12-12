@@ -84,11 +84,14 @@ public class Assessment extends ArtemisConnectionHolder {
     private final List<TestResult> testResults;
     private final ProgrammingSubmission programmingSubmission;
     private final GradingConfig config;
-    private final int correctionRound;
+    private final CorrectionRound correctionRound;
     private final Locale studentLocale;
 
     public Assessment(
-            ResultDTO result, GradingConfig config, ProgrammingSubmission programmingSubmission, int correctionRound)
+            ResultDTO result,
+            GradingConfig config,
+            ProgrammingSubmission programmingSubmission,
+            CorrectionRound correctionRound)
             throws AnnotationMappingException, ArtemisNetworkException {
         this(result, config, programmingSubmission, correctionRound, Locale.GERMANY);
     }
@@ -97,7 +100,7 @@ public class Assessment extends ArtemisConnectionHolder {
             ResultDTO result,
             GradingConfig config,
             ProgrammingSubmission programmingSubmission,
-            int correctionRound,
+            CorrectionRound correctionRound,
             Locale studentLocale)
             throws AnnotationMappingException, ArtemisNetworkException {
         super(programmingSubmission);
@@ -190,8 +193,7 @@ public class Assessment extends ArtemisConnectionHolder {
             throw new IllegalArgumentException("Mistake type is a custom annotation");
         }
 
-        var source =
-                this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
+        var source = this.correctionRound.toAnnotationSource();
         var annotation = new Annotation(mistakeType, location, customMessage, null, source);
         this.annotations.add(annotation);
         return annotation;
@@ -231,8 +233,7 @@ public class Assessment extends ArtemisConnectionHolder {
                     "Custom annotations with positive scores are not allowed for this exercise");
         }
 
-        var source =
-                this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
+        var source = this.correctionRound.toAnnotationSource();
         var annotation = new Annotation(mistakeType, location, customMessage, customScore, source);
         this.annotations.add(annotation);
         return annotation;
@@ -297,7 +298,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * submission is the same.
      */
     public String exportAssessment() throws AnnotationMappingException {
-        String header = this.programmingSubmission.getId() + ";" + this.correctionRound + ";";
+        String header = this.programmingSubmission.getId() + ";" + this.correctionRound.toArtemis() + ";";
         return header + MetaFeedbackMapper.serializeAnnotations(this.annotations);
     }
 
@@ -312,7 +313,7 @@ public class Assessment extends ArtemisConnectionHolder {
             if (Integer.parseInt(parts[0]) != this.programmingSubmission.getId()) {
                 throw new IllegalArgumentException("Submission ID does not match");
             }
-            if (Integer.parseInt(parts[1]) != this.correctionRound) {
+            if (Integer.parseInt(parts[1]) != this.correctionRound.toArtemis()) {
                 throw new IllegalArgumentException("Correction round does not match");
             }
         } catch (NumberFormatException e) {
@@ -374,7 +375,9 @@ public class Assessment extends ArtemisConnectionHolder {
      * total points for the annotations.
      */
     public Optional<Points> calculatePointsForMistakeType(MistakeType mistakeType) {
-        var annotationsWithType = this.getAnnotations(mistakeType);
+        var annotationsWithType = this.getAnnotations(mistakeType).stream()
+                .filter(a -> !a.isDeletedInReview())
+                .toList();
         if (annotationsWithType.isEmpty()) {
             return Optional.empty();
         }
@@ -389,6 +392,7 @@ public class Assessment extends ArtemisConnectionHolder {
         double points = this.annotations.stream()
                 .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
                 .filter(a -> a.getMistakeType().shouldScore())
+                .filter(a -> !a.isDeletedInReview())
                 .collect(Collectors.groupingBy(Annotation::getMistakeType))
                 .entrySet()
                 .stream()
@@ -408,7 +412,7 @@ public class Assessment extends ArtemisConnectionHolder {
         return config;
     }
 
-    public int getCorrectionRound() {
+    public CorrectionRound getCorrectionRound() {
         return correctionRound;
     }
 
@@ -502,6 +506,7 @@ public class Assessment extends ArtemisConnectionHolder {
                 "File " + sampleAnnotation.getFilePathWithoutType() + " at line " + sampleAnnotation.getDisplayLine();
         String reference = "file:" + sampleAnnotation.getFilePath() + "_line:" + sampleAnnotation.getStartLine();
         String detailText = annotations.getValue().stream()
+                .filter(a -> !a.isDeletedInReview())
                 .map(a -> {
                     if (a.getMistakeType().isCustomAnnotation()) {
                         return MANUAL_FEEDBACK_CUSTOM_PENALTY
@@ -658,6 +663,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var annotationsByFilePath = annotationsWithType.stream()
+                .filter(a -> !a.isDeletedInReview())
                 .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
 
         for (var annotationsForPath : annotationsByFilePath.values()) {

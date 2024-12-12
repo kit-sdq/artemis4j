@@ -22,11 +22,12 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingSubmissionDTO dto;
 
-    private final int correctionRound;
+    private final CorrectionRound correctionRound;
     private final User student;
     private final ProgrammingExercise exercise;
 
-    public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise, int correctionRound) {
+    public ProgrammingSubmission(
+            ProgrammingSubmissionDTO dto, ProgrammingExercise exercise, CorrectionRound correctionRound) {
         super(exercise);
 
         this.dto = dto;
@@ -78,7 +79,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         return exercise;
     }
 
-    public int getCorrectionRound() {
+    public CorrectionRound getCorrectionRound() {
         return this.correctionRound;
     }
 
@@ -220,7 +221,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
             return Optional.of(results.get(0));
         } else {
             // More than one result, so probably multiple correction rounds
-            return Optional.of(results.get(this.correctionRound));
+            return Optional.of(results.get(this.correctionRound.toArtemis()));
         }
     }
 }

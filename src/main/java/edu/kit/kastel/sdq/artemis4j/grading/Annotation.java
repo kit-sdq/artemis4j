@@ -25,6 +25,7 @@ public final class Annotation {
     private final AnnotationSource source;
     private String customMessage;
     private Double customScore;
+    private boolean deletedInReview;
     // If not empty, this list contains classifiers that are used to group annotations.
     // For example, all annotations that are related, could have the classifier ["a"],
     // then they would be grouped together.
@@ -49,6 +50,7 @@ public final class Annotation {
         this.customScore = dto.customPenaltyForJSON();
         this.classifiers = dto.classifiers() != null ? dto.classifiers() : List.of();
         this.annotationLimit = dto.annotationLimit();
+        this.deletedInReview = dto.deletedInReview() != null && dto.deletedInReview();
     }
 
     Annotation(
@@ -205,6 +207,14 @@ public final class Annotation {
         return source;
     }
 
+    public void setDeletedInReview(boolean deletedInReview) {
+        this.deletedInReview = deletedInReview;
+    }
+
+    public boolean isDeletedInReview() {
+        return this.deletedInReview;
+    }
+
     /**
      * Serializes this annotation to its metajson format
      */
@@ -219,7 +229,8 @@ public final class Annotation {
                 customScore,
                 source,
                 classifiers,
-                annotationLimit);
+                annotationLimit,
+                deletedInReview);
     }
 
     @Override
