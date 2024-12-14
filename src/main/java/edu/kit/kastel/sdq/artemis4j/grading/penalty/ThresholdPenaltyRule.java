@@ -2,6 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
 import java.util.List;
+import java.util.Objects;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -16,7 +17,7 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
     public ThresholdPenaltyRule(
             @JsonProperty("threshold") int threshold,
             @JsonProperty(value = "penalty", required = true) double penalty,
-            @JsonProperty(value = "repetitions", defaultValue = "1") int repetitions) {
+            @JsonProperty(value = "repetitions", defaultValue = "1") Integer repetitions) {
         this.threshold = threshold;
         // It is not defined how the code should behave if the threshold is 0 or negative, therefore an exception is
         // thrown here.
@@ -25,11 +26,12 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
         }
         this.penalty = penalty;
         // sanity check in case this is misused.
-        if (repetitions < 1) {
+        if (repetitions != null && repetitions < 1) {
             throw new IllegalArgumentException(
                     "If specified, the repetitions must be at least 1, but was %d".formatted(repetitions));
         }
-        this.repetitions = repetitions;
+
+        this.repetitions = Objects.requireNonNullElse(repetitions, 1);
     }
 
     @Override
