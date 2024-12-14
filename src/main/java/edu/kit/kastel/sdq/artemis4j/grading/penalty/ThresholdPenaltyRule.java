@@ -42,7 +42,7 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
         // any further annotations would not be penalized.
 
         return new Points(
-                (double) Math.min(annotations.size() / this.threshold, this.repetitions) * -this.penalty,
+                Math.min(annotations.size() / this.threshold, this.repetitions) * -this.penalty,
                 annotations.size() > this.threshold * this.repetitions);
     }
 
