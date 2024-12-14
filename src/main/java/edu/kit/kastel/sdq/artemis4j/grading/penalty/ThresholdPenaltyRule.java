@@ -18,14 +18,16 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
             @JsonProperty(value = "penalty", required = true) double penalty,
             @JsonProperty(value = "repetitions", defaultValue = "1") int repetitions) {
         this.threshold = threshold;
-        // It is not defined how the code should behave if the threshold is 0 or negative, therefore an exception is thrown here.
+        // It is not defined how the code should behave if the threshold is 0 or negative, therefore an exception is
+        // thrown here.
         if (this.threshold <= 0) {
             throw new IllegalArgumentException("The threshold must be at least 1, but was %d".formatted(threshold));
         }
         this.penalty = penalty;
         // sanity check in case this is misused.
         if (repetitions < 1) {
-            throw new IllegalArgumentException("If specified, the repetitions must be at least 1, but was %d".formatted(repetitions));
+            throw new IllegalArgumentException(
+                    "If specified, the repetitions must be at least 1, but was %d".formatted(repetitions));
         }
         this.repetitions = repetitions;
     }
@@ -40,9 +42,8 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
         // any further annotations would not be penalized.
 
         return new Points(
-            (double) Math.min(annotations.size() / this.threshold, this.repetitions) * -this.penalty,
-            annotations.size() > this.threshold * this.repetitions
-        );
+                (double) Math.min(annotations.size() / this.threshold, this.repetitions) * -this.penalty,
+                annotations.size() > this.threshold * this.repetitions);
     }
 
     public int getThreshold() {
