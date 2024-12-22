@@ -74,19 +74,52 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return this.dto.secondCorrectionEnabled() != null && this.dto.secondCorrectionEnabled();
     }
 
-    /**
-     * Fetches all submissions for this exercise. This may fetch *many* submissions,
-     * and does not cache the result, so be careful.
-     *
-     * @param correctionRound       The correction round to fetch submissions for
-     * @param filterAssessedByTutor Whether to only fetch submissions that the
-     *                              current user has assessed
-     * @return a list of submissions
-     * @throws ArtemisNetworkException if the request fails
-     */
-    public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound, boolean filterAssessedByTutor)
-            throws ArtemisNetworkException {
+    // /**
+    //  * Fetches all submissions for this exercise. This may fetch *many* submissions,
+    //  * and does not cache the result, so be careful.
+    //  *
+    //  * @param correctionRound       The correction round to fetch submissions for
+    //  * @param filterAssessedByTutor Whether to only fetch submissions that the
+    //  *                              current user has assessed
+    //  * @return a list of submissions
+    //  * @throws ArtemisNetworkException if the request fails
+    //  */
+    // public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound, boolean filterAssessedByTutor)
+    //         throws ArtemisNetworkException {
+    //
+    //     if (correctionRound == CorrectionRound.SECOND && !this.hasSecondCorrectionRound()) {
+    //         throw new IllegalArgumentException("This exercise does not have a second correction round");
+    //     }
+    //
+    //     if (correctionRound == CorrectionRound.REVIEW) {
+    //         throw new IllegalArgumentException("Can't fetch submissions for the review 'round'");
+    //     }
+    //
+    //     return ProgrammingSubmissionDTO.fetchAll(
+    //                     this.getConnection().getClient(),
+    //                     this.getId(),
+    //                     correctionRound.toArtemis(),
+    //                     filterAssessedByTutor)
+    //             .stream()
+    //             .map(submissionDto -> new ProgrammingSubmission(submissionDto, this))
+    //             .toList();
+    // }
 
+    public List<ProgrammingSubmissionWithResults> fetchAllSubmissions()
+            throws ArtemisNetworkException {
+        // Artemis ignores the correction round since assessedByTutor is false
+        return ProgrammingSubmissionDTO.fetchAll(
+                        this.getConnection().getClient(),
+                        this.getId(),
+                        0,
+                        true)
+                .stream()
+                .map(dto -> new ProgrammingSubmissionWithResults(new ProgrammingSubmission(dto, this)))
+                .toList();
+    }
+
+    public List<PackedAssessment> fetchMyAssessments(CorrectionRound correctionRound)
+            throws ArtemisNetworkException {
         if (correctionRound == CorrectionRound.SECOND && !this.hasSecondCorrectionRound()) {
             throw new IllegalArgumentException("This exercise does not have a second correction round");
         }
@@ -95,33 +128,25 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             throw new IllegalArgumentException("Can't fetch submissions for the review 'round'");
         }
 
-        return ProgrammingSubmissionDTO.fetchAll(
+        var submissions = ProgrammingSubmissionDTO.fetchAll(
                         this.getConnection().getClient(),
                         this.getId(),
                         correctionRound.toArtemis(),
-                        filterAssessedByTutor)
+                        true)
                 .stream()
-                .map(submissionDto -> new ProgrammingSubmission(submissionDto, this, correctionRound))
+                .map(submissionDto -> new ProgrammingSubmission(submissionDto, this))
                 .toList();
-    }
 
-    public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound)
-            throws ArtemisNetworkException {
-        return this.fetchSubmissions(
-                correctionRound,
-                !this.getCourse().isInstructor(this.getConnection().getAssessor()));
-    }
-
-    /**
-     * Fetches all submissions from correction round 1 and 2 (if enabled).
-     */
-    public List<ProgrammingSubmission> fetchSubmissions() throws ArtemisNetworkException {
-        List<ProgrammingSubmission> submissions = new ArrayList<>(this.fetchSubmissions(CorrectionRound.FIRST));
-        if (this.hasSecondCorrectionRound()) {
-            submissions.addAll(this.fetchSubmissions(CorrectionRound.SECOND));
+        var assessments = new ArrayList<PackedAssessment>(submissions.size());
+        for (var submission : submissions) {
+            // TODO this may return more than one result for instructors
+            var results = submission.getDTO().nonAutomaticResults();
+            if (results.size() != 1) {
+                throw new IllegalStateException("Too many non-automatic results");
+            }
+            assessments.add(new PackedAssessment(results.get(0), correctionRound, submission));
         }
-
-        return submissions;
+        return assessments;
     }
 
     /**
@@ -178,9 +203,8 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
                 this.getConnection().getClient(), submissionId, correctionRound.toArtemis());
 
         if (locked.id() != submissionId) {
-            // Artemis automatically returns the most recent submission associated with the
-            // same participation
-            // as the requested submission
+            // Artemis automatically returns the most recent submission that is associated with the
+            // participation of the requested submission
             throw new MoreRecentSubmissionException(
                     submissionId, locked.id(), locked.participation().id());
         }
@@ -199,16 +223,16 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             return Optional.empty();
         }
 
-        var submission = new ProgrammingSubmission(locked, this, correctionRound);
+        var submission = new ProgrammingSubmission(locked, this);
         return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
     }
 
-    public int fetchOwnSubmissionCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
-        return this.fetchSubmissions(correctionRound, true).size();
+    public int fetchOwnAssessmentCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
+        return this.fetchMyAssessments(correctionRound).size();
     }
 
     public int fetchLockedSubmissionCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
-        return (int) this.fetchSubmissions(correctionRound, true).stream()
+        return (int) this.fetchMyAssessments(correctionRound).stream()
                 .filter(s -> !s.isSubmitted())
                 .count();
     }
