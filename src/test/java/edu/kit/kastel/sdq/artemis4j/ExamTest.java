@@ -20,6 +20,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.Exam;
 import edu.kit.kastel.sdq.artemis4j.grading.ExamExerciseGroup;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
+import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import org.junit.jupiter.api.Test;
 
@@ -50,9 +51,9 @@ class ExamTest {
         GradingConfig config =
                 GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), exercise);
 
-        ProgrammingSubmission roundOneSubmission =
-                findSubmission(exercise.fetchSubmissions(CorrectionRound.FIRST), STUDENT_USER);
-        Assessment roundOneAssessment = roundOneSubmission.tryLock(config).orElseThrow();
+        var submission = findSubmission(exercise.fetchAllSubmissions(), STUDENT_USER);
+
+        Assessment roundOneAssessment = submission.getFirstRoundAssessment().open(config).orElseThrow();
         roundOneAssessment.clearAnnotations();
         roundOneAssessment.addCustomAnnotation(
                 config.getMistakeTypeById("custom"),
@@ -63,9 +64,7 @@ class ExamTest {
                 -2.0);
         roundOneAssessment.submit();
 
-        ProgrammingSubmission roundTwoSubmission =
-                findSubmission(exercise.fetchSubmissions(CorrectionRound.SECOND), STUDENT_USER);
-        Assessment roundTwoAssessment = roundTwoSubmission.tryLock(config).orElseThrow();
+        Assessment roundTwoAssessment = submission.getSecondRoundAssessment().open(config).orElseThrow();
         roundTwoAssessment.addCustomAnnotation(
                 config.getMistakeTypeById("custom"),
                 "src/edu/kit/informatik/BubbleSort.java",
@@ -86,9 +85,9 @@ class ExamTest {
         roundTwoAssessment.submit();
     }
 
-    private ProgrammingSubmission findSubmission(List<ProgrammingSubmission> submissions, String student) {
+    private ProgrammingSubmissionWithResults findSubmission(List<ProgrammingSubmissionWithResults> submissions, String student) {
         return submissions.stream()
-                .filter(submission -> submission.getParticipantIdentifier().equals(student))
+                .filter(submission -> submission.getSubmission().getParticipantIdentifier().equals(student))
                 .findFirst()
                 .orElseThrow();
     }
