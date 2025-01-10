@@ -73,7 +73,7 @@ class ExamTest {
                 ROUND_TWO_FEEDBACK,
                 -1.0);
 
-        var annotations = roundTwoAssessment.getAnnotations();
+        var annotations = roundTwoAssessment.getAllAnnotations();
         assertEquals(2, annotations.size());
         assertTrue(annotations.stream()
                 .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_FIRST_ROUND

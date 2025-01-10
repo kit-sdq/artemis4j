@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
@@ -134,13 +135,32 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Get the annotations that are present. Use the add/remove methods to modify
+     * Get all annotations, including ones that were deleted in review. Use the add/remove methods to modify
      * the list of annotations.
      *
      * @return An unmodifiable list of annotations.
      */
-    public List<Annotation> getAnnotations() {
+    public List<Annotation> getAllAnnotations() {
         return Collections.unmodifiableList(this.annotations);
+    }
+
+    /**
+     * Get the annotations that were not deleted in review. Use the add/remove methods to modify
+     * the list of annotations.
+     *
+     * @return An unmodifiable list of annotations.
+     */
+    public List<Annotation> getNonDeletedAnnotations() {
+        return this.annotations.stream().filter(a -> !a.isDeletedInReview()).toList();
+    }
+
+    /**
+     * Stream the annotations that were not deleted in review.
+     *
+     * @return A stream of annotations.
+     */
+    public Stream<Annotation> streamNonDeletedAnnotations() {
+        return this.annotations.stream().filter(a -> !a.isDeletedInReview());
     }
 
     /**
@@ -389,10 +409,9 @@ public class Assessment extends ArtemisConnectionHolder {
      * rating group.
      */
     public Points calculatePointsForRatingGroup(RatingGroup ratingGroup) {
-        double points = this.annotations.stream()
+        double points = this.streamNonDeletedAnnotations()
                 .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
                 .filter(a -> a.getMistakeType().shouldScore())
-                .filter(a -> !a.isDeletedInReview())
                 .collect(Collectors.groupingBy(Annotation::getMistakeType))
                 .entrySet()
                 .stream()
@@ -506,7 +525,6 @@ public class Assessment extends ArtemisConnectionHolder {
                 "File " + sampleAnnotation.getFilePathWithoutType() + " at line " + sampleAnnotation.getDisplayLine();
         String reference = "file:" + sampleAnnotation.getFilePath() + "_line:" + sampleAnnotation.getStartLine();
         String detailText = annotations.getValue().stream()
-                .filter(a -> !a.isDeletedInReview())
                 .map(a -> {
                     if (a.getMistakeType().isCustomAnnotation()) {
                         return MANUAL_FEEDBACK_CUSTOM_PENALTY
