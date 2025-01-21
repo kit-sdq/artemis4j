@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
 import java.util.Collections;
@@ -29,47 +29,50 @@ public final class GradingConfig {
         this.positiveFeedbackAllowed = positiveFeedbackAllowed;
     }
 
-    public static GradingConfig readFromString(String configString, ProgrammingExercise exercise)
+    public static GradingConfig fromDTO(GradingConfigDTO configDTO, ProgrammingExercise exercise)
             throws InvalidGradingConfigException {
+        if (configDTO.isAllowedForExercise(exercise.getId())) {
+            throw new InvalidGradingConfigException(
+                    "Grading config is not valid for exercise with id " + exercise.getId());
+        }
+
+        var ratingGroups =
+                configDTO.ratingGroups().stream().map(RatingGroup::new).toList();
+        var ratingGroupsById = ratingGroups.stream().collect(Collectors.toMap(RatingGroup::getId, Function.identity()));
+
+        for (MistakeType.MistakeTypeDTO dto : configDTO.mistakeTypes()) {
+            if (!StringUtil.matchMaybe(exercise.getShortName(), dto.enabledForExercises())) {
+                continue;
+            }
+
+            MistakeType.createAndAddToGroup(
+                    dto,
+                    StringUtil.matchMaybe(exercise.getShortName(), dto.enabledPenaltyForExercises()),
+                    ratingGroupsById.get(dto.appliesTo()));
+        }
+
+        var config = new GradingConfig(
+                configDTO.shortName(), configDTO.positiveFeedbackAllowed(), ratingGroups, exercise.getId());
+        log.info(
+                "Parsed grading config for exercise '{}' and found {} mistake types",
+                config.getShortName(),
+                config.getMistakeTypes().size());
+        return config;
+    }
+
+    public static GradingConfigDTO readDTOFromString(String configString) throws InvalidGradingConfigException {
         ObjectMapper mapper = new ObjectMapper();
 
         try {
-            var configDTO = mapper.readValue(configString, GradingConfigDTO.class);
-
-            // no allowed exercises means it is valid for all exercises
-            if (configDTO.allowedExercises() != null
-                    && !configDTO.allowedExercises().isEmpty()
-                    && !configDTO.allowedExercises().contains(exercise.getId())) {
-                throw new InvalidGradingConfigException(
-                        "Grading config is not valid for exercise with id " + exercise.getId());
-            }
-
-            var ratingGroups =
-                    configDTO.ratingGroups().stream().map(RatingGroup::new).toList();
-            var ratingGroupsById =
-                    ratingGroups.stream().collect(Collectors.toMap(RatingGroup::getId, Function.identity()));
-
-            for (MistakeType.MistakeTypeDTO dto : configDTO.mistakeTypes()) {
-                if (!StringUtil.matchMaybe(exercise.getShortName(), dto.enabledForExercises())) {
-                    continue;
-                }
-
-                MistakeType.createAndAddToGroup(
-                        dto,
-                        StringUtil.matchMaybe(exercise.getShortName(), dto.enabledPenaltyForExercises()),
-                        ratingGroupsById.get(dto.appliesTo()));
-            }
-
-            var config = new GradingConfig(
-                    configDTO.shortName(), configDTO.positiveFeedbackAllowed(), ratingGroups, exercise.getId());
-            log.info(
-                    "Parsed grading config for exercise '{}' and found {} mistake types",
-                    config.getShortName(),
-                    config.getMistakeTypes().size());
-            return config;
+            return mapper.readValue(configString, GradingConfigDTO.class);
         } catch (JsonProcessingException e) {
             throw new InvalidGradingConfigException(e);
         }
+    }
+
+    public static GradingConfig readFromString(String configString, ProgrammingExercise exercise)
+            throws InvalidGradingConfigException {
+        return fromDTO(readDTOFromString(configString), exercise);
     }
 
     public List<MistakeType> getMistakeTypes() {
@@ -108,10 +111,17 @@ public final class GradingConfig {
         return ratingGroups.stream().map(RatingGroup::getMistakeTypes).flatMap(List::stream);
     }
 
-    record GradingConfigDTO(
+    public record GradingConfigDTO(
             String shortName,
             @JsonProperty(defaultValue = "true") boolean positiveFeedbackAllowed,
             List<Long> allowedExercises,
             List<RatingGroup.RatingGroupDTO> ratingGroups,
-            List<MistakeType.MistakeTypeDTO> mistakeTypes) {}
+            List<MistakeType.MistakeTypeDTO> mistakeTypes) {
+        public boolean isAllowedForExercise(long exerciseId) {
+            // no allowed exercises means it is valid for all exercises
+            return this.allowedExercises() == null
+                    || this.allowedExercises().isEmpty()
+                    || this.allowedExercises().contains(exerciseId);
+        }
+    }
 }
