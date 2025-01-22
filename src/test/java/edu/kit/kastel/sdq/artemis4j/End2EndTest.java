@@ -1,5 +1,7 @@
-/* Licensed under EPL-2.0 2023-2024. */
+/* Licensed under EPL-2.0 2023-2025. */
 package edu.kit.kastel.sdq.artemis4j;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -23,8 +25,6 @@ import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 import org.junit.jupiter.api.*;
-
-import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class End2EndTest {
@@ -363,8 +363,14 @@ class End2EndTest {
 
     @Test
     void testHighlight() {
-        assertEquals(MistakeType.Highlight.DEFAULT, this.gradingConfig.getMistakeTypeById("custom").getHighlight());
-        assertEquals(MistakeType.Highlight.DEFAULT, this.gradingConfig.getMistakeTypeById("jdEmpty").getHighlight());
-        assertEquals(MistakeType.Highlight.NONE, this.gradingConfig.getMistakeTypeById("magicLiteral").getHighlight());
+        assertEquals(
+                MistakeType.Highlight.DEFAULT,
+                this.gradingConfig.getMistakeTypeById("custom").getHighlight());
+        assertEquals(
+                MistakeType.Highlight.DEFAULT,
+                this.gradingConfig.getMistakeTypeById("jdEmpty").getHighlight());
+        assertEquals(
+                MistakeType.Highlight.NONE,
+                this.gradingConfig.getMistakeTypeById("magicLiteral").getHighlight());
     }
 }
