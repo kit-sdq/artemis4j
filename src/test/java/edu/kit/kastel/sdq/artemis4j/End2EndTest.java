@@ -1,5 +1,7 @@
-/* Licensed under EPL-2.0 2023-2024. */
+/* Licensed under EPL-2.0 2023-2025. */
 package edu.kit.kastel.sdq.artemis4j;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -108,10 +110,10 @@ class End2EndTest {
         this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
 
         List<TestResult> tests = this.assessment.getTestResults();
-        Assertions.assertEquals(13, tests.size());
+        assertEquals(13, tests.size());
 
-        Assertions.assertEquals(1, this.assessment.getAnnotations().size());
-        Assertions.assertEquals(
+        assertEquals(1, this.assessment.getAnnotations().size());
+        assertEquals(
                 AnnotationSource.MANUAL_FIRST_ROUND,
                 this.assessment.getAnnotations().get(0).getSource());
     }
@@ -128,13 +130,13 @@ class End2EndTest {
         this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
 
         List<TestResult> tests = this.assessment.getTestResults();
-        Assertions.assertEquals(13, tests.size());
+        assertEquals(13, tests.size());
 
-        Assertions.assertEquals(1, this.assessment.getAnnotations().size());
+        assertEquals(1, this.assessment.getAnnotations().size());
         var annotation = this.assessment.getAnnotations().get(0);
-        Assertions.assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
-        Assertions.assertEquals(Optional.of(-2.0), annotation.getCustomScore());
-        Assertions.assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());
+        assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
+        assertEquals(Optional.of(-2.0), annotation.getCustomScore());
+        assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());
     }
 
     @Test
@@ -142,16 +144,16 @@ class End2EndTest {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
         this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
-        Assertions.assertEquals(1, this.assessment.getAnnotations().size());
+        assertEquals(1, this.assessment.getAnnotations().size());
         var oldAnnotations = this.assessment.getAnnotations();
 
         String exportedAssessment = this.assessment.exportAssessment();
 
         this.assessment.clearAnnotations();
-        Assertions.assertEquals(0, this.assessment.getAnnotations().size());
+        assertEquals(0, this.assessment.getAnnotations().size());
 
         this.assessment.importAssessment(exportedAssessment);
-        Assertions.assertEquals(oldAnnotations, this.assessment.getAnnotations());
+        assertEquals(oldAnnotations, this.assessment.getAnnotations());
     }
 
     @Test
@@ -176,11 +178,11 @@ class End2EndTest {
             }
         }
 
-        Assertions.assertEquals(this.programmingSubmission, updatedSubmission);
+        assertEquals(this.programmingSubmission, updatedSubmission);
 
         Assessment newAssessment =
                 updatedSubmission.openAssessment(this.gradingConfig).orElseThrow();
-        Assertions.assertEquals(1, newAssessment.getAnnotations().size());
+        assertEquals(1, newAssessment.getAnnotations().size());
     }
 
     @Test
@@ -338,7 +340,7 @@ class End2EndTest {
             feedbackTexts.add(feedbackDTO.detailText());
         }
 
-        Assertions.assertEquals(
+        assertEquals(
                 List.of(
                         // other feedback is 5 annotations in MergeSort and 5 in Client that should be merged
                         "[Funktionalität:Custom Penalty] Other Feedback 0 (0P)",
@@ -357,5 +359,18 @@ class End2EndTest {
                         "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden",
                         "[Funktionalität:JavaDoc Leer] JavaDoc ist leer oder nicht vorhanden\nExplanation: Has used last annotation for message. Weitere Probleme in L12."),
                 feedbackTexts);
+    }
+
+    @Test
+    void testHighlight() {
+        assertEquals(
+                MistakeType.Highlight.DEFAULT,
+                this.gradingConfig.getMistakeTypeById("custom").getHighlight());
+        assertEquals(
+                MistakeType.Highlight.DEFAULT,
+                this.gradingConfig.getMistakeTypeById("jdEmpty").getHighlight());
+        assertEquals(
+                MistakeType.Highlight.NONE,
+                this.gradingConfig.getMistakeTypeById("magicLiteral").getHighlight());
     }
 }

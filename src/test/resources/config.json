@@ -37,7 +37,8 @@
         "threshold": 1,
         "penalty": 5
       },
-      "appliesTo": "functionality"
+      "appliesTo": "functionality",
+      "highlight": "default"
     },
     {
       "shortName": "jdTrivial",
@@ -49,6 +50,21 @@
         "penalty": 5
       },
       "appliesTo": "functionality"
+    },
+    {
+      "shortName": "magicLiteral",
+      "message": "Literal wird nicht als Konstante ausgelagert",
+      "button": "Magic Literal",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 1.0
+      },
+      "appliesTo": "functionality",
+      "autograderProblemTypes": [
+        "MAGIC_LITERAL"
+      ],
+      "highlight": "none"
     }
   ]
 }
