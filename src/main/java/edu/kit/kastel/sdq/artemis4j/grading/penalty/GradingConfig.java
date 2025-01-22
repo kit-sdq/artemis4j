@@ -31,7 +31,7 @@ public final class GradingConfig {
 
     public static GradingConfig fromDTO(GradingConfigDTO configDTO, ProgrammingExercise exercise)
             throws InvalidGradingConfigException {
-        if (configDTO.isAllowedForExercise(exercise.getId())) {
+        if (!configDTO.isAllowedForExercise(exercise.getId())) {
             throw new InvalidGradingConfigException(
                     "Grading config is not valid for exercise with id " + exercise.getId());
         }

@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonValue;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
 
@@ -17,6 +19,7 @@ public final class MistakeType {
     private final FormatString buttonTexts;
     private final MistakeReportingState reporting;
     private final List<String> autograderProblemTypes;
+    private final Highlight highlight;
 
     static void createAndAddToGroup(MistakeTypeDTO dto, boolean shouldScore, RatingGroup ratingGroup) {
         var mistakeType = new MistakeType(dto, shouldScore, ratingGroup);
@@ -41,6 +44,8 @@ public final class MistakeType {
         } else {
             this.reporting = MistakeReportingState.REPORT;
         }
+
+        this.highlight = dto.highlight() == null ? Highlight.DEFAULT : dto.highlight();
     }
 
     public String getId() {
@@ -79,6 +84,15 @@ public final class MistakeType {
         return Collections.unmodifiableList(autograderProblemTypes);
     }
 
+    /**
+     * Returns how the mistake type should be highlighted.
+     *
+     * @return the highlight for the mistake
+     */
+    public Highlight getHighlight() {
+        return this.highlight;
+    }
+
     @Override
     public boolean equals(Object o) {
         if (this == o) return true;
@@ -101,7 +115,19 @@ public final class MistakeType {
                 + message.getDefaultTranslationPattern() + ", buttonTexts="
                 + buttonTexts.getDefaultTranslationPattern() + ", reporting="
                 + reporting + ", autograderProblemTypes="
-                + autograderProblemTypes + '}';
+                + autograderProblemTypes + ", highlight="
+                + highlight + '}';
+    }
+
+    public enum Highlight {
+        NONE,
+        DEFAULT;
+
+        @JsonValue
+        @Override
+        public String toString() {
+            return this.name().toLowerCase();
+        }
     }
 
     record MistakeTypeDTO(
@@ -114,5 +140,6 @@ public final class MistakeType {
             String enabledPenaltyForExercises,
             Map<String, String> additionalButtonTexts,
             Map<String, String> additionalMessages,
-            List<String> autograderProblemTypes) {}
+            List<String> autograderProblemTypes,
+            @JsonProperty(defaultValue = "Highlight.DEFAULT") Highlight highlight) {}
 }
