@@ -5,8 +5,6 @@ import java.util.Comparator;
 import java.util.Objects;
 import java.util.Optional;
 
-import org.jetbrains.annotations.NotNull;
-
 /**
  * A line-column pair representing the start or end of a {@link Location}.
  *
@@ -49,7 +47,7 @@ public record LineColumn(int line, Optional<Integer> column) implements Comparab
     }
 
     @Override
-    public int compareTo(@NotNull LineColumn other) {
+    public int compareTo(LineColumn other) {
         return Comparator.comparingInt(LineColumn::line)
                 .thenComparing(LineColumn::column, Comparator.comparingInt(value -> value.orElse(Integer.MAX_VALUE)))
                 .compare(this, other);
