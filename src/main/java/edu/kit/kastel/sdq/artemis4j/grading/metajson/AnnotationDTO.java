@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.metajson;
 
 import java.util.List;
@@ -14,7 +14,9 @@ public record AnnotationDTO(
         @JsonProperty String uuid,
         @JsonProperty String mistakeTypeId,
         @JsonProperty int startLine,
+        @JsonProperty Integer startColumn,
         @JsonProperty int endLine,
+        @JsonProperty Integer endColumn,
         @JsonProperty String classFilePath,
         @JsonProperty String customMessageForJSON,
         @JsonProperty Double customPenaltyForJSON,

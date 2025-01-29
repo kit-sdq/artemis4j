@@ -19,6 +19,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
+import edu.kit.kastel.sdq.artemis4j.grading.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
 import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
@@ -207,9 +208,7 @@ class End2EndTest {
             // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/BubbleSort.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i + 1),
                     defaultFeedbackText.formatted(i),
                     "FirstCheck",
                     "FIRST_PROBLEM_TYPE",
@@ -246,9 +245,7 @@ class End2EndTest {
             // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/BubbleSort.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i + 1),
                     defaultFeedbackText.formatted(i),
                     "FirstCheck",
                     "FIRST_PROBLEM_TYPE",
@@ -259,9 +256,7 @@ class End2EndTest {
         for (int i = 0; i < 5; i++) {
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/MergeSort.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/MergeSort.java", i, i + 1),
                     otherFeedbackText.formatted(i),
                     "FirstCheck",
                     "SECOND_PROBLEM_TYPE",
@@ -271,9 +266,7 @@ class End2EndTest {
         for (int i = 0; i < 5; i++) {
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/Client.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/Client.java", i, i + 1),
                     otherFeedbackText.formatted(i),
                     "FirstCheck",
                     "SECOND_PROBLEM_TYPE",
@@ -284,9 +277,7 @@ class End2EndTest {
         for (int i = 5; i < 9; i++) {
             this.assessment.addAutograderAnnotation(
                     nonCustomMistakeType,
-                    "src/edu/kit/informatik/Client.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/Client.java", i, i + 1),
                     null,
                     "SecondCheck",
                     "THIRD_PROBLEM_TYPE",
@@ -297,9 +288,7 @@ class End2EndTest {
         for (int i = 9; i < 12; i++) {
             this.assessment.addAutograderAnnotation(
                     nonCustomMistakeType,
-                    "src/edu/kit/informatik/Client.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/Client.java", i, i + 1),
                     null,
                     "ThirdCheck",
                     "THIRD_PROBLEM_TYPE",
@@ -308,9 +297,7 @@ class End2EndTest {
 
         this.assessment.addAutograderAnnotation(
                 nonCustomMistakeType,
-                "src/edu/kit/informatik/Client.java",
-                13,
-                14,
+                new Location("src/edu/kit/informatik/Client.java", 13, 14),
                 "Has used last annotation for message",
                 "ThirdCheck",
                 "THIRD_PROBLEM_TYPE",
