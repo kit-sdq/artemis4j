@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
@@ -147,13 +147,23 @@ public class Assessment extends ArtemisConnectionHolder {
      */
     public Annotation addPredefinedAnnotation(
             MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage) {
+        return this.addPredefinedAnnotation(mistakeType, new Location(filePath, startLine, endLine), customMessage);
+    }
+
+    /**
+     * Adds a non-custom manual annotation to the assessment.
+     *
+     * @param mistakeType   Must not be a custom mistake type
+     * @param customMessage May be null if no custom message is provided
+     */
+    public Annotation addPredefinedAnnotation(MistakeType mistakeType, Location location, String customMessage) {
         if (mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is a custom annotation");
         }
 
         var source =
                 this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, null, source);
+        var annotation = new Annotation(mistakeType, location, customMessage, null, source);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -171,6 +181,18 @@ public class Assessment extends ArtemisConnectionHolder {
             int endLine,
             String customMessage,
             double customScore) {
+        return this.addCustomAnnotation(
+                mistakeType, new Location(filePath, startLine, endLine), customMessage, customScore);
+    }
+
+    /**
+     * Adds a custom manual annotation to the assessment.
+     *
+     * @param mistakeType   Must be a custom mistake type
+     * @param customMessage May not be null
+     */
+    public Annotation addCustomAnnotation(
+            MistakeType mistakeType, Location location, String customMessage, double customScore) {
         if (!mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is not a custom annotation");
         }
@@ -182,16 +204,14 @@ public class Assessment extends ArtemisConnectionHolder {
 
         var source =
                 this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source);
+        var annotation = new Annotation(mistakeType, location, customMessage, customScore, source);
         this.annotations.add(annotation);
         return annotation;
     }
 
     public Annotation addAutograderAnnotation(
             MistakeType mistakeType,
-            String filePath,
-            int startLine,
-            int endLine,
+            Location location,
             String explanation,
             String checkName,
             String problemType,
@@ -199,9 +219,7 @@ public class Assessment extends ArtemisConnectionHolder {
         Double customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
         var annotation = new Annotation(
                 mistakeType,
-                filePath,
-                startLine,
-                endLine,
+                location,
                 explanation,
                 customScore,
                 AnnotationSource.AUTOGRADER,

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
@@ -126,9 +126,7 @@ final class AnnotationMerger {
 
         result.add(new Annotation(
                 firstAnnotation.getMistakeType(),
-                firstAnnotation.getFilePath(),
-                firstAnnotation.getStartLine(),
-                firstAnnotation.getEndLine(),
+                firstAnnotation.getLocation(),
                 customMessage,
                 firstAnnotation.getCustomScore().orElse(null),
                 firstAnnotation.getSource()));
@@ -150,7 +148,7 @@ final class AnnotationMerger {
             List<Annotation> filePositions = entry.getValue();
 
             String lines = filePositions.stream()
-                    .map(position -> "L%d".formatted(position.getStartLine()))
+                    .map(position -> "L%d".formatted(position.getDisplayLine()))
                     .collect(Collectors.joining(", "));
 
             if (filePositions.size() > 1 && !withoutFilename) {
