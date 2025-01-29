@@ -15,6 +15,16 @@ import org.jetbrains.annotations.NotNull;
  */
 public record LineColumn(int line, Optional<Integer> column) implements Comparable<LineColumn> {
     /**
+     * Constructs a {@link LineColumn} with a line and a column.
+     *
+     * @param line the 0-indexed line in the source file
+     * @param column the 0-indexed column in the source file
+     */
+    public LineColumn(int line, int column) {
+        this(line, Optional.of(column));
+    }
+
+    /**
      * Constructs a {@link LineColumn} spanning the entire line.
      *
      * @param line the line in the source file
