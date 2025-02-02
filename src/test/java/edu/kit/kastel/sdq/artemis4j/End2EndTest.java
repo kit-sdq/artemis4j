@@ -208,7 +208,7 @@ class End2EndTest {
             // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i + 1),
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
                     defaultFeedbackText.formatted(i),
                     "FirstCheck",
                     "FIRST_PROBLEM_TYPE",
@@ -245,7 +245,7 @@ class End2EndTest {
             // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i + 1),
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
                     defaultFeedbackText.formatted(i),
                     "FirstCheck",
                     "FIRST_PROBLEM_TYPE",
@@ -256,17 +256,18 @@ class End2EndTest {
         for (int i = 0; i < 5; i++) {
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    new Location("src/edu/kit/informatik/MergeSort.java", i, i + 1),
+                    new Location("src/edu/kit/informatik/MergeSort.java", i, i),
                     otherFeedbackText.formatted(i),
                     "FirstCheck",
                     "SECOND_PROBLEM_TYPE",
                     3);
         }
 
+        // start at line 0 and end at line 5 (L1-6)
         for (int i = 0; i < 5; i++) {
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    new Location("src/edu/kit/informatik/Client.java", i, i + 1),
+                    new Location("src/edu/kit/informatik/Client.java", i, i),
                     otherFeedbackText.formatted(i),
                     "FirstCheck",
                     "SECOND_PROBLEM_TYPE",
@@ -277,7 +278,7 @@ class End2EndTest {
         for (int i = 5; i < 9; i++) {
             this.assessment.addAutograderAnnotation(
                     nonCustomMistakeType,
-                    new Location("src/edu/kit/informatik/Client.java", i, i + 1),
+                    new Location("src/edu/kit/informatik/Client.java", i, i),
                     null,
                     "SecondCheck",
                     "THIRD_PROBLEM_TYPE",
@@ -288,7 +289,7 @@ class End2EndTest {
         for (int i = 9; i < 12; i++) {
             this.assessment.addAutograderAnnotation(
                     nonCustomMistakeType,
-                    new Location("src/edu/kit/informatik/Client.java", i, i + 1),
+                    new Location("src/edu/kit/informatik/Client.java", i, i),
                     null,
                     "ThirdCheck",
                     "THIRD_PROBLEM_TYPE",
@@ -297,7 +298,7 @@ class End2EndTest {
 
         this.assessment.addAutograderAnnotation(
                 nonCustomMistakeType,
-                new Location("src/edu/kit/informatik/Client.java", 13, 14),
+                new Location("src/edu/kit/informatik/Client.java", 13, 13),
                 "Has used last annotation for message",
                 "ThirdCheck",
                 "THIRD_PROBLEM_TYPE",
@@ -332,7 +333,7 @@ class End2EndTest {
                         // other feedback is 5 annotations in MergeSort and 5 in Client that should be merged
                         "[Funktionalität:Custom Penalty] Other Feedback 0 (0P)",
                         "[Funktionalität:Custom Penalty] Other Feedback 1 (0P)",
-                        "[Funktionalität:Custom Penalty] Other Feedback 2. Weitere Probleme in MergeSort:(L4, L5), Client:(L1, L2, L3, L4, L5). (0P)",
+                        "[Funktionalität:Custom Penalty] Other Feedback 2. Weitere Probleme in Client:(L1, L2, L3, L4, L5), MergeSort:(L4, L5). (0P)",
                         // all feedbacks in the same file
                         "[Funktionalität:Custom Penalty] This is annotation 0 (0P)",
                         "[Funktionalität:Custom Penalty] This is annotation 1 (0P)",
