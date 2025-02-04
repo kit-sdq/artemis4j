@@ -1,5 +1,5 @@
 /* Licensed under EPL-2.0 2025. */
-package edu.kit.kastel.sdq.artemis4j.utils;
+package edu.kit.kastel.sdq.artemis4j.location;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -8,8 +8,9 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-import edu.kit.kastel.sdq.artemis4j.grading.LineColumn;
-import edu.kit.kastel.sdq.artemis4j.grading.Location;
+import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
+import edu.kit.kastel.sdq.artemis4j.grading.location.LocationFormatter;
 import org.junit.jupiter.api.Test;
 
 class LocationFormatterTest {
@@ -25,18 +26,15 @@ class LocationFormatterTest {
                         "src/fs/example/Example.java", new LineColumn(0, 0), new LineColumn(2, Optional.empty())))
                 .addLocation(new Location("src/fs/example/Example.java", new LineColumn(0, 10), new LineColumn(2, 5)))
                 // the default formatter does not display the columns
-                .setPathFormatter(new DefaultPathFormatter() {
-                    @Override
-                    public String formatLocation(Location location) {
-                        LineColumn start = location.start();
-                        LineColumn end = location.end();
+                .setLocationToString(location -> {
+                    LineColumn start = location.start();
+                    LineColumn end = location.end();
 
-                        if (start.equals(end)) {
-                            return "L%d".formatted(start.line() + 1);
-                        }
-
-                        return start + "-" + end.toString();
+                    if (start.equals(end)) {
+                        return "L%d".formatted(start.line() + 1);
                     }
+
+                    return start + "-" + end.toString();
                 });
 
         assertEquals(
@@ -99,11 +97,14 @@ class LocationFormatterTest {
                 .addLocation(new Location("src/edu/kit/kastel/extras/BubbleSort", 1, 1))
                 .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 1, 1))
                 .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 0, 0))
-                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 1, 1))
-                .setPathFormatter(new LocationMergingPathFormatter(new DefaultPathFormatter()));
+                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 3, 3))
+                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 4, 4))
+                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 6, 7))
+                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 8, 10))
+                .enableLineMerging();
 
         assertEquals(
-                "src/edu/kit/kastel/(QuickSort:(L10-20, L30), extras/(BubbleSort:L2, InsertionSort:L1-2))",
+                "src/edu/kit/kastel/(QuickSort:(L10-20, L30), extras/(BubbleSort:L2, InsertionSort:(L1-2, L4-5, L7-11)))",
                 formatter.format());
     }
 
@@ -116,8 +117,7 @@ class LocationFormatterTest {
                 .addLocation(new Location("src/edu/kit/kastel/extras/BubbleSort", 1, 1))
                 .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 1, 1))
                 .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 0, 0))
-                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 1, 1))
-                .setPathFormatter(new DefaultPathFormatter());
+                .addLocation(new Location("src\\edu/kit/kastel/extras/InsertionSort", 1, 1));
 
         assertEquals(
                 "src/edu/kit/kastel/(QuickSort:(L10, L11-20, L30), extras/(BubbleSort:L2, InsertionSort:(L1, L2)))",

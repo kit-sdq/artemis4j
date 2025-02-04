@@ -1,38 +1,45 @@
 /* Licensed under EPL-2.0 2025. */
-package edu.kit.kastel.sdq.artemis4j.utils;
+package edu.kit.kastel.sdq.artemis4j.grading.location;
 
 import java.util.List;
 import java.util.SequencedSet;
 import java.util.Set;
 import java.util.TreeSet;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-
-import edu.kit.kastel.sdq.artemis4j.grading.Location;
 
 /**
  * Makes multiple locations more readable by intelligently merging them.
  */
 public class LocationFormatter implements Comparable<LocationFormatter> {
     private final SequencedSet<PathSegment> segments;
-    private PathFormatter pathFormatter;
+    private Function<Location, String> locationToString;
     private Predicate<String> shouldRemoveSharedPrefix;
     private boolean shouldRemoveExtension;
+    private boolean shouldMergeLines;
 
     /**
      * Creates a new location formatter.
      */
     public LocationFormatter() {
         this.segments = new TreeSet<>();
-        this.pathFormatter = new DefaultPathFormatter();
+        this.locationToString = null;
         this.shouldRemoveSharedPrefix = prefix -> false;
         this.shouldRemoveExtension = true;
+        this.shouldMergeLines = false;
     }
 
-    private void addPathSegment(String filePath, SequencedSet<Location> locations) {
+    /**
+     * Adds a location to the formatter.
+     *
+     * @param location the location to add
+     * @return this formatter
+     */
+    public LocationFormatter addLocation(Location location) {
         // separate the path into its components and create a segment for the last one
-        List<String> path = List.of(filePath.replace("\\", "/").split("/"));
-        PathSegment segment = new PathSegment(path.getLast(), new TreeSet<>(), locations);
+        List<String> path = List.of(location.filePath().split("/"));
+        PathSegment segment = new PathSegment(path.getLast(), new TreeSet<>(), new TreeSet<>(Set.of(location)));
 
         // now create the segment for the remaining path components
         for (int i = path.size() - 2; i >= 0; i--) {
@@ -51,16 +58,7 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
         if (!hasBeenAdded) {
             this.segments.add(segment);
         }
-    }
 
-    /**
-     * Adds a location to the formatter.
-     *
-     * @param location the location to add
-     * @return this formatter
-     */
-    public LocationFormatter addLocation(Location location) {
-        this.addPathSegment(location.filePath(), new TreeSet<>(Set.of(location)));
         return this;
     }
 
@@ -104,14 +102,30 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
     }
 
     /**
-     * Sets the function that is used to format a path.
-     *
-     * @param formatter the formatter to use for paths
+     * Sets the function that is used to convert a {@link Location} to a {@link String}.
+     * @param formatter the function that converts a location to a string
      * @return this formatter
      */
-    public LocationFormatter setPathFormatter(PathFormatter formatter) {
-        this.pathFormatter = formatter;
+    public LocationFormatter setLocationToString(Function<Location, String> formatter) {
+        this.locationToString = formatter;
         return this;
+    }
+
+    /**
+     * Enables the merging of locations. Instead of displaying L1, L2, L3, L5, L6, L7, it will display L1-7.
+     * <p>
+     * Note that this ignores the column information, because for the correct merging of the columns,
+     * the source file would be necessary.
+     *
+     * @return this formatter
+     */
+    public LocationFormatter enableLineMerging() {
+        this.shouldMergeLines = true;
+        return this;
+    }
+
+    private SequencedSet<PathSegment> segments() {
+        return this.segments;
     }
 
     @Override
@@ -132,10 +146,6 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
     public int compareTo(LocationFormatter other) {
         // Comparable is mostly implemented for convenience in intelligrade.
         return ComparatorUtils.comparing(LocationFormatter::segments).compare(this, other);
-    }
-
-    private SequencedSet<PathSegment> segments() {
-        return this.segments;
     }
 
     /**
@@ -180,9 +190,24 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
     }
 
     private PathFormatter getActualPathFormatter() {
+        PathFormatter pathFormatter = new DefaultPathFormatter() {
+            @Override
+            public String formatLocation(Location location) {
+                if (LocationFormatter.this.locationToString == null) {
+                    return super.formatLocation(location);
+                }
+
+                return LocationFormatter.this.locationToString.apply(location);
+            }
+        };
+
+        if (this.shouldMergeLines) {
+            pathFormatter = new LocationMergingPathFormatter(pathFormatter);
+        }
+
         if (this.shouldRemoveExtension) {
             // this removes the extension from the filename:
-            return new DelegatingPathFormatter(this.pathFormatter) {
+            return new DelegatingPathFormatter(pathFormatter) {
                 @Override
                 public String formatFile(String name, List<Location> locations) {
                     return super.formatFile(getFilenameWithoutExtension(name), locations);
@@ -197,6 +222,6 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
             };
         }
 
-        return this.pathFormatter;
+        return pathFormatter;
     }
 }

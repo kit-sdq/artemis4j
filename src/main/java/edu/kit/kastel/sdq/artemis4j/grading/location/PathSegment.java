@@ -1,5 +1,5 @@
 /* Licensed under EPL-2.0 2025. */
-package edu.kit.kastel.sdq.artemis4j.utils;
+package edu.kit.kastel.sdq.artemis4j.grading.location;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -7,8 +7,6 @@ import java.util.Comparator;
 import java.util.SequencedSet;
 import java.util.TreeSet;
 import java.util.stream.Collectors;
-
-import edu.kit.kastel.sdq.artemis4j.grading.Location;
 
 /**
  * A segment of a path, which can either be a folder or a file.
