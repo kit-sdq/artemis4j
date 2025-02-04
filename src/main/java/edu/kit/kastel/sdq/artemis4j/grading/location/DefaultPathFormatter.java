@@ -1,13 +1,10 @@
 /* Licensed under EPL-2.0 2025. */
-package edu.kit.kastel.sdq.artemis4j.utils;
+package edu.kit.kastel.sdq.artemis4j.grading.location;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-import edu.kit.kastel.sdq.artemis4j.grading.LineColumn;
-import edu.kit.kastel.sdq.artemis4j.grading.Location;
-
-public class DefaultPathFormatter implements PathFormatter {
+class DefaultPathFormatter implements PathFormatter {
     @Override
     public String formatLocation(Location location) {
         LineColumn start = location.start();

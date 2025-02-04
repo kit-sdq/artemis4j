@@ -8,6 +8,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
+import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 

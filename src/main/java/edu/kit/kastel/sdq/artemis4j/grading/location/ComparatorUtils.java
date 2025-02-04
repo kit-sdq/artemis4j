@@ -1,5 +1,5 @@
 /* Licensed under EPL-2.0 2025. */
-package edu.kit.kastel.sdq.artemis4j.utils;
+package edu.kit.kastel.sdq.artemis4j.grading.location;
 
 import java.util.ArrayList;
 import java.util.Collection;

@@ -10,8 +10,8 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import edu.kit.kastel.sdq.artemis4j.grading.location.LocationFormatter;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
-import edu.kit.kastel.sdq.artemis4j.utils.LocationFormatter;
 
 /**
  * Merges annotations based on their classifiers.

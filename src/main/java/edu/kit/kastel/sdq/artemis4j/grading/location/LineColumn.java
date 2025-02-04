@@ -1,5 +1,5 @@
 /* Licensed under EPL-2.0 2025. */
-package edu.kit.kastel.sdq.artemis4j.grading;
+package edu.kit.kastel.sdq.artemis4j.grading.location;
 
 import java.util.Comparator;
 import java.util.Objects;
@@ -12,6 +12,16 @@ import java.util.Optional;
  * @param column the 0-indexed column in the source file on which the {@link Location} starts or ends (inclusive). If empty, the entire line is spanned.
  */
 public record LineColumn(int line, Optional<Integer> column) implements Comparable<LineColumn> {
+    public LineColumn {
+        if (line < 0) {
+            throw new IllegalArgumentException("line must be >= 0, but was %d".formatted(line));
+        }
+
+        if (column.isPresent() && column.get() < 0) {
+            throw new IllegalArgumentException("column must be >= 0, but was %d".formatted(column.get()));
+        }
+    }
+
     /**
      * Constructs a {@link LineColumn} with a line and a column.
      *

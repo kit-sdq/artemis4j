@@ -16,8 +16,8 @@ import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.api.loader.AutograderLoader;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.ClonedProgrammingSubmission;
-import edu.kit.kastel.sdq.artemis4j.grading.LineColumn;
-import edu.kit.kastel.sdq.artemis4j.grading.Location;
+import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 
 public final class AutograderRunner {
     private AutograderRunner() {}
