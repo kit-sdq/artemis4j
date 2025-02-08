@@ -171,12 +171,7 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
             // if all locations are in the same file, it is unnecessary to display the filename:
             // File:(L1, L2, L3) -> L1, L2, L3
             if (segment.elements().isEmpty()) {
-                return segment.toString(new DelegatingPathFormatter(formatter) {
-                    @Override
-                    public String formatFile(String name, List<Location> locations) {
-                        return locations.stream().map(this::formatLocation).collect(Collectors.joining(", "));
-                    }
-                });
+                return segment.toString(formatter.showFilePath(false));
             }
 
             return segment.elements().stream()
@@ -190,7 +185,7 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
     }
 
     private PathFormatter getActualPathFormatter() {
-        PathFormatter pathFormatter = new DefaultPathFormatter() {
+        return new PathFormatter() {
             @Override
             public String formatLocation(Location location) {
                 if (LocationFormatter.this.locationToString == null) {
@@ -199,29 +194,22 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
 
                 return LocationFormatter.this.locationToString.apply(location);
             }
-        };
 
-        if (this.shouldMergeLines) {
-            pathFormatter = new LocationMergingPathFormatter(pathFormatter);
-        }
-
-        if (this.shouldRemoveExtension) {
-            // this removes the extension from the filename:
-            return new DelegatingPathFormatter(pathFormatter) {
-                @Override
-                public String formatFile(String name, List<Location> locations) {
+            @Override
+            public String formatFile(String name, List<Location> locations) {
+                if (LocationFormatter.this.shouldRemoveExtension) {
                     return super.formatFile(getFilenameWithoutExtension(name), locations);
                 }
 
-                private static String getFilenameWithoutExtension(String path) {
-                    String[] parts = path.split("[\\\\\\/]");
-                    String file = parts[parts.length - 1];
+                return super.formatFile(name, locations);
+            }
 
-                    return file.split("\\.")[0];
-                }
-            };
-        }
+            private static String getFilenameWithoutExtension(String path) {
+                String[] parts = path.split("[\\\\\\/]");
+                String file = parts[parts.length - 1];
 
-        return pathFormatter;
+                return file.split("\\.")[0];
+            }
+        }.shouldMergeLines(this.shouldMergeLines);
     }
 }
