@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.location;
 
+import java.util.Comparator;
 import java.util.List;
 import java.util.SequencedSet;
 import java.util.Set;
@@ -145,7 +146,8 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
     @Override
     public int compareTo(LocationFormatter other) {
         // Comparable is mostly implemented for convenience in intelligrade.
-        return ComparatorUtils.comparing(LocationFormatter::segments).compare(this, other);
+        return Comparator.comparing(LocationFormatter::segments, ComparatorUtils.compareByElement())
+                .compare(this, other);
     }
 
     /**

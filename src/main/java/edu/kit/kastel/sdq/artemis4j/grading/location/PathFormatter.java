@@ -14,7 +14,6 @@ class PathFormatter {
     PathFormatter() {
         this.shouldMergeLines = false;
         this.showFilePath = true;
-
     }
 
     PathFormatter shouldMergeLines(boolean shouldMergeLines) {
