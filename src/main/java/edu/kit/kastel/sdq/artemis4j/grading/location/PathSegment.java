@@ -80,8 +80,8 @@ record PathSegment(String name, SequencedSet<PathSegment> elements, SequencedSet
         //    ^ because the file does not have elements, it should be considered smaller
         // 3. if both are files, compare by locations
         return Comparator.comparing(PathSegment::name)
-                .thenComparing(ComparatorUtils.comparing(PathSegment::elements))
-                .thenComparing(ComparatorUtils.comparing(PathSegment::locations))
+                .thenComparing(PathSegment::elements, ComparatorUtils.compareByElement())
+                .thenComparing(PathSegment::locations, ComparatorUtils.compareByElement())
                 .compare(this, other);
     }
 

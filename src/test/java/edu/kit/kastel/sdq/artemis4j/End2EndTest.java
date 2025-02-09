@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -360,5 +362,99 @@ class End2EndTest {
         assertEquals(
                 MistakeType.Highlight.NONE,
                 this.gradingConfig.getMistakeTypeById("magicLiteral").getHighlight());
+    }
+
+    @Test
+    void testGlobalFeedbackSorting() throws ArtemisClientException {
+        // First add some annotations
+        String defaultFeedbackText = "Some feedback text";
+
+        for (int i = 0; i < 5; i++) {
+            this.assessment.addPredefinedAnnotation(
+                    this.gradingConfig.getMistakeTypeById("jdEmpty"),
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
+                    defaultFeedbackText);
+        }
+
+        this.assessment.addPredefinedAnnotation(
+                this.gradingConfig.getMistakeTypeById("jdEmpty"),
+                new Location("src/edu/kit/informatik/InsertionSort.java", 5, 5),
+                defaultFeedbackText);
+
+        for (int i = 0; i < 3; i++) {
+            this.assessment.addPredefinedAnnotation(
+                    this.gradingConfig.getMistakeTypeById("jdEmpty"),
+                    new Location("src/edu/kit/informatik/RadixSort.java", i + 3, i + 5),
+                    defaultFeedbackText);
+        }
+
+        // to test custom scoring, add some custom annotations:
+        for (int i = 0; i < 3; i++) {
+            this.assessment.addCustomAnnotation(
+                    this.gradingConfig.getMistakeTypeById("custom"),
+                    new Location("src/edu/kit/informatik/RadixSort.java", i, i),
+                    defaultFeedbackText,
+                    -0.5);
+        }
+
+        this.assessment.addCustomAnnotation(
+                this.gradingConfig.getMistakeTypeById("custom"),
+                new Location("src/edu/kit/informatik/InsertionSort.java", 5, 5),
+                defaultFeedbackText,
+                0.0);
+
+        for (int i = 0; i < 2; i++) {
+            this.assessment.addCustomAnnotation(
+                    this.gradingConfig.getMistakeTypeById("custom"),
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
+                    defaultFeedbackText,
+                    0.0);
+        }
+
+        this.assessment.addCustomAnnotation(
+                this.gradingConfig.getMistakeTypeById("custom"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 3, 3),
+                defaultFeedbackText,
+                -0.5);
+
+        // this should be the first annotation
+        this.assessment.addPredefinedAnnotation(
+                this.gradingConfig.getMistakeTypeById("jdTrivial"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 0, 0),
+                defaultFeedbackText);
+
+        this.assessment.submit();
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+
+        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        var feedbacks = ResultDTO.fetchDetailedFeedbacks(
+                this.connection.getClient(),
+                resultDTO.id(),
+                this.programmingSubmission.getParticipationId(),
+                resultDTO.feedbacks());
+
+        Collection<String> globalFeedbackLines = new ArrayList<>();
+        for (FeedbackDTO feedbackDTO : feedbacks) {
+            if (feedbackDTO.type() != FeedbackType.MANUAL_UNREFERENCED || feedbackDTO.visibility() != null) {
+                continue;
+            }
+
+            globalFeedbackLines.addAll(Arrays.asList(feedbackDTO.detailText().split("\\n")));
+        }
+
+        assertEquals(
+                List.of(
+                        "Funktionalität [-12P (Range: -20P -- ∞P)]",
+                        "    * JavaDoc Trivial [-5P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at line 1",
+                        "    * Custom Penalty [-2P]:",
+                        "        * src/edu/kit/informatik/RadixSort.java at lines 1, 2, 3 (-1,5P)",
+                        "        * src/edu/kit/informatik/InsertionSort.java at line 6 (0P)",
+                        "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 4 (-0,5P)",
+                        "    * JavaDoc Leer [-5P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 3, 4, 5",
+                        "        * src/edu/kit/informatik/InsertionSort.java at line 6",
+                        "        * src/edu/kit/informatik/RadixSort.java at lines 4, 5, 6"),
+                globalFeedbackLines);
     }
 }

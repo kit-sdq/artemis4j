@@ -4,30 +4,28 @@ package edu.kit.kastel.sdq.artemis4j.grading.location;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
-import java.util.function.Function;
 
-final class ComparatorUtils {
+public final class ComparatorUtils {
     private ComparatorUtils() {}
 
     /**
-     * This is essentially {@link Comparator#comparing(Function)}, but for collections, which don't implement {@link Comparable} by default.
+     * Returns a comparator that compares collections based on their elements.
      * <p>
-     * Make sure that the provided collection has some kind of order, like a {@link java.util.TreeSet} or a {@link java.util.List}.
-     * The behavior is undefined if the collection is unordered.
+     * The comparator will first compare the elements element-wise, and if they are equal, the collection with fewer elements
+     * is considered smaller.
      *
-     * @param keyExtractor the function to extract the key from the object
-     * @return a comparator that compares the objects based on the extracted keys
-     * @param <T> the type of the objects to compare
-     * @param <V> the type of the keys to compare
+     * @param comparator the comparator to compare the elements with
+     * @return a comparator that compares collections based on their elements
+     * @param <T> the type of the elements in the collections
+     * @param <U> the type of the collections
      */
-    static <T, V extends Comparable<V>> Comparator<T> comparing(
-            Function<? super T, ? extends Collection<V>> keyExtractor) {
+    public static <T, U extends Collection<T>> Comparator<U> compareByElement(Comparator<? super T> comparator) {
         return (left, right) -> {
-            var leftList = new ArrayList<>(keyExtractor.apply(left));
-            var rightList = new ArrayList<>(keyExtractor.apply(right));
+            var leftList = new ArrayList<>(left);
+            var rightList = new ArrayList<>(right);
 
             for (int i = 0; i < Math.min(leftList.size(), rightList.size()); i++) {
-                int comparison = leftList.get(i).compareTo(rightList.get(i));
+                int comparison = comparator.compare(leftList.get(i), rightList.get(i));
                 if (comparison != 0) {
                     return comparison;
                 }
@@ -35,5 +33,22 @@ final class ComparatorUtils {
 
             return Integer.compare(leftList.size(), rightList.size());
         };
+    }
+
+    static <T extends Comparable<T>, U extends Collection<T>> Comparator<U> compareByElement() {
+        return compareByElement(Comparator.naturalOrder());
+    }
+
+    /**
+     * Returns a comparator that compares collections based on their size.
+     *
+     * @param comparator the comparator to compare collections with the same size
+     * @return a comparator that compares collections based on their size
+     * @param <T> the type of the elements in the collections
+     * @param <U> the type of the collections
+     */
+    public static <T, U extends Collection<T>> Comparator<U> shortestFirst(Comparator<? super U> comparator) {
+        // NOTE: does no longer compile if the lambda is replaced with Collection::size
+        return Comparator.comparingInt((U collection) -> collection.size()).thenComparing(comparator);
     }
 }
