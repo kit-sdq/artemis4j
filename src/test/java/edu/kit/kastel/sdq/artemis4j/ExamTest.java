@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -14,12 +14,10 @@ import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
-import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.Exam;
 import edu.kit.kastel.sdq.artemis4j.grading.ExamExerciseGroup;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
-import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import org.junit.jupiter.api.Test;
@@ -53,7 +51,8 @@ class ExamTest {
 
         var submission = findSubmission(exercise.fetchAllSubmissions(), STUDENT_USER);
 
-        Assessment roundOneAssessment = submission.getFirstRoundAssessment().open(config).orElseThrow();
+        Assessment roundOneAssessment =
+                submission.getFirstRoundAssessment().lockAndOpen(config).orElseThrow();
         roundOneAssessment.clearAnnotations();
         roundOneAssessment.addCustomAnnotation(
                 config.getMistakeTypeById("custom"),
@@ -64,7 +63,8 @@ class ExamTest {
                 -2.0);
         roundOneAssessment.submit();
 
-        Assessment roundTwoAssessment = submission.getSecondRoundAssessment().open(config).orElseThrow();
+        Assessment roundTwoAssessment =
+                submission.getSecondRoundAssessment().lockAndOpen(config).orElseThrow();
         roundTwoAssessment.addCustomAnnotation(
                 config.getMistakeTypeById("custom"),
                 "src/edu/kit/informatik/BubbleSort.java",
@@ -85,9 +85,11 @@ class ExamTest {
         roundTwoAssessment.submit();
     }
 
-    private ProgrammingSubmissionWithResults findSubmission(List<ProgrammingSubmissionWithResults> submissions, String student) {
+    private ProgrammingSubmissionWithResults findSubmission(
+            List<ProgrammingSubmissionWithResults> submissions, String student) {
         return submissions.stream()
-                .filter(submission -> submission.getSubmission().getParticipantIdentifier().equals(student))
+                .filter(submission ->
+                        submission.getSubmission().getParticipantIdentifier().equals(student))
                 .findFirst()
                 .orElseThrow();
     }

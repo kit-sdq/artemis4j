@@ -1,5 +1,10 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
+
+import java.nio.file.Path;
+import java.time.ZonedDateTime;
+import java.util.Objects;
+import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
@@ -7,11 +12,6 @@ import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
-
-import java.nio.file.Path;
-import java.time.ZonedDateTime;
-import java.util.Objects;
-import java.util.Optional;
 
 /**
  * A student's programming submission. A submission essentially consists of the
@@ -24,8 +24,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final User student;
     private final ProgrammingExercise exercise;
 
-    public ProgrammingSubmission(
-            ProgrammingSubmissionDTO dto, ProgrammingExercise exercise) {
+    public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise) {
         super(exercise);
 
         this.dto = dto;

@@ -90,7 +90,10 @@ class End2EndTest {
                 Files.readString(Path.of("src/test/resources/config.json")), this.exercise);
 
         // ensure that the submission is locked & clear the assessment
-        this.assessment = this.programmingSubmission.getFirstRoundAssessment().open(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
         this.assessment.clearAnnotations();
 
         Assertions.assertTrue(this.assessment.getAllAnnotations().isEmpty());
@@ -111,7 +114,10 @@ class End2EndTest {
         this.assessment.submit();
 
         // Check Assessments
-        this.assessment = this.programmingSubmission.getFirstRoundAssessment().open(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         List<TestResult> tests = this.assessment.getTestResults();
         assertEquals(13, tests.size());
@@ -131,7 +137,10 @@ class End2EndTest {
         this.assessment.submit();
 
         // Check Assessments
-        this.assessment = this.programmingSubmission.getFirstRoundAssessment().open(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         List<TestResult> tests = this.assessment.getTestResults();
         assertEquals(13, tests.size());
@@ -174,14 +183,16 @@ class End2EndTest {
 
         // find the programming submission that was just assessed in all submissions of
         // the exercise:
-        ProgrammingSubmissionWithResults updatedSubmission = this.exercise.fetchAllSubmissions().stream().filter(
-                s -> s.getSubmission().getParticipantIdentifier().equals(STUDENT_USER)).findFirst().orElseThrow();
+        ProgrammingSubmissionWithResults updatedSubmission = this.exercise.fetchAllSubmissions().stream()
+                .filter(s -> s.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
+                .findFirst()
+                .orElseThrow();
 
         assertEquals(this.programmingSubmission.getSubmission(), updatedSubmission.getSubmission());
 
         Assessment newAssessment = updatedSubmission
                 .getFirstRoundAssessment()
-                .open(this.gradingConfig)
+                .lockAndOpen(this.gradingConfig)
                 .orElseThrow();
         Assertions.assertEquals(1, newAssessment.getAllAnnotations().size());
     }
@@ -220,7 +231,10 @@ class End2EndTest {
         this.assessment.submit();
 
         // Check Assessments
-        this.assessment = this.programmingSubmission.getFirstRoundAssessment().open(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         for (Annotation annotation : this.assessment.getAllAnnotations()) {
             Assertions.assertTrue(
@@ -308,11 +322,15 @@ class End2EndTest {
         this.assessment.submit();
 
         // the assessment will not show the merged annotations (it will unmerge them after loading)
-        this.assessment = this.programmingSubmission.getFirstRoundAssessment().open(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         // so we need to check the submission itself:
 
-        ResultDTO resultDTO = this.programmingSubmission.getFirstRoundAssessment().result();
+        ResultDTO resultDTO =
+                this.programmingSubmission.getFirstRoundAssessment().result();
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
                 this.connection.getClient(),
                 resultDTO.id(),

@@ -80,7 +80,7 @@ public class Assessment extends ArtemisConnectionHolder {
      */
     private static final double GLOBAL_FEEDBACK_OTHER_PARTS_SCORE = -Double.MIN_VALUE;
 
-    private final ResultDTO lockingResult;
+    private final ResultDTO result;
     private final List<Annotation> annotations;
     private final List<TestResult> testResults;
     private final ProgrammingSubmission programmingSubmission;
@@ -105,7 +105,7 @@ public class Assessment extends ArtemisConnectionHolder {
             Locale studentLocale)
             throws AnnotationMappingException, ArtemisNetworkException {
         super(programmingSubmission);
-        this.lockingResult = result;
+        this.result = result;
         this.programmingSubmission = programmingSubmission;
         this.config = config;
         this.correctionRound = correctionRound;
@@ -135,6 +135,14 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
+     *
+     * @return whether the assessment has already been submitted
+     */
+    public boolean isSubmitted() {
+        return result.completionDate() != null;
+    }
+
+    /**
      * Get all annotations, including ones that were deleted in review. Use the add/remove methods to modify
      * the list of annotations.
      *
@@ -151,7 +159,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * @return An unmodifiable list of annotations.
      */
     public List<Annotation> getNonDeletedAnnotations() {
-        return this.annotations.stream().filter(a -> !a.isDeletedInReview()).toList();
+        return this.streamNonDeletedAnnotations().toList();
     }
 
     /**
@@ -179,16 +187,20 @@ public class Assessment extends ArtemisConnectionHolder {
                 .toList();
     }
 
+    public Stream<Annotation> streamAllAnnotations(MistakeType mistakeType) {
+        return this.annotations.stream().filter(a -> a.getMistakeType().equals(mistakeType));
+    }
+
     /**
      * Gets all annotations associated with the specified rating group. The rating
      * group must be associated with the same grading config as this assessment.
+     * This method includes annotations that were deleted in review.
      *
-     * @return An unmodifiable list of annotations, possibly empty but never null.
+     * @return A stream of annotations, possibly empty but never null.
      */
-    public List<Annotation> getAnnotations(RatingGroup ratingGroup) {
+    public Stream<Annotation> getAllAnnotations(RatingGroup ratingGroup) {
         return this.annotations.stream()
-                .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
-                .toList();
+                .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup));
     }
 
     /**
@@ -395,7 +407,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * total points for the annotations.
      */
     public Optional<Points> calculatePointsForMistakeType(MistakeType mistakeType) {
-        var annotationsWithType = this.getAnnotations(mistakeType).stream()
+        var annotationsWithType = this.streamAllAnnotations(mistakeType)
                 .filter(a -> !a.isDeletedInReview())
                 .toList();
         if (annotationsWithType.isEmpty()) {
@@ -445,7 +457,7 @@ public class Assessment extends ArtemisConnectionHolder {
         double absoluteScore = this.calculateTotalPoints();
         double relativeScore = absoluteScore / this.getMaxPoints() * 100.0;
         ResultDTO result = ResultDTO.forAssessmentSubmission(
-                this.programmingSubmission.getId(), relativeScore, feedbacks, this.lockingResult);
+                this.programmingSubmission.getId(), relativeScore, feedbacks, this.result);
 
         // Sanity check
         double feedbackPoints = Math.clamp(
