@@ -4,7 +4,7 @@
 
   <groupId>edu.kit.kastel.sdq</groupId>
   <artifactId>artemis4j</artifactId>
-  <version>7.7.5-SNAPSHOT</version>
+  <version>7.10.1</version>
 
   <name>Artemis4J</name>
   <description>Artemis4J is a Java library for interacting with the Artemis teaching system.</description>
