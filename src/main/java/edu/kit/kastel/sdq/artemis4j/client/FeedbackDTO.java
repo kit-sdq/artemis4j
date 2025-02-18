@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.List;
@@ -58,10 +58,9 @@ public record FeedbackDTO(
                 FeedbackType.MANUAL_UNREFERENCED, null, credits, null, "NEVER", text, null, detailText, null, null);
     }
 
-    public static String fetchLongFeedback(ArtemisClient client, long resultId, long feedbackId)
-            throws ArtemisNetworkException {
+    public static String fetchLongFeedback(ArtemisClient client, long feedbackId) throws ArtemisNetworkException {
         return ArtemisRequest.get()
-                .path(List.of("results", resultId, "feedbacks", feedbackId, "long-feedback"))
+                .path(List.of("feedbacks", feedbackId, "long-feedback"))
                 .executeAndDecode(client, String.class);
     }
 

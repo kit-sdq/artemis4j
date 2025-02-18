@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -91,7 +91,7 @@ public record ResultDTO(
 
             String detailText = feedback.detailText();
             if (feedback.hasLongFeedbackText()) {
-                detailText = FeedbackDTO.fetchLongFeedback(client, resultId, feedback.id());
+                detailText = FeedbackDTO.fetchLongFeedback(client, feedback.id());
             }
             cleanedFeedbacks.add(new FeedbackDTO(detailText, feedback));
         }
