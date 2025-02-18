@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.time.ZonedDateTime;
@@ -84,7 +84,8 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
     //  * @return a list of submissions
     //  * @throws ArtemisNetworkException if the request fails
     //  */
-    // public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound, boolean filterAssessedByTutor)
+    // public List<ProgrammingSubmission> fetchSubmissions(CorrectionRound correctionRound, boolean
+    // filterAssessedByTutor)
     //         throws ArtemisNetworkException {
     //
     //     if (correctionRound == CorrectionRound.SECOND && !this.hasSecondCorrectionRound()) {
@@ -105,21 +106,22 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
     //             .toList();
     // }
 
-    public List<ProgrammingSubmissionWithResults> fetchAllSubmissions()
-            throws ArtemisNetworkException {
+    public List<ProgrammingSubmissionWithResults> fetchAllSubmissions() throws ArtemisNetworkException {
         // Artemis ignores the correction round since assessedByTutor is false
-        return ProgrammingSubmissionDTO.fetchAll(
-                        this.getConnection().getClient(),
-                        this.getId(),
-                        0,
-                        true)
-                .stream()
+        return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), 0, true).stream()
                 .map(dto -> new ProgrammingSubmissionWithResults(new ProgrammingSubmission(dto, this)))
                 .toList();
     }
 
-    public List<PackedAssessment> fetchMyAssessments(CorrectionRound correctionRound)
-            throws ArtemisNetworkException {
+    public List<PackedAssessment> fetchMyAssessments() throws ArtemisNetworkException {
+        var assessments = new ArrayList<>(this.fetchMyAssessments(CorrectionRound.FIRST));
+        if (this.hasSecondCorrectionRound()) {
+            assessments.addAll(this.fetchMyAssessments(CorrectionRound.SECOND));
+        }
+        return assessments;
+    }
+
+    public List<PackedAssessment> fetchMyAssessments(CorrectionRound correctionRound) throws ArtemisNetworkException {
         if (correctionRound == CorrectionRound.SECOND && !this.hasSecondCorrectionRound()) {
             throw new IllegalArgumentException("This exercise does not have a second correction round");
         }
@@ -128,14 +130,12 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             throw new IllegalArgumentException("Can't fetch submissions for the review 'round'");
         }
 
-        var submissions = ProgrammingSubmissionDTO.fetchAll(
-                        this.getConnection().getClient(),
-                        this.getId(),
-                        correctionRound.toArtemis(),
-                        true)
-                .stream()
-                .map(submissionDto -> new ProgrammingSubmission(submissionDto, this))
-                .toList();
+        var submissions =
+                ProgrammingSubmissionDTO.fetchAll(
+                                this.getConnection().getClient(), this.getId(), correctionRound.toArtemis(), true)
+                        .stream()
+                        .map(submissionDto -> new ProgrammingSubmission(submissionDto, this))
+                        .toList();
 
         var assessments = new ArrayList<PackedAssessment>(submissions.size());
         for (var submission : submissions) {
@@ -227,7 +227,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return Optional.of(new Assessment(result, gradingConfig, submission, correctionRound));
     }
 
-    public int fetchOwnAssessmentCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
+    public int fetchMyAssessmentCount(CorrectionRound correctionRound) throws ArtemisNetworkException {
         return this.fetchMyAssessments(correctionRound).size();
     }
 

@@ -1,12 +1,13 @@
+/* Licensed under EPL-2.0 2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
+
+import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
-
-import java.util.Optional;
 
 /**
  * For API users, this is used in place of an assessment whenever we don't want to do
@@ -38,7 +39,8 @@ public record PackedAssessment(ResultDTO result, CorrectionRound round, Programm
      *                                    present could not be mapped given the
      *                                    gradingConfig
      */
-    public Optional<Assessment> open(GradingConfig config) throws MoreRecentSubmissionException, ArtemisNetworkException, AnnotationMappingException {
+    public Optional<Assessment> lockAndOpen(GradingConfig config)
+            throws MoreRecentSubmissionException, ArtemisNetworkException, AnnotationMappingException {
         return this.submission.getExercise().tryLockSubmission(this.submission.getId(), this.round, config);
     }
 
