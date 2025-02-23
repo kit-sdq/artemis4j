@@ -5,6 +5,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.SequencedSet;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.TreeSet;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -162,12 +163,22 @@ public class LocationFormatter implements Comparable<LocationFormatter> {
         if (this.segments.size() == 1
                 && this.shouldRemoveSharedPrefix.test(this.segments.getFirst().name())) {
             PathSegment segment = this.segments.getFirst();
-            String currentPrefix = segment.name();
+            StringJoiner currentPrefix = new StringJoiner("/");
+            currentPrefix.add(segment.name());
+            // the paths might share a common prefix, for example when one has a path src/main/java/File.java
+            // and the other src/main/java/other/File.java
+            //
+            // this loop calls the predicate with the current prefix:
+            // 1. src
+            // 2. src/main
+            // 3. src/main/java
+            //
+            // and removes it if the predicate returns true.
             while (segment.elements().size() == 1
                     && this.shouldRemoveSharedPrefix.test(
                             currentPrefix + "/" + segment.elements().getFirst().name())) {
                 segment = segment.elements().getFirst();
-                currentPrefix += "/" + segment.name();
+                currentPrefix.add(segment.name());
             }
 
             // if all locations are in the same file, it is unnecessary to display the filename:

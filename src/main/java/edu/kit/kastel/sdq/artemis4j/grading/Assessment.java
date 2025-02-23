@@ -616,15 +616,16 @@ public class Assessment extends ArtemisConnectionHolder {
             var annotationsByFilePath = annotationsWithType.stream()
                     .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
 
-            for (var annotations : annotationsByFilePath.values()) {
+            for (var annotationsForPath : annotationsByFilePath.values()) {
                 // Individual annotations
                 Predicate<Annotation> hasScore = a -> a.getCustomScore().isPresent() && ratingGroup.isScoringGroup();
 
                 // separate annotations with and without score
                 List<Annotation> annotationsWithScore =
-                        annotations.stream().filter(hasScore).toList();
-                List<Annotation> annotationsWithoutScore =
-                        annotations.stream().filter(Predicate.not(hasScore)).toList();
+                        annotationsForPath.stream().filter(hasScore).toList();
+                List<Annotation> annotationsWithoutScore = annotationsForPath.stream()
+                        .filter(Predicate.not(hasScore))
+                        .toList();
 
                 // For custom annotations, we have '* <file> at line <line> (<score>P)'
                 if (!annotationsWithScore.isEmpty()) {

@@ -394,7 +394,7 @@ class End2EndTest {
                     this.gradingConfig.getMistakeTypeById("custom"),
                     new Location("src/edu/kit/informatik/RadixSort.java", i, i),
                     defaultFeedbackText,
-                    -0.5);
+                    -2.0 / 3.0);
         }
 
         this.assessment.addCustomAnnotation(
@@ -415,7 +415,7 @@ class End2EndTest {
                 this.gradingConfig.getMistakeTypeById("custom"),
                 new Location("src/edu/kit/informatik/BubbleSort.java", 3, 3),
                 defaultFeedbackText,
-                -0.5);
+                -1.0);
 
         // this should be the first annotation
         this.assessment.addPredefinedAnnotation(
@@ -424,6 +424,7 @@ class End2EndTest {
                 defaultFeedbackText);
 
         this.assessment.submit();
+        // after submitting, we need to check that the global feedback looks as expected
         this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
 
         ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
@@ -444,13 +445,13 @@ class End2EndTest {
 
         assertEquals(
                 List.of(
-                        "Funktionalität [-12P (Range: -20P -- ∞P)]",
+                        "Funktionalität [-13P (Range: -20P -- ∞P)]",
                         "    * JavaDoc Trivial [-5P]:",
                         "        * src/edu/kit/informatik/BubbleSort.java at line 1",
-                        "    * Custom Penalty [-2P]:",
-                        "        * src/edu/kit/informatik/RadixSort.java at lines 1, 2, 3 (-1,5P)",
+                        "    * Custom Penalty [-3P]:",
+                        "        * src/edu/kit/informatik/RadixSort.java at lines 1, 2, 3 (-2P)",
                         "        * src/edu/kit/informatik/InsertionSort.java at line 6 (0P)",
-                        "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 4 (-0,5P)",
+                        "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 4 (-1P)",
                         "    * JavaDoc Leer [-5P]:",
                         "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 3, 4, 5",
                         "        * src/edu/kit/informatik/InsertionSort.java at line 6",
