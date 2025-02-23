@@ -7,6 +7,8 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -22,6 +24,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
 import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 import org.junit.jupiter.api.*;
@@ -207,9 +210,7 @@ class End2EndTest {
             // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/BubbleSort.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
                     defaultFeedbackText.formatted(i),
                     "FirstCheck",
                     "FIRST_PROBLEM_TYPE",
@@ -246,9 +247,7 @@ class End2EndTest {
             // NOTE: the file has 16 lines, so the annotations are created in a way that they don't overlap
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/BubbleSort.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
                     defaultFeedbackText.formatted(i),
                     "FirstCheck",
                     "FIRST_PROBLEM_TYPE",
@@ -259,21 +258,18 @@ class End2EndTest {
         for (int i = 0; i < 5; i++) {
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/MergeSort.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/MergeSort.java", i, i),
                     otherFeedbackText.formatted(i),
                     "FirstCheck",
                     "SECOND_PROBLEM_TYPE",
                     3);
         }
 
+        // start at line 0 and end at line 5 (L1-6)
         for (int i = 0; i < 5; i++) {
             this.assessment.addAutograderAnnotation(
                     mistakeType,
-                    "src/edu/kit/informatik/Client.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/Client.java", i, i),
                     otherFeedbackText.formatted(i),
                     "FirstCheck",
                     "SECOND_PROBLEM_TYPE",
@@ -284,9 +280,7 @@ class End2EndTest {
         for (int i = 5; i < 9; i++) {
             this.assessment.addAutograderAnnotation(
                     nonCustomMistakeType,
-                    "src/edu/kit/informatik/Client.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/Client.java", i, i),
                     null,
                     "SecondCheck",
                     "THIRD_PROBLEM_TYPE",
@@ -297,9 +291,7 @@ class End2EndTest {
         for (int i = 9; i < 12; i++) {
             this.assessment.addAutograderAnnotation(
                     nonCustomMistakeType,
-                    "src/edu/kit/informatik/Client.java",
-                    i + 1,
-                    i + 2,
+                    new Location("src/edu/kit/informatik/Client.java", i, i),
                     null,
                     "ThirdCheck",
                     "THIRD_PROBLEM_TYPE",
@@ -308,9 +300,7 @@ class End2EndTest {
 
         this.assessment.addAutograderAnnotation(
                 nonCustomMistakeType,
-                "src/edu/kit/informatik/Client.java",
-                13,
-                14,
+                new Location("src/edu/kit/informatik/Client.java", 13, 13),
                 "Has used last annotation for message",
                 "ThirdCheck",
                 "THIRD_PROBLEM_TYPE",
@@ -345,7 +335,7 @@ class End2EndTest {
                         // other feedback is 5 annotations in MergeSort and 5 in Client that should be merged
                         "[Funktionalität:Custom Penalty] Other Feedback 0 (0P)",
                         "[Funktionalität:Custom Penalty] Other Feedback 1 (0P)",
-                        "[Funktionalität:Custom Penalty] Other Feedback 2. Weitere Probleme in MergeSort:(L4, L5), Client:(L1, L2, L3, L4, L5). (0P)",
+                        "[Funktionalität:Custom Penalty] Other Feedback 2. Weitere Probleme in Client:(L1, L2, L3, L4, L5), MergeSort:(L4, L5). (0P)",
                         // all feedbacks in the same file
                         "[Funktionalität:Custom Penalty] This is annotation 0 (0P)",
                         "[Funktionalität:Custom Penalty] This is annotation 1 (0P)",
@@ -372,5 +362,100 @@ class End2EndTest {
         assertEquals(
                 MistakeType.Highlight.NONE,
                 this.gradingConfig.getMistakeTypeById("magicLiteral").getHighlight());
+    }
+
+    @Test
+    void testGlobalFeedbackSorting() throws ArtemisClientException {
+        // First add some annotations
+        String defaultFeedbackText = "Some feedback text";
+
+        for (int i = 0; i < 5; i++) {
+            this.assessment.addPredefinedAnnotation(
+                    this.gradingConfig.getMistakeTypeById("jdEmpty"),
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
+                    defaultFeedbackText);
+        }
+
+        this.assessment.addPredefinedAnnotation(
+                this.gradingConfig.getMistakeTypeById("jdEmpty"),
+                new Location("src/edu/kit/informatik/InsertionSort.java", 5, 5),
+                defaultFeedbackText);
+
+        for (int i = 0; i < 3; i++) {
+            this.assessment.addPredefinedAnnotation(
+                    this.gradingConfig.getMistakeTypeById("jdEmpty"),
+                    new Location("src/edu/kit/informatik/RadixSort.java", i + 3, i + 5),
+                    defaultFeedbackText);
+        }
+
+        // to test custom scoring, add some custom annotations:
+        for (int i = 0; i < 3; i++) {
+            this.assessment.addCustomAnnotation(
+                    this.gradingConfig.getMistakeTypeById("custom"),
+                    new Location("src/edu/kit/informatik/RadixSort.java", i, i),
+                    defaultFeedbackText,
+                    -2.0 / 3.0);
+        }
+
+        this.assessment.addCustomAnnotation(
+                this.gradingConfig.getMistakeTypeById("custom"),
+                new Location("src/edu/kit/informatik/InsertionSort.java", 5, 5),
+                defaultFeedbackText,
+                0.0);
+
+        for (int i = 0; i < 2; i++) {
+            this.assessment.addCustomAnnotation(
+                    this.gradingConfig.getMistakeTypeById("custom"),
+                    new Location("src/edu/kit/informatik/BubbleSort.java", i, i),
+                    defaultFeedbackText,
+                    0.0);
+        }
+
+        this.assessment.addCustomAnnotation(
+                this.gradingConfig.getMistakeTypeById("custom"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 3, 3),
+                defaultFeedbackText,
+                -1.0);
+
+        // this should be the first annotation
+        this.assessment.addPredefinedAnnotation(
+                this.gradingConfig.getMistakeTypeById("jdTrivial"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 0, 0),
+                defaultFeedbackText);
+
+        this.assessment.submit();
+        // after submitting, we need to check that the global feedback looks as expected
+        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+
+        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        var feedbacks = ResultDTO.fetchDetailedFeedbacks(
+                this.connection.getClient(),
+                resultDTO.id(),
+                this.programmingSubmission.getParticipationId(),
+                resultDTO.feedbacks());
+
+        Collection<String> globalFeedbackLines = new ArrayList<>();
+        for (FeedbackDTO feedbackDTO : feedbacks) {
+            if (feedbackDTO.type() != FeedbackType.MANUAL_UNREFERENCED || feedbackDTO.visibility() != null) {
+                continue;
+            }
+
+            globalFeedbackLines.addAll(Arrays.asList(feedbackDTO.detailText().split("\\n")));
+        }
+
+        assertEquals(
+                List.of(
+                        "Funktionalität [-13P (Range: -20P -- ∞P)]",
+                        "    * JavaDoc Trivial [-5P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at line 1",
+                        "    * Custom Penalty [-3P]:",
+                        "        * src/edu/kit/informatik/RadixSort.java at lines 1, 2, 3 (-2P)",
+                        "        * src/edu/kit/informatik/InsertionSort.java at line 6 (0P)",
+                        "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 4 (-1P)",
+                        "    * JavaDoc Leer [-5P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at lines 1, 2, 3, 4, 5",
+                        "        * src/edu/kit/informatik/InsertionSort.java at line 6",
+                        "        * src/edu/kit/informatik/RadixSort.java at lines 4, 5, 6"),
+                globalFeedbackLines);
     }
 }

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
@@ -8,9 +8,9 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
-import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import edu.kit.kastel.sdq.artemis4j.grading.location.LocationFormatter;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 
 /**
@@ -126,9 +126,7 @@ final class AnnotationMerger {
 
         result.add(new Annotation(
                 firstAnnotation.getMistakeType(),
-                firstAnnotation.getFilePath(),
-                firstAnnotation.getStartLine(),
-                firstAnnotation.getEndLine(),
+                firstAnnotation.getLocation(),
                 customMessage,
                 firstAnnotation.getCustomScore().orElse(null),
                 firstAnnotation.getSource()));
@@ -136,42 +134,15 @@ final class AnnotationMerger {
         return result;
     }
 
-    private static String displayLocations(Annotation first, Collection<Annotation> others) {
-        Map<String, List<Annotation>> positionsByFile = others.stream()
-                .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
-
-        // if all annotations are in the same file, we don't need to display the filename
-        boolean withoutFilename = positionsByFile.size() == 1 && positionsByFile.containsKey(first.getFilePath());
-
-        StringJoiner joiner = new StringJoiner(", ");
-        // Format should look like this: File:(L1, L2, L3), File2:(L4, L5), File3:L5
-        for (Map.Entry<String, List<Annotation>> entry : positionsByFile.entrySet()) {
-            String path = entry.getKey();
-            List<Annotation> filePositions = entry.getValue();
-
-            String lines = filePositions.stream()
-                    .map(position -> "L%d".formatted(position.getStartLine()))
-                    .collect(Collectors.joining(", "));
-
-            if (filePositions.size() > 1 && !withoutFilename) {
-                lines = "(%s)".formatted(lines);
-            }
-
-            if (withoutFilename) {
-                joiner.add(lines);
-                continue;
-            }
-
-            joiner.add("%s:%s".formatted(getFilenameWithoutExtension(path), lines));
+    private static String displayLocations(Annotation first, Iterable<Annotation> others) {
+        LocationFormatter formatter = new LocationFormatter();
+        for (var annotation : others) {
+            formatter.addLocation(annotation.getLocation());
         }
 
-        return joiner.toString();
-    }
-
-    private static String getFilenameWithoutExtension(String path) {
-        String[] parts = path.split("[\\\\\\/]");
-        String file = parts[parts.length - 1];
-
-        return file.split("\\.")[0];
+        return formatter
+                .removeSharedPrefix(prefix -> first.getFilePath().startsWith(prefix))
+                .removeExtension(true)
+                .format();
     }
 }
