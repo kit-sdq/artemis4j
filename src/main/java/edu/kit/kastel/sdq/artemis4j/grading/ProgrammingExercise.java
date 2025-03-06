@@ -108,7 +108,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
     public List<ProgrammingSubmissionWithResults> fetchAllSubmissions() throws ArtemisNetworkException {
         // Artemis ignores the correction round since assessedByTutor is false
-        return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), 0, true).stream()
+        return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), 0, false).stream()
                 .map(dto -> new ProgrammingSubmissionWithResults(new ProgrammingSubmission(dto, this)))
                 .toList();
     }
