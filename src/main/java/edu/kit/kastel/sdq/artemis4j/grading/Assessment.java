@@ -111,6 +111,10 @@ public class Assessment extends ArtemisConnectionHolder {
         this.correctionRound = correctionRound;
         this.studentLocale = studentLocale;
 
+        if ((this.correctionRound == CorrectionRound.REVIEW) && !this.config.isReview()) {
+            throw new IllegalArgumentException("For a review round, the config must be a review config");
+        }
+
         // ensure that the feedbacks are fetched (some api endpoints do not return them)
         // and for long feedbacks, we need to fetch the detailed feedbacks
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
@@ -292,17 +296,28 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Removes an annotation from the assessment. If the annotation is not present,
-     * nothing happens.
+     * Removes an annotation from the assessment, or marks it as deleted if in review mode.
+     * If the annotation is not present, nothing happens.
      */
     public void removeAnnotation(Annotation annotation) {
-        this.annotations.remove(annotation);
+        if (this.correctionRound == CorrectionRound.REVIEW) {
+            // If the annotation is not present, nothing should happen
+            if (this.annotations.contains(annotation)) {
+                annotation.setDeletedInReview(true);
+            }
+        } else {
+            this.annotations.remove(annotation);
+        }
     }
 
     /**
-     * Clears all annotations from the assessment.
+     * Clears all annotations from the assessment. This operation is not permitted in review mode.
      */
     public void clearAnnotations() {
+        if (this.correctionRound == CorrectionRound.REVIEW) {
+            throw new IllegalInReviewException("Can't clear annotations in review mode");
+        }
+
         this.annotations.clear();
     }
 
