@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.Arrays;
@@ -19,14 +19,14 @@ public record CourseDTO(
 
     public static List<CourseDTO> fetchAll(ArtemisClient client) throws ArtemisNetworkException {
         var courses = ArtemisRequest.get()
-                .path(List.of("courses", "with-user-stats"))
+                .path(List.of("core", "courses", "with-user-stats"))
                 .executeAndDecode(client, CourseDTO[].class);
         return Arrays.asList(courses);
     }
 
     public static List<UserDTO> fetchAllTutors(ArtemisClient client, long courseId) throws ArtemisNetworkException {
         var tutors = ArtemisRequest.get()
-                .path(List.of("courses", courseId, "tutors"))
+                .path(List.of("core", "courses", courseId, "tutors"))
                 .executeAndDecode(client, UserDTO[].class);
         return Arrays.asList(tutors);
     }
@@ -34,14 +34,14 @@ public record CourseDTO(
     public static void removeTutor(ArtemisClient client, int courseId, String tutorLogin)
             throws ArtemisNetworkException {
         ArtemisRequest.delete()
-                .path(List.of("courses", courseId, "tutors", tutorLogin))
+                .path(List.of("core", "courses", courseId, "tutors", tutorLogin))
                 .execute(client);
     }
 
     public static List<GenericSubmissionDTO> fetchLockedSubmissions(ArtemisClient client, int courseId)
             throws ArtemisNetworkException {
         var submissions = ArtemisRequest.get()
-                .path(List.of("courses", courseId, "locked-submissions"))
+                .path(List.of("core", "courses", courseId, "locked-submissions"))
                 .executeAndDecodeMaybe(client, GenericSubmissionDTO[].class)
                 .orElse(new GenericSubmissionDTO[0]);
         return Arrays.asList(submissions);

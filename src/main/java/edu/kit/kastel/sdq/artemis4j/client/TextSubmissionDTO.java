@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -38,7 +38,7 @@ public record TextSubmissionDTO(
             ArtemisClient client, long exerciseId, int correctionRound, boolean filterAssessedByTutor)
             throws ArtemisNetworkException {
         return new ArrayList<>(Arrays.asList(ArtemisRequest.get()
-                .path(List.of("exercises", exerciseId, "text-submissions"))
+                .path(List.of("text", "exercises", exerciseId, "text-submissions"))
                 .param("assessedByTutor", filterAssessedByTutor)
                 .param("correction-round", correctionRound)
                 .executeAndDecode(client, TextSubmissionDTO[].class)));
@@ -57,7 +57,7 @@ public record TextSubmissionDTO(
             ArtemisClient client, long exerciseId, int correctionRound) throws ArtemisNetworkException {
         // Artemis returns an empty string if there is no new submission to lock
         return ArtemisRequest.get()
-                .path(List.of("exercises", exerciseId, "text-submission-without-assessment"))
+                .path(List.of("text", "exercises", exerciseId, "text-submission-without-assessment"))
                 .param("lock", true)
                 .param("correction-round", correctionRound)
                 .executeAndDecodeMaybe(client, TextSubmissionDTO.class);
@@ -66,7 +66,7 @@ public record TextSubmissionDTO(
     public static TextSubmissionDTO openAssessment(ArtemisClient client, long submissionId, int correctionRound)
             throws ArtemisNetworkException {
         var res = ArtemisRequest.get()
-                .path(List.of("text-submissions", submissionId, "for-assessment"))
+                .path(List.of("text", "text-submissions", submissionId, "for-assessment"))
                 .param("correction-round", correctionRound)
                 .executeAndDecode(client, InternalOpenAssessmentDTO.class);
 
@@ -97,7 +97,8 @@ public record TextSubmissionDTO(
     public static void cancelAssessment(ArtemisClient client, long submissionId, long participationId)
             throws ArtemisNetworkException {
         ArtemisRequest.post()
-                .path(List.of("participations", participationId, "submissions", submissionId, "cancel-assessment"))
+                .path(List.of(
+                        "text", "participations", participationId, "submissions", submissionId, "cancel-assessment"))
                 .execute(client);
     }
 
@@ -119,7 +120,7 @@ public record TextSubmissionDTO(
             List<TextBlockDTO> textBlocks)
             throws ArtemisNetworkException {
         ArtemisRequest.post()
-                .path(List.of("participations", participationId, "results", resultId, "submit-text-assessment"))
+                .path(List.of("text", "participations", participationId, "results", resultId, "submit-text-assessment"))
                 .body(Map.of(
                         "feedbacks", feedbacks,
                         "textBlocks", textBlocks))

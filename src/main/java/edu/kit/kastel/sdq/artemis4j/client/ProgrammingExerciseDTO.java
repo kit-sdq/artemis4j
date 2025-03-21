@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -22,7 +22,7 @@ public record ProgrammingExerciseDTO(
     public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, int courseId)
             throws ArtemisNetworkException {
         var exercises = ArtemisRequest.get()
-                .path(List.of("courses", courseId, "with-exercises"))
+                .path(List.of("core", "courses", courseId, "with-exercises"))
                 .executeAndDecode(client, ExerciseWrapperDTO.class);
         // Remove all non-programming exercises
         return exercises.exercises().stream()

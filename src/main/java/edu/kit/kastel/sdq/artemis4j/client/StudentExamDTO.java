@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.Arrays;
@@ -11,7 +11,7 @@ public record StudentExamDTO(@JsonProperty long id, @JsonProperty boolean submit
     public static List<StudentExamDTO> fetchAll(ArtemisClient client, int courseId, long examId)
             throws ArtemisNetworkException {
         return Arrays.asList(ArtemisRequest.get()
-                .path(List.of("courses", courseId, "exams", examId, "student-exams"))
+                .path(List.of("exam", "courses", courseId, "exams", examId, "student-exams"))
                 .executeAndDecode(client, StudentExamDTO[].class));
     }
 
@@ -19,7 +19,14 @@ public record StudentExamDTO(@JsonProperty long id, @JsonProperty boolean submit
             throws ArtemisNetworkException {
         ArtemisRequest.put()
                 .path(List.of(
-                        "courses", courseId, "exams", examId, "student-exams", studentExamId, "toggle-to-submitted"))
+                        "exam",
+                        "courses",
+                        courseId,
+                        "exams",
+                        examId,
+                        "student-exams",
+                        studentExamId,
+                        "toggle-to-submitted"))
                 .body("{}")
                 .execute(client);
     }
