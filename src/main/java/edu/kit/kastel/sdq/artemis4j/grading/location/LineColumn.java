@@ -48,7 +48,7 @@ public record LineColumn(int line, Optional<Integer> column) implements Comparab
             return false;
         }
 
-        return this.line() == that.line() && this.column() == that.column();
+        return this.line() == that.line() && this.column().equals(that.column());
     }
 
     @Override

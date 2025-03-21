@@ -604,40 +604,8 @@ public class Assessment extends ArtemisConnectionHolder {
                 continue;
             }
 
-            // Header per mistake type
-            if (ratingGroup.isScoringGroup() && mistakeType.shouldScore()) {
-                lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(
-                        mistakeType.getButtonText(), mistakePoints.get().score()));
-            } else {
-                // We don't want to display points if the rating group does not score
-                lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING.format(mistakeType.getButtonText()));
-            }
-
-            var annotationsByFilePath = annotationsWithType.stream()
-                    .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
-
-            for (var annotationsForPath : annotationsByFilePath.values()) {
-                // Individual annotations
-                Predicate<Annotation> hasScore = a -> a.getCustomScore().isPresent() && ratingGroup.isScoringGroup();
-
-                // separate annotations with and without score
-                List<Annotation> annotationsWithScore =
-                        annotationsForPath.stream().filter(hasScore).toList();
-                List<Annotation> annotationsWithoutScore = annotationsForPath.stream()
-                        .filter(Predicate.not(hasScore))
-                        .toList();
-
-                // For custom annotations, we have '* <file> at line <line> (<score>P)'
-                if (!annotationsWithScore.isEmpty()) {
-                    lines.add(this.formatGlobalFeedbackAnnotations(annotationsWithScore, true));
-                }
-
-                // Otherwise, it's just '* <file> at line <line>'
-                // Lines are zero-indexed
-                if (!annotationsWithoutScore.isEmpty()) {
-                    lines.add(this.formatGlobalFeedbackAnnotations(annotationsWithoutScore, false));
-                }
-            }
+            lines.addAll(this.makeFeedbackForMistakeType(
+                    ratingGroup, mistakeType, annotationsWithType, mistakePoints.get()));
         }
 
         // No feedback, so return early
@@ -670,5 +638,48 @@ public class Assessment extends ArtemisConnectionHolder {
             }
             return feedbacks;
         }
+    }
+
+    private List<TranslatableString> makeFeedbackForMistakeType(
+            RatingGroup ratingGroup,
+            MistakeType mistakeType,
+            Collection<Annotation> annotationsWithType,
+            Points mistakePoints) {
+        List<TranslatableString> lines = new ArrayList<>();
+
+        // Header per mistake type
+        if (ratingGroup.isScoringGroup() && mistakeType.shouldScore()) {
+            lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(mistakeType.getButtonText(), mistakePoints.score()));
+        } else {
+            // We don't want to display points if the rating group does not score
+            lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING.format(mistakeType.getButtonText()));
+        }
+
+        var annotationsByFilePath = annotationsWithType.stream()
+                .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
+
+        for (var annotationsForPath : annotationsByFilePath.values()) {
+            // Individual annotations
+            Predicate<Annotation> hasScore = a -> a.getCustomScore().isPresent() && ratingGroup.isScoringGroup();
+
+            // separate annotations with and without score
+            List<Annotation> annotationsWithScore =
+                    annotationsForPath.stream().filter(hasScore).toList();
+            List<Annotation> annotationsWithoutScore =
+                    annotationsForPath.stream().filter(Predicate.not(hasScore)).toList();
+
+            // For custom annotations, we have '* <file> at line <line> (<score>P)'
+            if (!annotationsWithScore.isEmpty()) {
+                lines.add(this.formatGlobalFeedbackAnnotations(annotationsWithScore, true));
+            }
+
+            // Otherwise, it's just '* <file> at line <line>'
+            // Lines are zero-indexed
+            if (!annotationsWithoutScore.isEmpty()) {
+                lines.add(this.formatGlobalFeedbackAnnotations(annotationsWithoutScore, false));
+            }
+        }
+
+        return lines;
     }
 }

@@ -60,9 +60,6 @@ public record Location(String filePath, LineColumn start, LineColumn end) implem
 
     @Override
     public int hashCode() {
-        int result = Objects.hashCode(this.filePath());
-        result = 31 * result + Objects.hashCode(this.start());
-        result = 31 * result + Objects.hashCode(this.end());
-        return result;
+        return Objects.hash(this.filePath(), this.start(), this.end());
     }
 }
