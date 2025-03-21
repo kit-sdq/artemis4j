@@ -60,7 +60,7 @@ public record FeedbackDTO(
 
     public static String fetchLongFeedback(ArtemisClient client, long feedbackId) throws ArtemisNetworkException {
         return ArtemisRequest.get()
-                .path(List.of("feedbacks", feedbackId, "long-feedback"))
+                .path(List.of("assessment", "feedbacks", feedbackId, "long-feedback"))
                 .executeAndDecode(client, String.class);
     }
 

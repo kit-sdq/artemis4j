@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.List;
@@ -13,7 +13,7 @@ public record AssessmentStatsDTO(
 
     public static AssessmentStatsDTO fetch(ArtemisClient client, long exerciseId) throws ArtemisNetworkException {
         return ArtemisRequest.get()
-                .path(List.of("exercises", exerciseId, "stats-for-assessment-dashboard"))
+                .path(List.of("exercise", "exercises", exerciseId, "stats-for-assessment-dashboard"))
                 .executeAndDecode(client, AssessmentStatsDTO.class);
     }
 

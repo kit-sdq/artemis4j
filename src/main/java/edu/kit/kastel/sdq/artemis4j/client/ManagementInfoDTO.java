@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.List;
@@ -14,7 +14,7 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 public record ManagementInfoDTO(@JsonProperty String sshCloneURLTemplate) {
     public static ManagementInfoDTO fetch(ArtemisClient client) throws ArtemisNetworkException {
         return ArtemisRequest.get()
-                .path(List.of("info"))
+                .path(List.of("management", "info"))
                 .managementRequest(true)
                 .executeAndDecode(client, ManagementInfoDTO.class);
     }
