@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.io.IOException;
@@ -51,7 +51,7 @@ public class ArtemisClient {
 
         var payload = ArtemisClient.encodeJSON(new AuthenticationDTO(username, password));
         var request = new Request.Builder()
-                .url(artemis.url(List.of("public", "authenticate"), null))
+                .url(artemis.url(List.of("core", "public", "authenticate"), null))
                 .post(payload)
                 .build();
 

@@ -57,7 +57,7 @@ public record ResultDTO(
     private static List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long resultId, long participationId)
             throws ArtemisNetworkException {
         return Arrays.asList(ArtemisRequest.get()
-                .path(List.of("participations", participationId, "results", resultId, "details"))
+                .path(List.of("assessment", "participations", participationId, "results", resultId, "details"))
                 .executeAndDecode(client, FeedbackDTO[].class));
     }
 

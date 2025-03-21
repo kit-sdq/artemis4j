@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -34,7 +34,7 @@ public record ProgrammingSubmissionDTO(
             ArtemisClient client, long exerciseId, int correctionRound, boolean filterAssessedByTutor)
             throws ArtemisNetworkException {
         return new ArrayList<>(Arrays.asList(ArtemisRequest.get()
-                .path(List.of("exercises", exerciseId, "programming-submissions"))
+                .path(List.of("programming", "exercises", exerciseId, "programming-submissions"))
                 .param("assessedByTutor", filterAssessedByTutor)
                 .param("correction-round", correctionRound)
                 .executeAndDecode(client, ProgrammingSubmissionDTO[].class)));
@@ -43,7 +43,7 @@ public record ProgrammingSubmissionDTO(
     public static ProgrammingSubmissionDTO lock(ArtemisClient client, long submissionId, int correctionRound)
             throws ArtemisNetworkException {
         return ArtemisRequest.get()
-                .path(List.of("programming-submissions", submissionId, "lock"))
+                .path(List.of("programming", "programming-submissions", submissionId, "lock"))
                 .param("correction-round", correctionRound)
                 .executeAndDecode(client, ProgrammingSubmissionDTO.class);
     }
@@ -52,7 +52,7 @@ public record ProgrammingSubmissionDTO(
             ArtemisClient client, long exerciseId, int correctionRound) throws ArtemisNetworkException {
         // Artemis returns an empty string if there is no new submission to lock
         return ArtemisRequest.get()
-                .path(List.of("exercises", exerciseId, "programming-submission-without-assessment"))
+                .path(List.of("programming", "exercises", exerciseId, "programming-submission-without-assessment"))
                 .param("lock", true)
                 .param("correction-round", correctionRound)
                 .executeAndDecodeMaybe(client, ProgrammingSubmissionDTO.class);
@@ -60,14 +60,14 @@ public record ProgrammingSubmissionDTO(
 
     public static void cancelAssessment(ArtemisClient client, long submissionId) throws ArtemisNetworkException {
         ArtemisRequest.put()
-                .path(List.of("programming-submissions", submissionId, "cancel-assessment"))
+                .path(List.of("programming", "programming-submissions", submissionId, "cancel-assessment"))
                 .execute(client);
     }
 
     public static void saveAssessment(ArtemisClient client, long participationId, boolean submit, ResultDTO result)
             throws ArtemisNetworkException {
         ArtemisRequest.put()
-                .path(List.of("participations", participationId, "manual-results"))
+                .path(List.of("programming", "participations", participationId, "manual-results"))
                 .param("submit", submit)
                 .body(result)
                 .execute(client);
