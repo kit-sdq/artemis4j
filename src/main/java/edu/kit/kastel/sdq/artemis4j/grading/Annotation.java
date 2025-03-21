@@ -8,7 +8,6 @@ import java.util.Optional;
 import java.util.UUID;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
-import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
 import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
@@ -44,10 +43,7 @@ public final class Annotation {
     public Annotation(AnnotationDTO dto, MistakeType mistakeType) {
         this.uuid = dto.uuid();
         this.type = mistakeType;
-        this.location = new Location(
-                dto.classFilePath(),
-                new LineColumn(dto.startLine(), Optional.ofNullable(dto.startColumn())),
-                new LineColumn(dto.endLine(), Optional.ofNullable(dto.endColumn())));
+        this.location = new Location(dto.classFilePath(), dto.start(), dto.end());
         this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
         this.customMessage = dto.customMessageForJSON();
         this.customScore = dto.customPenaltyForJSON();
@@ -216,10 +212,8 @@ public final class Annotation {
         return new AnnotationDTO(
                 uuid,
                 type.getId(),
-                getStartLine(),
-                getLocation().start().column().orElse(null),
-                getEndLine(),
-                getLocation().end().column().orElse(null),
+                getLocation().start(),
+                getLocation().end(),
                 getFilePath(),
                 customMessage,
                 customScore,
