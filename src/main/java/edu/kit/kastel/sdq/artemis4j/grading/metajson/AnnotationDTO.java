@@ -14,12 +14,6 @@ import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
 public record AnnotationDTO(
         @JsonProperty String uuid,
         @JsonProperty String mistakeTypeId,
-        // TODO: remove these fields
-        @JsonProperty Integer startLine,
-        @JsonProperty Integer startColumn,
-        @JsonProperty Integer endLine,
-        @JsonProperty Integer endColumn,
-        // TODO: _________________________
         @JsonProperty LineColumn start,
         @JsonProperty LineColumn end,
         @JsonProperty String classFilePath,
