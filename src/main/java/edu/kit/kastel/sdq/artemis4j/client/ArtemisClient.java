@@ -14,6 +14,7 @@ import com.fasterxml.jackson.core.StreamReadFeature;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.json.JsonMapper;
+import com.fasterxml.jackson.datatype.jdk8.Jdk8Module;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import com.fasterxml.jackson.module.paramnames.ParameterNamesModule;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
@@ -163,7 +164,8 @@ public class ArtemisClient {
                 .addModule(new JavaTimeModule())
                 .addModule(new ParameterNamesModule())
                 .build()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL);
+                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .registerModule(new Jdk8Module());
 
         oom.setVisibility(oom.getSerializationConfig()
                 .getDefaultVisibilityChecker()
