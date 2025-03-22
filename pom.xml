@@ -85,6 +85,12 @@
       <version>${jackson.version}</version>
     </dependency>
     <dependency>
+      <!-- This is necessary to (de)serialize Optional -->
+      <groupId>com.fasterxml.jackson.datatype</groupId>
+      <artifactId>jackson-datatype-jdk8</artifactId>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
       <groupId>com.fasterxml.jackson.module</groupId>
       <artifactId>jackson-module-parameter-names</artifactId>
       <version>${jackson.version}</version>

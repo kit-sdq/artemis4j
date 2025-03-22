@@ -20,6 +20,10 @@ public record Location(String filePath, LineColumn start, LineColumn end) implem
      * @param end the end of the location
      */
     public Location {
+        if (start == null || end == null) {
+            throw new IllegalArgumentException("start (%s) and end (%s) must not be null".formatted(start, end));
+        }
+
         if (start.compareTo(end) > 0) {
             throw new IllegalArgumentException("start %s must be before end %s".formatted(start, end));
         }
