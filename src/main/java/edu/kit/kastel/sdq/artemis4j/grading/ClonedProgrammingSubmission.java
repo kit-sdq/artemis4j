@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.io.IOException;
@@ -13,8 +13,6 @@ import edu.kit.kastel.sdq.artemis4j.grading.git.VCSTokenCloningStrategy;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Represents a submission and associated tests repository that has been cloned
@@ -23,7 +21,6 @@ import org.slf4j.LoggerFactory;
  * Most of the logic in this class is required to support cloning via SSH.
  */
 public class ClonedProgrammingSubmission implements AutoCloseable {
-    private static final Logger log = LoggerFactory.getLogger(ClonedProgrammingSubmission.class);
     private final ProgrammingSubmission submission;
     private final Path testsPath;
     private final Path submissionPath;
@@ -116,7 +113,7 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
                     .sorted(Comparator.reverseOrder())
                     .toList();
             for (var file : filesInDirectory) {
-                file.delete();
+                Files.delete(file.toPath());
             }
         }
     }

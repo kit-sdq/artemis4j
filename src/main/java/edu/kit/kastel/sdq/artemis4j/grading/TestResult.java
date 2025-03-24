@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.Optional;
@@ -17,6 +17,10 @@ public class TestResult {
 
         this.id = dto.id();
         this.dto = dto;
+    }
+
+    public long getId() {
+        return id;
     }
 
     public String getTestName() {

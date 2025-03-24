@@ -338,7 +338,7 @@ public class Assessment extends ArtemisConnectionHolder {
     public double calculateTotalPoints() {
         double points = this.calculateTotalPointsOfAnnotations();
         points += this.calculateTotalPointsOfTests();
-        return Math.min(Math.max(points, 0.0), this.getMaxPoints());
+        return Math.clamp(points, 0.0, this.getMaxPoints());
     }
 
     /**

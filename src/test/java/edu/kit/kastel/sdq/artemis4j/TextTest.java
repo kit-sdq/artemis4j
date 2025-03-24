@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2023-2024. */
+/* Licensed under EPL-2.0 2023-2025. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import java.util.List;
@@ -36,7 +36,7 @@ class TextTest {
     private TextSubmission textSubmission;
 
     @BeforeAll
-    public void checkConfiguration() {
+    void checkConfiguration() {
         Assertions.assertNotNull(INSTRUCTOR_USER);
         Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
         Assertions.assertNotNull(STUDENT_USER);
@@ -46,7 +46,7 @@ class TextTest {
     }
 
     @BeforeEach
-    public void setup() throws ArtemisClientException {
+    void setup() throws ArtemisClientException {
         this.artemisInstance = new ArtemisInstance(ARTEMIS_URL);
         this.connection = ArtemisConnection.connectWithUsernamePassword(
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
