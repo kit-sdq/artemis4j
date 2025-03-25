@@ -74,6 +74,8 @@ public class Assessment extends ArtemisConnectionHolder {
      * the other parts are passed a negative score that is as close to zero as possible.
      * <p>
      * This negative score is defined by the following constant.
+     * <p>
+     * Neither -0.0 nor setting the positive flag to false was accepted by artemis.
      */
     private static final double GLOBAL_FEEDBACK_OTHER_PARTS_SCORE = -Double.MIN_VALUE;
 
