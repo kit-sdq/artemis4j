@@ -1,13 +1,17 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
+import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
@@ -16,6 +20,9 @@ import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
+import edu.kit.kastel.sdq.artemis4j.grading.location.ComparatorUtils;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
+import edu.kit.kastel.sdq.artemis4j.grading.location.LocationFormatter;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.MetaFeedbackMapper;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
@@ -47,12 +54,30 @@ public class Assessment extends ArtemisConnectionHolder {
     private static final FormatString GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING =
             new FormatString(new MessageFormat("    * {0}:"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION =
-            new FormatString(new MessageFormat("        * {0} " + "at line {1,number}"));
+            new FormatString(new MessageFormat("        * {0} at line {1}"));
+    private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_MULTIPLE =
+            new FormatString(new MessageFormat("        * {0} at lines {1}"));
     private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY =
-            new FormatString(new MessageFormat("        * {0} at line {1,number} ({2,number,##.###}P)"));
+            new FormatString(new MessageFormat("        * {0} at line {1} ({2,number,##.###}P)"));
+    private static final FormatString GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY_MULTIPLE =
+            new FormatString(new MessageFormat("        * {0} at lines {1} ({2,number,##.###}P)"));
     private static final FormatString GLOBAL_FEEDBACK_LIMIT_OVERRUN = new FormatString(
             new MessageFormat("    * Note:" + " The sum of penalties hit the limits for this rating group."));
     private static final FormatString NO_FEEDBACK_DUMMY = new FormatString("The tutor has made no annotations.");
+
+    /**
+     * The global feedback containing a list of all annotations that were made, might be too large. In this case,
+     * the feedback is split into multiple parts. Artemis will display feedbacks that subtract points in a different
+     * section than feedbacks that do not subtract points.
+     * <p>
+     * With only the first feedback deducting points, the rest would be displayed in the info section. To prevent this,
+     * the other parts are passed a negative score that is as close to zero as possible.
+     * <p>
+     * This negative score is defined by the following constant.
+     * <p>
+     * Neither -0.0 nor setting the positive flag to false was accepted by artemis.
+     */
+    private static final double GLOBAL_FEEDBACK_OTHER_PARTS_SCORE = -Double.MIN_VALUE;
 
     private final ResultDTO lockingResult;
     private final List<Annotation> annotations;
@@ -122,7 +147,11 @@ public class Assessment extends ArtemisConnectionHolder {
      * @return An unmodifiable list of annotations, possibly empty but never null.
      */
     public List<Annotation> getAnnotations(MistakeType mistakeType) {
-        return this.annotations.stream()
+        return this.getAnnotations(mistakeType, this.annotations);
+    }
+
+    private List<Annotation> getAnnotations(MistakeType mistakeType, Collection<Annotation> annotations) {
+        return annotations.stream()
                 .filter(a -> a.getMistakeType().equals(mistakeType))
                 .toList();
     }
@@ -147,13 +176,23 @@ public class Assessment extends ArtemisConnectionHolder {
      */
     public Annotation addPredefinedAnnotation(
             MistakeType mistakeType, String filePath, int startLine, int endLine, String customMessage) {
+        return this.addPredefinedAnnotation(mistakeType, new Location(filePath, startLine, endLine), customMessage);
+    }
+
+    /**
+     * Adds a non-custom manual annotation to the assessment.
+     *
+     * @param mistakeType   Must not be a custom mistake type
+     * @param customMessage May be null if no custom message is provided
+     */
+    public Annotation addPredefinedAnnotation(MistakeType mistakeType, Location location, String customMessage) {
         if (mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is a custom annotation");
         }
 
         var source =
                 this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, null, source);
+        var annotation = new Annotation(mistakeType, location, customMessage, null, source);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -171,6 +210,18 @@ public class Assessment extends ArtemisConnectionHolder {
             int endLine,
             String customMessage,
             double customScore) {
+        return this.addCustomAnnotation(
+                mistakeType, new Location(filePath, startLine, endLine), customMessage, customScore);
+    }
+
+    /**
+     * Adds a custom manual annotation to the assessment.
+     *
+     * @param mistakeType   Must be a custom mistake type
+     * @param customMessage May not be null
+     */
+    public Annotation addCustomAnnotation(
+            MistakeType mistakeType, Location location, String customMessage, double customScore) {
         if (!mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is not a custom annotation");
         }
@@ -182,16 +233,14 @@ public class Assessment extends ArtemisConnectionHolder {
 
         var source =
                 this.correctionRound == 0 ? AnnotationSource.MANUAL_FIRST_ROUND : AnnotationSource.MANUAL_SECOND_ROUND;
-        var annotation = new Annotation(mistakeType, filePath, startLine, endLine, customMessage, customScore, source);
+        var annotation = new Annotation(mistakeType, location, customMessage, customScore, source);
         this.annotations.add(annotation);
         return annotation;
     }
 
     public Annotation addAutograderAnnotation(
             MistakeType mistakeType,
-            String filePath,
-            int startLine,
-            int endLine,
+            Location location,
             String explanation,
             String checkName,
             String problemType,
@@ -199,9 +248,7 @@ public class Assessment extends ArtemisConnectionHolder {
         Double customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
         var annotation = new Annotation(
                 mistakeType,
-                filePath,
-                startLine,
-                endLine,
+                location,
                 explanation,
                 customScore,
                 AnnotationSource.AUTOGRADER,
@@ -378,13 +425,8 @@ public class Assessment extends ArtemisConnectionHolder {
                 this.programmingSubmission.getId(), relativeScore, feedbacks, this.lockingResult);
 
         // Sanity check
-        double feedbackPoints = Math.min(
-                Math.max(
-                        result.feedbacks().stream()
-                                .mapToDouble(FeedbackDTO::credits)
-                                .sum(),
-                        0.0),
-                this.getMaxPoints());
+        double feedbackPoints = Math.clamp(
+                result.feedbacks().stream().mapToDouble(FeedbackDTO::credits).sum(), 0.0, this.getMaxPoints());
         if (Math.abs(absoluteScore - feedbackPoints) > 1e-7) {
             throw new IllegalStateException("Feedback points do not match the calculated points. Calculated "
                     + absoluteScore + " but feedbacks sum up to " + feedbackPoints + " points.");
@@ -423,7 +465,7 @@ public class Assessment extends ArtemisConnectionHolder {
                 .map(this::createInlineFeedback)
                 .toList());
 
-        // We have on (or more if they are too long) global feedback per rating group
+        // We have one (or more if they are too long) global feedback per rating group
         // These feedbacks deduct points
         feedbacks.addAll(this.config.getRatingGroups().stream()
                 .flatMap(r -> this.createGlobalFeedback(r).stream())
@@ -453,8 +495,8 @@ public class Assessment extends ArtemisConnectionHolder {
         return feedbacks;
     }
 
-    private FeedbackDTO createInlineFeedback(Map.Entry<Integer, List<Annotation>> annotations) {
-        var sampleAnnotation = annotations.getValue().get(0);
+    private FeedbackDTO createInlineFeedback(Map.Entry<Integer, ? extends List<Annotation>> annotations) {
+        var sampleAnnotation = annotations.getValue().getFirst();
 
         String text =
                 "File " + sampleAnnotation.getFilePathWithoutType() + " at line " + sampleAnnotation.getDisplayLine();
@@ -492,6 +534,40 @@ public class Assessment extends ArtemisConnectionHolder {
         return FeedbackDTO.newManual(0.0, text, reference, detailText);
     }
 
+    private TranslatableString formatGlobalFeedbackAnnotations(List<Annotation> annotations, boolean hasScore) {
+        LocationFormatter formatter = new LocationFormatter()
+                // .enableLineMerging()
+                .removeSharedPrefix(true)
+                // only show the starting line number
+                .setLocationToString(location -> "" + (location.start().line() + 1));
+
+        for (var annotation : annotations) {
+            formatter.addLocation(annotation.getLocation());
+        }
+
+        String filePath = annotations.getFirst().getFilePath();
+
+        if (hasScore) {
+            double customScore = annotations.stream()
+                    .mapToDouble(a -> a.getCustomScore().get())
+                    .sum();
+
+            FormatString formatString = GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY_MULTIPLE;
+            if (annotations.size() == 1) {
+                formatString = GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY;
+            }
+
+            return formatString.format(filePath, formatter.format(), customScore);
+        } else {
+            FormatString formatString = GLOBAL_FEEDBACK_ANNOTATION_MULTIPLE;
+            if (annotations.size() == 1) {
+                formatString = GLOBAL_FEEDBACK_ANNOTATION;
+            }
+
+            return formatString.format(filePath, formatter.format());
+        }
+    }
+
     /**
      * This builds one (or more if the feedback is too long) global feedback for a
      * rating group. The feedback deducts points, and lists all annotations that are
@@ -506,37 +582,32 @@ public class Assessment extends ArtemisConnectionHolder {
         var header = GLOBAL_FEEDBACK_HEADER.format(
                 ratingGroup.getDisplayName(), points.score(), ratingGroup.getMinPenalty(), ratingGroup.getMaxPenalty());
 
-        // First collect only the lines so that we can later split the feedback by lines
-        List<TranslatableString> lines = new ArrayList<>();
+        // group annotations by mistake type
+        List<Map.Entry<MistakeType, List<Annotation>>> annotationsByType = new ArrayList<>();
         for (var mistakeType : ratingGroup.getMistakeTypes()) {
-            Optional<Points> mistakePoints = this.calculatePointsForMistakeType(mistakeType);
-            if (mistakePoints.isPresent()) {
-
-                // Header per mistake type
-                if (ratingGroup.isScoringGroup() && mistakeType.shouldScore()) {
-                    lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(
-                            mistakeType.getButtonText(), mistakePoints.get().score()));
-                } else {
-                    // We don't want to display points if the rating group does not score
-                    lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING.format(mistakeType.getButtonText()));
-                }
-
-                // Individual annotations
-                for (var annotation : this.getAnnotations(mistakeType)) {
-                    // For custom annotations, we have '* <file> at line <line> (<score>P)'
-                    // Otherwise, it's just '* <file> at line <line>'
-                    // Lines are zero-indexed
-                    if (annotation.getCustomScore().isPresent() && ratingGroup.isScoringGroup()) {
-                        lines.add(GLOBAL_FEEDBACK_ANNOTATION_CUSTOM_PENALTY.format(
-                                annotation.getFilePath(),
-                                annotation.getDisplayLine(),
-                                annotation.getCustomScore().get()));
-                    } else {
-                        lines.add(GLOBAL_FEEDBACK_ANNOTATION.format(
-                                annotation.getFilePath(), annotation.getDisplayLine()));
-                    }
-                }
+            var annotationsWithType = this.getAnnotations(mistakeType, this.annotations);
+            if (!annotationsWithType.isEmpty()) {
+                annotationsByType.add(Map.entry(mistakeType, annotationsWithType));
             }
+        }
+
+        // Sort the entries by their size, then by their elements location
+        annotationsByType.sort(Map.Entry.comparingByValue(ComparatorUtils.shortestFirst(
+                ComparatorUtils.compareByElement(Comparator.comparing(Annotation::getLocation)))));
+
+        // First collect only the lines so that we can later split the feedback by lines
+        Collection<TranslatableString> lines = new ArrayList<>();
+        for (var entry : annotationsByType) {
+            MistakeType mistakeType = entry.getKey();
+            List<Annotation> annotationsWithType = entry.getValue();
+
+            Optional<Points> mistakePoints = this.calculatePointsForMistakeType(mistakeType);
+            if (mistakePoints.isEmpty()) {
+                continue;
+            }
+
+            lines.addAll(this.makeFeedbackForMistakeType(
+                    ratingGroup, mistakeType, annotationsWithType, mistakePoints.get()));
         }
 
         // No feedback, so return early
@@ -561,10 +632,56 @@ public class Assessment extends ArtemisConnectionHolder {
             List<FeedbackDTO> feedbacks = new ArrayList<>();
             for (int i = 0; i < feedbackTexts.size(); i++) {
                 // Only the first feedback deducts points
-                feedbacks.add(FeedbackDTO.newVisibleManualUnreferenced(
-                        i == 0 ? points.score() : 0.0, null, feedbackTexts.get(i)));
+                double score = points.score();
+                if (i != 0) {
+                    score = GLOBAL_FEEDBACK_OTHER_PARTS_SCORE;
+                }
+                feedbacks.add(FeedbackDTO.newVisibleManualUnreferenced(score, null, feedbackTexts.get(i)));
             }
             return feedbacks;
         }
+    }
+
+    private List<TranslatableString> makeFeedbackForMistakeType(
+            RatingGroup ratingGroup,
+            MistakeType mistakeType,
+            Collection<Annotation> annotationsWithType,
+            Points mistakePoints) {
+        List<TranslatableString> lines = new ArrayList<>();
+
+        // Header per mistake type
+        if (ratingGroup.isScoringGroup() && mistakeType.shouldScore()) {
+            lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER.format(mistakeType.getButtonText(), mistakePoints.score()));
+        } else {
+            // We don't want to display points if the rating group does not score
+            lines.add(GLOBAL_FEEDBACK_MISTAKE_TYPE_HEADER_NONSCORING.format(mistakeType.getButtonText()));
+        }
+
+        var annotationsByFilePath = annotationsWithType.stream()
+                .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
+
+        for (var annotationsForPath : annotationsByFilePath.values()) {
+            // Individual annotations
+            Predicate<Annotation> hasScore = a -> a.getCustomScore().isPresent() && ratingGroup.isScoringGroup();
+
+            // separate annotations with and without score
+            List<Annotation> annotationsWithScore =
+                    annotationsForPath.stream().filter(hasScore).toList();
+            List<Annotation> annotationsWithoutScore =
+                    annotationsForPath.stream().filter(Predicate.not(hasScore)).toList();
+
+            // For custom annotations, we have '* <file> at line <line> (<score>P)'
+            if (!annotationsWithScore.isEmpty()) {
+                lines.add(this.formatGlobalFeedbackAnnotations(annotationsWithScore, true));
+            }
+
+            // Otherwise, it's just '* <file> at line <line>'
+            // Lines are zero-indexed
+            if (!annotationsWithoutScore.isEmpty()) {
+                lines.add(this.formatGlobalFeedbackAnnotations(annotationsWithoutScore, false));
+            }
+        }
+
+        return lines;
     }
 }

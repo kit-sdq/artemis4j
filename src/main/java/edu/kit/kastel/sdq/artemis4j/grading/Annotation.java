@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.ArrayList;
@@ -8,6 +8,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 
@@ -20,9 +21,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 public final class Annotation {
     private final String uuid;
     private final MistakeType type;
-    private final ArtemisPath filePath;
-    private final int startLine;
-    private final int endLine;
+    private final Location location;
     private final AnnotationSource source;
     private String customMessage;
     private Double customScore;
@@ -44,9 +43,7 @@ public final class Annotation {
     public Annotation(AnnotationDTO dto, MistakeType mistakeType) {
         this.uuid = dto.uuid();
         this.type = mistakeType;
-        this.filePath = new ArtemisPath(dto.classFilePath());
-        this.startLine = dto.startLine();
-        this.endLine = dto.endLine();
+        this.location = new Location(dto.classFilePath(), dto.start(), dto.end());
         this.source = dto.source() != null ? dto.source() : AnnotationSource.UNKNOWN;
         this.customMessage = dto.customMessageForJSON();
         this.customScore = dto.customPenaltyForJSON();
@@ -56,20 +53,16 @@ public final class Annotation {
 
     Annotation(
             MistakeType mistakeType,
-            String filePath,
-            int startLine,
-            int endLine,
+            Location location,
             String customMessage,
             Double customScore,
             AnnotationSource source) {
-        this(mistakeType, filePath, startLine, endLine, customMessage, customScore, source, List.of(), null);
+        this(mistakeType, location, customMessage, customScore, source, List.of(), null);
     }
 
     Annotation(
             MistakeType mistakeType,
-            String filePath,
-            int startLine,
-            int endLine,
+            Location location,
             String customMessage,
             Double customScore,
             AnnotationSource source,
@@ -89,9 +82,7 @@ public final class Annotation {
 
         this.uuid = generateUUID();
         this.type = mistakeType;
-        this.filePath = new ArtemisPath(filePath);
-        this.startLine = startLine;
-        this.endLine = endLine;
+        this.location = location;
         this.customMessage = customMessage;
         this.customScore = customScore;
         this.source = source;
@@ -111,11 +102,18 @@ public final class Annotation {
     }
 
     /**
+     * Returns the location of this annotation in the source code.
+     */
+    public Location getLocation() {
+        return this.location;
+    }
+
+    /**
      * The path of the file this annotation is associated with, including its file
      * ending
      */
     public String getFilePath() {
-        return this.filePath.toString();
+        return this.getLocation().filePath();
     }
 
     /**
@@ -123,14 +121,14 @@ public final class Annotation {
      * ending
      */
     public String getFilePathWithoutType() {
-        return this.filePath.toString().replace(".java", "");
+        return this.getFilePath().replace(".java", "");
     }
 
     /**
      * The line in the file where this annotation starts (0-based)
      */
     public int getStartLine() {
-        return startLine;
+        return this.getLocation().start().line();
     }
 
     /**
@@ -138,14 +136,14 @@ public final class Annotation {
      * the user e.g. in Artemis)
      */
     public int getDisplayLine() {
-        return startLine + 1;
+        return this.getStartLine() + 1;
     }
 
     /**
      * The line in the file where this annotation ends (0-based)
      */
     public int getEndLine() {
-        return endLine;
+        return this.getLocation().end().line();
     }
 
     /**
@@ -214,9 +212,9 @@ public final class Annotation {
         return new AnnotationDTO(
                 uuid,
                 type.getId(),
-                startLine,
-                endLine,
-                filePath.toString(),
+                getLocation().start(),
+                getLocation().end(),
+                getFilePath(),
                 customMessage,
                 customScore,
                 source,
@@ -239,23 +237,5 @@ public final class Annotation {
 
     private static String generateUUID() {
         return UUID.randomUUID().toString();
-    }
-
-    /**
-     * A wrapper class that helps to ensure that paths are in the format that artemis expects.
-     * <p>
-     * In the past there were problems with paths that contained backslashes. This class ensures that this will never happen again.
-     *
-     * @param path the path
-     */
-    private record ArtemisPath(String path) {
-        private ArtemisPath {
-            path = path.replace("\\", "/");
-        }
-
-        @Override
-        public String toString() {
-            return this.path;
-        }
     }
 }

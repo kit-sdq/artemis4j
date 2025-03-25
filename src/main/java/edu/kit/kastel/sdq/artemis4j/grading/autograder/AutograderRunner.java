@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.autograder;
 
 import java.io.IOException;
@@ -16,6 +16,8 @@ import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.api.loader.AutograderLoader;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.ClonedProgrammingSubmission;
+import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
+import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 
 public final class AutograderRunner {
     private AutograderRunner() {}
@@ -71,9 +73,10 @@ public final class AutograderRunner {
                 var position = problem.getPosition();
                 assessment.addAutograderAnnotation(
                         mistakeType,
-                        "src/" + position.path().toString(),
-                        position.startLine() - 1,
-                        position.endLine() - 1,
+                        new Location(
+                                "src/" + position.path().toString(),
+                                new LineColumn(position.startLine() - 1, position.startColumn() - 1),
+                                new LineColumn(position.endLine() - 1, position.endColumn() - 1)),
                         autograder.translateMessage(problem.getExplanation()),
                         problem.getCheckName(),
                         problem.getType(),
