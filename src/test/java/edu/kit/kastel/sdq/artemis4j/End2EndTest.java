@@ -55,7 +55,7 @@ class End2EndTest {
     private GradingConfig gradingConfig;
 
     @BeforeAll
-    public void checkConfiguration() {
+    void checkConfiguration() {
         Assertions.assertNotNull(INSTRUCTOR_USER);
         Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
         Assertions.assertNotNull(STUDENT_USER);
@@ -65,7 +65,7 @@ class End2EndTest {
     }
 
     @BeforeEach
-    public void setup() throws ArtemisClientException, IOException {
+    void setup() throws ArtemisClientException, IOException {
         this.artemisInstance = new ArtemisInstance(ARTEMIS_URL);
         this.connection = ArtemisConnection.connectWithUsernamePassword(
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);

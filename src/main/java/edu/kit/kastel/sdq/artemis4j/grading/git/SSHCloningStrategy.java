@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.git;
 
 import java.io.File;
@@ -147,10 +147,9 @@ public class SSHCloningStrategy implements CloningStrategy {
 
         private void askForPassword(CredentialItem.Password passwordItem) {
             try {
-                SwingUtilities.invokeAndWait(() -> {
-                    this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
-                            .orElse(null);
-                });
+                SwingUtilities.invokeAndWait(
+                        () -> this.passphrase = PasswordPanel.show("Clone via SSH", passwordItem.getPromptText())
+                                .orElse(null));
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
                 throw new IllegalStateException(e);

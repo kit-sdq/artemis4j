@@ -90,7 +90,7 @@ public record ResultDTO(
             }
 
             String detailText = feedback.detailText();
-            if (feedback.hasLongFeedbackText()) {
+            if (feedback.hasLongFeedbackText() == Boolean.TRUE) {
                 detailText = FeedbackDTO.fetchLongFeedback(client, feedback.id());
             }
             cleanedFeedbacks.add(new FeedbackDTO(detailText, feedback));
