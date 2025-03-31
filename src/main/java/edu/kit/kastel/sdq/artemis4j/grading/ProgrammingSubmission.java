@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.nio.file.Path;
@@ -8,7 +8,6 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisClientException;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
-import edu.kit.kastel.sdq.artemis4j.client.AssessmentType;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
@@ -22,11 +21,10 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingSubmissionDTO dto;
 
-    private final int correctionRound;
     private final User student;
     private final ProgrammingExercise exercise;
 
-    public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise, int correctionRound) {
+    public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise) {
         super(exercise);
 
         this.dto = dto;
@@ -39,8 +37,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         } else {
             this.student = null;
         }
-
-        this.correctionRound = correctionRound;
     }
 
     public long getId() {
@@ -78,10 +74,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         return exercise;
     }
 
-    public int getCorrectionRound() {
-        return this.correctionRound;
-    }
-
     public ZonedDateTime getSubmissionDate() {
         return this.dto.submissionDate();
     }
@@ -92,17 +84,6 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
         } else {
             return Optional.empty();
         }
-    }
-
-    /**
-     * Get the assessor of this assessment.
-     * <p>
-     * This is the user who has locked the submission.
-     *
-     * @return the assessor or empty if the submission has not been assessed
-     */
-    public Optional<User> getAssessor() {
-        return this.getRelevantResult().map(ResultDTO::assessor).map(User::new);
     }
 
     /**
@@ -130,7 +111,9 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     /**
-     * Tries to lock this submission. Locking is reentrant.
+     * Prefer the methods on PackedAssessment!
+     * <p>
+     * Tries to lock this submission for a given correction round. Locking is reentrant.
      *
      * @return An empty optional if a *different* user has already locked the
      *         submission, otherwise the assessment
@@ -143,46 +126,21 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
      *                                       corresponding student (i.e.
      *                                       participation)
      */
-    public Optional<Assessment> tryLock(GradingConfig gradingConfig)
+    public Optional<Assessment> tryLock(GradingConfig gradingConfig, CorrectionRound correctionRound)
             throws AnnotationMappingException, ArtemisNetworkException, MoreRecentSubmissionException {
-        return this.exercise.tryLockSubmission(this.getId(), this.getCorrectionRound(), gradingConfig);
-    }
-
-    public boolean isSubmitted() {
-        var result = this.getRelevantResult();
-        if (result.isEmpty() || result.get().completionDate() == null) {
-            return false;
-        }
-
-        var assessmentType = result.get().assessmentType();
-        return assessmentType == AssessmentType.MANUAL || assessmentType == AssessmentType.SEMI_AUTOMATIC;
-    }
-
-    /**
-     * Opens the assessment for this submission.
-     * <p>
-     * If the submission has not been assessed by you, you might not be able to
-     * change the assessment.
-     *
-     * @param config the config for the exercise
-     * @return the assessment if there are results for this submission
-     * @throws AnnotationMappingException If the annotations that were already
-     *                                    present could not be mapped given the
-     *                                    gradingConfig
-     */
-    public Optional<Assessment> openAssessment(GradingConfig config)
-            throws AnnotationMappingException, ArtemisNetworkException {
-        ResultDTO resultDTO = this.getRelevantResult().orElse(null);
-
-        if (resultDTO != null) {
-            return Optional.of(new Assessment(resultDTO, config, this, this.correctionRound));
-        }
-
-        return Optional.empty();
+        return this.exercise.tryLockSubmission(this.getId(), correctionRound, gradingConfig);
     }
 
     public boolean isBuildFailed() {
         return this.dto.buildFailed();
+    }
+
+    /**
+     * Be VERY careful with the dto's results, since their number may differ depending on the source of the dto.
+     * @return the corresponding dto
+     */
+    public ProgrammingSubmissionDTO getDTO() {
+        return this.dto;
     }
 
     @Override
@@ -196,31 +154,5 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     @Override
     public int hashCode() {
         return Objects.hashCode(this.getId());
-    }
-
-    /**
-     * Returns the relevant result for this submission.
-     * <p>
-     * The difference between this method and {@link #getLatestResult()} is that
-     * when a submission has multiple results from different correction rounds, this
-     * method will return the result for the current correction round. If you want the
-     * latest result regardless of the correction round, use {@link #getLatestResult()}.
-     *
-     * @return the relevant result, if present
-     */
-    public Optional<ResultDTO> getRelevantResult() {
-        var results = this.dto.nonAutomaticResults();
-
-        if (results.isEmpty()) {
-            return Optional.empty();
-        } else if (results.size() == 1) {
-            // We only have one result, so the submission has
-            // probably been created for a specific correction round,
-            // or we only have one correction round
-            return Optional.of(results.get(0));
-        } else {
-            // More than one result, so probably multiple correction rounds
-            return Optional.of(results.get(this.correctionRound));
-        }
     }
 }
