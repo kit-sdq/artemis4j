@@ -19,6 +19,15 @@
       },
       "negativeLimit": -3,
       "positiveLimit": null
+    },
+    {
+      "shortName": "functionality::oop",
+      "displayName": "Objektorientierung",
+      "additionalDisplayNames": {
+        "en": "Object Orientation"
+      },
+      "negativeLimit": null,
+      "positiveLimit": null
     }
   ],
   "mistakeTypes": [
@@ -107,6 +116,18 @@
         "penalty": 5.0
       },
       "appliesTo": "functionality::quality"
+    },
+    {
+      "shortName": "instanceof",
+      "button": "instanceof",
+      "message": "instanceof sollte nicht verwendet werden",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 5.0,
+        "repetitions": 3
+      },
+      "appliesTo": "functionality::oop"
     }
   ]
 }
