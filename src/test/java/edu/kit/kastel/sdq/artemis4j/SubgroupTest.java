@@ -261,32 +261,31 @@ class SubgroupTest {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypeById("systemexit");
 
         this.assessment.addPredefinedAnnotation(
-            mistakeType, new Location("src/edu/kit/informatik/BubbleSort.java", 0, 1), null);
+                mistakeType, new Location("src/edu/kit/informatik/BubbleSort.java", 0, 1), null);
         this.assessment.addPredefinedAnnotation(
-            this.gradingConfig.getMistakeTypeById("magicLiteral"),
-            new Location("src/edu/kit/informatik/BubbleSort.java", 1, 2),
-            null);
+                this.gradingConfig.getMistakeTypeById("magicLiteral"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 1, 2),
+                null);
         this.assessment.addPredefinedAnnotation(
-            this.gradingConfig.getMistakeTypeById("instanceof"),
-            new Location("src/edu/kit/informatik/BubbleSort.java", 3, 4),
-            null);
+                this.gradingConfig.getMistakeTypeById("instanceof"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 3, 4),
+                null);
         this.assessment.addPredefinedAnnotation(
-            this.gradingConfig.getMistakeTypeById("instanceof"),
-            new Location("src/edu/kit/informatik/BubbleSort.java", 4, 5),
-            null);
+                this.gradingConfig.getMistakeTypeById("instanceof"),
+                new Location("src/edu/kit/informatik/BubbleSort.java", 4, 5),
+                null);
 
         assertEquals(
-            List.of(
-                "Funktionalität [-14P (Range: -20P -- ∞P)]",
-                "    * System.exit [-5P]:",
-                "        * src/edu/kit/informatik/BubbleSort.java at line 1",
-                "    * Magic Literal [-1P]:",
-                "        * src/edu/kit/informatik/BubbleSort.java at line 2",
-                "    * instanceof [-10P]:",
-                "        * src/edu/kit/informatik/BubbleSort.java at lines 4, 5"),
-            this.getGlobalFeedbackLines());
+                List.of(
+                        "Funktionalität [-14P (Range: -20P -- ∞P)]",
+                        "    * System.exit [-5P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at line 1",
+                        "    * Magic Literal [-1P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at line 2",
+                        "    * instanceof [-10P]:",
+                        "        * src/edu/kit/informatik/BubbleSort.java at lines 4, 5"),
+                this.getGlobalFeedbackLines());
     }
-
 
     @Test
     void testSubgroupsAreGroupedCorrectly() throws ArtemisClientException {
