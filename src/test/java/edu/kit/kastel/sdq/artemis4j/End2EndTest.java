@@ -20,9 +20,10 @@ import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
+import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
-import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
+import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
 import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
@@ -50,7 +51,7 @@ class End2EndTest {
     private ArtemisConnection connection;
     private Course course;
     private ProgrammingExercise exercise;
-    private ProgrammingSubmission programmingSubmission;
+    private ProgrammingSubmissionWithResults programmingSubmission;
     private Assessment assessment;
     private GradingConfig gradingConfig;
 
@@ -79,20 +80,23 @@ class End2EndTest {
                 .findFirst()
                 .orElseThrow();
 
-        var submissions = this.exercise.fetchSubmissions();
+        var submissions = this.exercise.fetchAllSubmissions();
         this.programmingSubmission = submissions.stream()
-                .filter(a -> a.getParticipantIdentifier().equals(STUDENT_USER))
+                .filter(s -> s.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
                 .findFirst()
                 .orElseThrow();
 
         this.gradingConfig = GradingConfig.readFromString(
                 Files.readString(Path.of("src/test/resources/config.json")), this.exercise);
 
-        // ensure that the submission is locked
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        // ensure that the submission is locked & clear the assessment
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
         this.assessment.clearAnnotations();
 
-        Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
+        Assertions.assertTrue(this.assessment.getAllAnnotations().isEmpty());
     }
 
     @Test
@@ -110,15 +114,18 @@ class End2EndTest {
         this.assessment.submit();
 
         // Check Assessments
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         List<TestResult> tests = this.assessment.getTestResults();
         assertEquals(13, tests.size());
 
-        assertEquals(1, this.assessment.getAnnotations().size());
+        assertEquals(1, this.assessment.getAllAnnotations().size());
         assertEquals(
                 AnnotationSource.MANUAL_FIRST_ROUND,
-                this.assessment.getAnnotations().get(0).getSource());
+                this.assessment.getAllAnnotations().get(0).getSource());
     }
 
     @Test
@@ -130,13 +137,16 @@ class End2EndTest {
         this.assessment.submit();
 
         // Check Assessments
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         List<TestResult> tests = this.assessment.getTestResults();
         assertEquals(13, tests.size());
 
-        assertEquals(1, this.assessment.getAnnotations().size());
-        var annotation = this.assessment.getAnnotations().get(0);
+        assertEquals(1, this.assessment.getAllAnnotations().size());
+        var annotation = this.assessment.getAllAnnotations().get(0);
         assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
         assertEquals(Optional.of(-2.0), annotation.getCustomScore());
         assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());
@@ -147,16 +157,16 @@ class End2EndTest {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
         this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
-        assertEquals(1, this.assessment.getAnnotations().size());
-        var oldAnnotations = this.assessment.getAnnotations();
+        assertEquals(1, this.assessment.getAllAnnotations().size());
+        var oldAnnotations = this.assessment.getAllAnnotations();
 
         String exportedAssessment = this.assessment.exportAssessment();
 
         this.assessment.clearAnnotations();
-        assertEquals(0, this.assessment.getAnnotations().size());
+        assertEquals(0, this.assessment.getAllAnnotations().size());
 
         this.assessment.importAssessment(exportedAssessment);
-        assertEquals(oldAnnotations, this.assessment.getAnnotations());
+        assertEquals(oldAnnotations, this.assessment.getAllAnnotations());
     }
 
     @Test
@@ -171,21 +181,20 @@ class End2EndTest {
         this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
         this.assessment.submit();
 
-        ProgrammingSubmission updatedSubmission = null;
         // find the programming submission that was just assessed in all submissions of
         // the exercise:
-        for (ProgrammingSubmission submission : this.exercise.fetchSubmissions()) {
-            if (submission.getId() == this.programmingSubmission.getId()) {
-                updatedSubmission = programmingSubmission;
-                break;
-            }
-        }
+        ProgrammingSubmissionWithResults updatedSubmission = this.exercise.fetchAllSubmissions().stream()
+                .filter(s -> s.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
+                .findFirst()
+                .orElseThrow();
 
-        assertEquals(this.programmingSubmission, updatedSubmission);
+        assertEquals(this.programmingSubmission.getSubmission(), updatedSubmission.getSubmission());
 
-        Assessment newAssessment =
-                updatedSubmission.openAssessment(this.gradingConfig).orElseThrow();
-        assertEquals(1, newAssessment.getAnnotations().size());
+        Assessment newAssessment = updatedSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
+        Assertions.assertEquals(1, newAssessment.getAllAnnotations().size());
     }
 
     @Test
@@ -218,13 +227,16 @@ class End2EndTest {
         }
 
         // create a copy of all annotations before submitting (which will merge them)
-        List<Annotation> currentAnnotations = new ArrayList<>(this.assessment.getAnnotations());
+        List<Annotation> currentAnnotations = new ArrayList<>(this.assessment.getAllAnnotations());
         this.assessment.submit();
 
         // Check Assessments
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
-        for (Annotation annotation : this.assessment.getAnnotations()) {
+        for (Annotation annotation : this.assessment.getAllAnnotations()) {
             Assertions.assertTrue(
                     currentAnnotations.contains(annotation),
                     "Annotation \"%s\" is missing after submission".formatted(annotation));
@@ -310,15 +322,19 @@ class End2EndTest {
         this.assessment.submit();
 
         // the assessment will not show the merged annotations (it will unmerge them after loading)
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         // so we need to check the submission itself:
 
-        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        ResultDTO resultDTO =
+                this.programmingSubmission.getFirstRoundAssessment().result();
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
                 this.connection.getClient(),
                 resultDTO.id(),
-                this.programmingSubmission.getParticipationId(),
+                this.programmingSubmission.getSubmission().getParticipationId(),
                 resultDTO.feedbacks());
 
         List<String> feedbackTexts = new ArrayList<>();
@@ -425,13 +441,13 @@ class End2EndTest {
 
         this.assessment.submit();
         // after submitting, we need to check that the global feedback looks as expected
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission.getSubmission().tryLock(this.gradingConfig, CorrectionRound.FIRST).orElseThrow();
 
-        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        ResultDTO resultDTO = this.programmingSubmission.getSubmission().getRelevantResult().orElseThrow();
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
                 this.connection.getClient(),
                 resultDTO.id(),
-                this.programmingSubmission.getParticipationId(),
+                this.programmingSubmission.getSubmission().getParticipationId(),
                 resultDTO.feedbacks());
 
         Collection<String> globalFeedbackLines = new ArrayList<>();
