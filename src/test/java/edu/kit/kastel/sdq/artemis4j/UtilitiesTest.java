@@ -21,7 +21,7 @@ import org.slf4j.LoggerFactory;
 class UtilitiesTest {
     private static final Logger log = LoggerFactory.getLogger(UtilitiesTest.class);
 
-    private static final String HOSTNAME = "https://artemis.praktomat.cs.kit.edu";
+    private static final String HOSTNAME = "https://artemis.cs.kit.edu";
     private final String username = System.getenv("ARTEMIS_USERNAME");
     private final String password = System.getenv("ARTEMIS_PASSWORD");
     private final String courseId = System.getenv("ARTEMIS_COURSE_ID");
