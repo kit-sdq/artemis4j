@@ -3,8 +3,6 @@ package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
 import java.util.Collections;
 import java.util.List;
-import java.util.function.Function;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -36,19 +34,20 @@ public final class GradingConfig {
                     "Grading config is not valid for exercise with id " + exercise.getId());
         }
 
-        var ratingGroups =
-                configDTO.ratingGroups().stream().map(RatingGroup::new).toList();
-        var ratingGroupsById = ratingGroups.stream().collect(Collectors.toMap(RatingGroup::getId, Function.identity()));
-
+        List<RatingGroup> ratingGroups = RatingGroup.createRatingGroups(configDTO.ratingGroups());
         for (MistakeType.MistakeTypeDTO dto : configDTO.mistakeTypes()) {
             if (!StringUtil.matchMaybe(exercise.getShortName(), dto.enabledForExercises())) {
                 continue;
             }
 
+            var group = ratingGroups.stream()
+                    .flatMap(ratingGroup -> ratingGroup.findGroup(dto.appliesTo()).stream())
+                    .findFirst()
+                    .orElseThrow(() -> new InvalidGradingConfigException("No group found for mistake type %s with id %s"
+                            .formatted(dto.shortName(), dto.appliesTo())));
+
             MistakeType.createAndAddToGroup(
-                    dto,
-                    StringUtil.matchMaybe(exercise.getShortName(), dto.enabledPenaltyForExercises()),
-                    ratingGroupsById.get(dto.appliesTo()));
+                    dto, StringUtil.matchMaybe(exercise.getShortName(), dto.enabledPenaltyForExercises()), group);
         }
 
         var config = new GradingConfig(
@@ -108,7 +107,7 @@ public final class GradingConfig {
     }
 
     private Stream<MistakeType> streamMistakeTypes() {
-        return ratingGroups.stream().map(RatingGroup::getMistakeTypes).flatMap(List::stream);
+        return ratingGroups.stream().map(RatingGroup::getAllMistakeTypes).flatMap(List::stream);
     }
 
     public record GradingConfigDTO(

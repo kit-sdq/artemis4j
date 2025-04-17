@@ -164,7 +164,7 @@ public class Assessment extends ArtemisConnectionHolder {
      */
     public List<Annotation> getAnnotations(RatingGroup ratingGroup) {
         return this.annotations.stream()
-                .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
+                .filter(annotation -> annotation.getMistakeType().isAssociatedWith(ratingGroup))
                 .toList();
     }
 
@@ -386,7 +386,15 @@ public class Assessment extends ArtemisConnectionHolder {
      * rating group.
      */
     public Points calculatePointsForRatingGroup(RatingGroup ratingGroup) {
-        double points = this.annotations.stream()
+        // First calculate the points deducted by annotations in a subgroup:
+        double points = 0.0;
+        for (var subgroup : ratingGroup.listSubGroups()) {
+            Points subgroupPoints = this.calculatePointsForRatingGroup(subgroup);
+            points += subgroupPoints.score();
+        }
+
+        // Now add the points of the annotations that are part of this rating group and not in a subgroup:
+        points += this.annotations.stream()
                 .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
                 .filter(a -> a.getMistakeType().shouldScore())
                 .collect(Collectors.groupingBy(Annotation::getMistakeType))
@@ -395,6 +403,7 @@ public class Assessment extends ArtemisConnectionHolder {
                 .mapToDouble(
                         e -> e.getKey().getRule().calculatePoints(e.getValue()).score())
                 .sum();
+
         if (points > ratingGroup.getMaxPenalty()) {
             return new Points(ratingGroup.getMaxPenalty(), true);
         } else if (points < ratingGroup.getMinPenalty()) {
@@ -506,7 +515,7 @@ public class Assessment extends ArtemisConnectionHolder {
                     if (a.getMistakeType().isCustomAnnotation()) {
                         return MANUAL_FEEDBACK_CUSTOM_PENALTY
                                 .format(
-                                        a.getMistakeType().getRatingGroup().getDisplayName(),
+                                        a.getMistakeType().getRepresentativeGroupDisplayName(),
                                         a.getMistakeType().getButtonText(),
                                         a.getCustomMessage().orElseThrow(),
                                         a.getCustomScore().orElseThrow())
@@ -515,7 +524,7 @@ public class Assessment extends ArtemisConnectionHolder {
                             && !a.getCustomMessage().get().isBlank()) {
                         return MANUAL_FEEDBACK_CUSTOM_EXP
                                 .format(
-                                        a.getMistakeType().getRatingGroup().getDisplayName(),
+                                        a.getMistakeType().getRepresentativeGroupDisplayName(),
                                         a.getMistakeType().getButtonText(),
                                         a.getMistakeType().getMessage(),
                                         a.getCustomMessage().get())
@@ -523,7 +532,7 @@ public class Assessment extends ArtemisConnectionHolder {
                     } else {
                         return MANUAL_FEEDBACK
                                 .format(
-                                        a.getMistakeType().getRatingGroup().getDisplayName(),
+                                        a.getMistakeType().getRepresentativeGroupDisplayName(),
                                         a.getMistakeType().getButtonText(),
                                         a.getMistakeType().getMessage())
                                 .translateTo(studentLocale);
@@ -584,7 +593,7 @@ public class Assessment extends ArtemisConnectionHolder {
 
         // group annotations by mistake type
         List<Map.Entry<MistakeType, List<Annotation>>> annotationsByType = new ArrayList<>();
-        for (var mistakeType : ratingGroup.getMistakeTypes()) {
+        for (var mistakeType : ratingGroup.getAllMistakeTypes()) {
             var annotationsWithType = this.getAnnotations(mistakeType, this.annotations);
             if (!annotationsWithType.isEmpty()) {
                 annotationsByType.add(Map.entry(mistakeType, annotationsWithType));

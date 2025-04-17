@@ -10,6 +10,24 @@
       },
       "negativeLimit": -20,
       "positiveLimit": null
+    },
+    {
+      "shortName": "functionality::quality",
+      "displayName": "Code Qualität",
+      "additionalDisplayNames": {
+        "en": "Code Quality"
+      },
+      "negativeLimit": -3,
+      "positiveLimit": null
+    },
+    {
+      "shortName": "functionality::oop",
+      "displayName": "Objektorientierung",
+      "additionalDisplayNames": {
+        "en": "Object Orientation"
+      },
+      "negativeLimit": null,
+      "positiveLimit": null
     }
   ],
   "mistakeTypes": [
@@ -65,6 +83,51 @@
         "MAGIC_LITERAL"
       ],
       "highlight": "none"
+    },
+    {
+      "shortName": "unused",
+      "button": "Unused Element",
+      "message": "Das Element wird nicht verwendet",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 1.0
+      },
+      "appliesTo": "functionality::quality"
+    },
+    {
+      "shortName": "visibility",
+      "button": "Sichtbarkeit",
+      "message": "Die Sichtbarkeit ist nicht korrekt",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 0.5
+      },
+      "appliesTo": "functionality::quality"
+    },
+    {
+      "shortName": "systemexit",
+      "button": "System.exit",
+      "message": "System.exit sollte nicht verwendet werden",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 5.0
+      },
+      "appliesTo": "functionality::quality"
+    },
+    {
+      "shortName": "instanceof",
+      "button": "instanceof",
+      "message": "instanceof sollte nicht verwendet werden",
+      "penaltyRule": {
+        "shortName": "thresholdPenalty",
+        "threshold": 1,
+        "penalty": 5.0,
+        "repetitions": 3
+      },
+      "appliesTo": "functionality::oop"
     }
   ]
 }

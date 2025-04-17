@@ -60,6 +60,27 @@ public final class MistakeType {
         return ratingGroup;
     }
 
+    public boolean isAssociatedWith(RatingGroup group) {
+        return this.ratingGroup.isAssociatedWith(group);
+    }
+
+    /**
+     * Returns the display name of the representative group for this mistake types group.
+     * For a group that is not a subgroup, this will return the {@link RatingGroup#getDisplayName()} of the group.
+     * For a subgroup, this will return the {@link RatingGroup#getDisplayName()} of the main <b>parent</b> group.
+     *
+     * @return the display name of the representative group
+     */
+    public TranslatableString getRepresentativeGroupDisplayName() {
+        RatingGroup group = this.ratingGroup;
+
+        while (group.getParent() != null) {
+            group = group.getParent();
+        }
+
+        return group.getDisplayName();
+    }
+
     public TranslatableString getMessage() {
         return message.format();
     }
