@@ -1,9 +1,10 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 public enum AnnotationSource {
     MANUAL_FIRST_ROUND,
     MANUAL_SECOND_ROUND,
+    REVIEW,
     AUTOGRADER,
     UNKNOWN
 }
