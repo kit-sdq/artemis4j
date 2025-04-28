@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
@@ -162,5 +161,5 @@ public final class MistakeType {
             Map<String, String> additionalButtonTexts,
             Map<String, String> additionalMessages,
             List<String> autograderProblemTypes,
-            @JsonProperty(defaultValue = "Highlight.DEFAULT") Highlight highlight) {}
+            Highlight highlight) {}
 }
