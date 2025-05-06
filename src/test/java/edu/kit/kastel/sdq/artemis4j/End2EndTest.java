@@ -2,6 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -457,5 +458,24 @@ class End2EndTest {
                         "        * src/edu/kit/informatik/InsertionSort.java at line 6",
                         "        * src/edu/kit/informatik/RadixSort.java at lines 4, 5, 6"),
                 globalFeedbackLines);
+    }
+
+    /**
+     * This attribute is important to be set correctly. This test is to ensure that this works as expected.
+     *
+     * @throws ArtemisClientException if a problem with artemis occurs
+     */
+    @Test
+    void testPositiveFeedbackAllowedByDefault() throws ArtemisClientException {
+        var minimalGradingConfig = GradingConfig.readDTOFromString(
+                """
+            {
+                "shortName": "E2E",
+                "ratingGroups": [],
+                "mistakeTypes": []
+            }
+            """);
+
+        assertTrue(minimalGradingConfig.positiveFeedbackAllowed());
     }
 }

@@ -5,7 +5,6 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Stream;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
@@ -112,7 +111,7 @@ public final class GradingConfig {
 
     public record GradingConfigDTO(
             String shortName,
-            @JsonProperty(defaultValue = "true") boolean positiveFeedbackAllowed,
+            Boolean positiveFeedbackAllowed,
             List<Long> allowedExercises,
             List<RatingGroup.RatingGroupDTO> ratingGroups,
             List<MistakeType.MistakeTypeDTO> mistakeTypes) {
@@ -121,6 +120,12 @@ public final class GradingConfig {
             return this.allowedExercises() == null
                     || this.allowedExercises().isEmpty()
                     || this.allowedExercises().contains(exerciseId);
+        }
+
+        @Override
+        public Boolean positiveFeedbackAllowed() {
+            // allow positive feedback if nothing is specified
+            return this.positiveFeedbackAllowed == null || this.positiveFeedbackAllowed;
         }
     }
 }
