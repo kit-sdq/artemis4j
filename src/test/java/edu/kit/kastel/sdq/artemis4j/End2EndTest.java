@@ -467,7 +467,7 @@ class End2EndTest {
      */
     @Test
     void testPositiveFeedbackAllowedByDefault() throws ArtemisClientException {
-        var gradingConfig = GradingConfig.readDTOFromString(
+        var minimalGradingConfig = GradingConfig.readDTOFromString(
                 """
             {
                 "shortName": "E2E",
@@ -476,6 +476,6 @@ class End2EndTest {
             }
             """);
 
-        assertTrue(gradingConfig.positiveFeedbackAllowed());
+        assertTrue(minimalGradingConfig.positiveFeedbackAllowed());
     }
 }
