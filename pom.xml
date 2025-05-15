@@ -57,7 +57,7 @@
     <slf4j.version>2.0.17</slf4j.version>
     <okhttp.version>4.12.0</okhttp.version>
     <autograder.version>6.8.9</autograder.version>
-    <jgit.version>7.2.0.202503040940-r</jgit.version>
+    <jgit.version>7.2.1.202505142326-r</jgit.version>
     <junit.version>5.13.0-M3</junit.version>
     <archunit.version>1.4.1</archunit.version>
     <versions-maven-plugin.version>2.18.0</versions-maven-plugin.version>
