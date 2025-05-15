@@ -362,6 +362,7 @@
               <publishingServerId>central</publishingServerId>
               <autoPublish>true</autoPublish>
               <waitUntil>published</waitUntil>
+              <deploymentName>artemis4j</deploymentName>
             </configuration>
           </plugin>
         </plugins>
