@@ -56,7 +56,7 @@
     <jackson.version>2.19.1</jackson.version>
     <slf4j.version>2.0.17</slf4j.version>
     <okhttp.version>4.12.0</okhttp.version>
-    <autograder.version>6.8.9</autograder.version>
+    <autograder.version>6.8.10</autograder.version>
     <jgit.version>7.3.0.202506031305-r</jgit.version>
     <junit.version>6.0.0-M1</junit.version>
     <archunit.version>1.4.1</archunit.version>
