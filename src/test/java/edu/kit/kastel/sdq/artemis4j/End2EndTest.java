@@ -443,7 +443,7 @@ class End2EndTest {
         // after submitting, we need to check that the global feedback looks as expected
         this.assessment = this.programmingSubmission.getSubmission().tryLock(this.gradingConfig, CorrectionRound.FIRST).orElseThrow();
 
-        ResultDTO resultDTO = this.programmingSubmission.getSubmission().getRelevantResult().orElseThrow();
+        ResultDTO resultDTO = this.programmingSubmission.getFirstRoundAssessment().result();
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
                 this.connection.getClient(),
                 resultDTO.id(),
