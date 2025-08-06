@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
@@ -58,6 +57,27 @@ public final class MistakeType {
 
     public RatingGroup getRatingGroup() {
         return ratingGroup;
+    }
+
+    public boolean isAssociatedWith(RatingGroup group) {
+        return this.ratingGroup.isAssociatedWith(group);
+    }
+
+    /**
+     * Returns the display name of the representative group for this mistake types group.
+     * For a group that is not a subgroup, this will return the {@link RatingGroup#getDisplayName()} of the group.
+     * For a subgroup, this will return the {@link RatingGroup#getDisplayName()} of the main <b>parent</b> group.
+     *
+     * @return the display name of the representative group
+     */
+    public TranslatableString getRepresentativeGroupDisplayName() {
+        RatingGroup group = this.ratingGroup;
+
+        while (group.getParent() != null) {
+            group = group.getParent();
+        }
+
+        return group.getDisplayName();
     }
 
     public TranslatableString getMessage() {
@@ -141,5 +161,5 @@ public final class MistakeType {
             Map<String, String> additionalButtonTexts,
             Map<String, String> additionalMessages,
             List<String> autograderProblemTypes,
-            @JsonProperty(defaultValue = "Highlight.DEFAULT") Highlight highlight) {}
+            Highlight highlight) {}
 }

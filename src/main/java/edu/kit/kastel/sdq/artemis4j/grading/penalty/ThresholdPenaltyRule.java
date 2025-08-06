@@ -17,7 +17,7 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
     public ThresholdPenaltyRule(
             @JsonProperty("threshold") int threshold,
             @JsonProperty(value = "penalty", required = true) double penalty,
-            @JsonProperty(value = "repetitions", defaultValue = "1") Integer repetitions) {
+            @JsonProperty("repetitions") Integer repetitions) {
         this.threshold = threshold;
         // It is not defined how the code should behave if the threshold is 0 or negative, therefore an exception is
         // thrown here.

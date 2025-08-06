@@ -44,11 +44,11 @@ public record LineColumn(int line, Optional<Integer> column) implements Comparab
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof LineColumn that)) {
+        if (!(object instanceof LineColumn(int otherLine, Optional<Integer> otherColumn))) {
             return false;
         }
 
-        return this.line() == that.line() && this.column().equals(that.column());
+        return this.line() == otherLine && this.column().equals(otherColumn);
     }
 
     @Override

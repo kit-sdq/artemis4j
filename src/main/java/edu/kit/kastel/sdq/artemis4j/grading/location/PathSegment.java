@@ -58,10 +58,15 @@ record PathSegment(String name, SequencedSet<PathSegment> elements, SequencedSet
     @Override
     public boolean equals(Object other) {
         return this == other
-                || other instanceof PathSegment otherSegment
-                        && this.name.equals(otherSegment.name())
-                        && this.elements.equals(otherSegment.elements())
-                        && this.locations.equals(otherSegment.locations());
+                || other
+                                instanceof
+                                PathSegment(
+                                        String otherName,
+                                        SequencedSet<PathSegment> otherElements,
+                                        SequencedSet<Location> otherLocations)
+                        && this.name.equals(otherName)
+                        && this.elements.equals(otherElements)
+                        && this.locations.equals(otherLocations);
     }
 
     @Override

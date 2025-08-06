@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import java.util.ArrayList;
@@ -17,10 +17,11 @@ import org.slf4j.LoggerFactory;
  * tasks like toggling all exams to "submitted".
  */
 @Disabled
+@SuppressWarnings("java:S1117") // Override names that are fields.
 class UtilitiesTest {
     private static final Logger log = LoggerFactory.getLogger(UtilitiesTest.class);
 
-    private static final String HOSTNAME = "https://artemis.praktomat.cs.kit.edu";
+    private static final String HOSTNAME = "https://artemis.cs.kit.edu";
     private final String username = System.getenv("ARTEMIS_USERNAME");
     private final String password = System.getenv("ARTEMIS_PASSWORD");
     private final String courseId = System.getenv("ARTEMIS_COURSE_ID");

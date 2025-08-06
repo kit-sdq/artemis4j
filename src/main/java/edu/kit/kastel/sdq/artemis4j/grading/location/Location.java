@@ -53,13 +53,13 @@ public record Location(String filePath, LineColumn start, LineColumn end) implem
 
     @Override
     public boolean equals(Object object) {
-        if (!(object instanceof Location location)) {
+        if (!(object instanceof Location(String otherFilePath, LineColumn otherStart, LineColumn otherEnd))) {
             return false;
         }
 
-        return Objects.equals(this.end(), location.end())
-                && Objects.equals(this.filePath(), location.filePath())
-                && Objects.equals(this.start(), location.start());
+        return Objects.equals(this.end(), otherEnd)
+                && Objects.equals(this.filePath(), otherFilePath)
+                && Objects.equals(this.start(), otherStart);
     }
 
     @Override
