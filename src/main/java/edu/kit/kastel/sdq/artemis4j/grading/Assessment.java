@@ -111,8 +111,12 @@ public class Assessment extends ArtemisConnectionHolder {
         this.correctionRound = correctionRound;
         this.studentLocale = studentLocale;
 
-        if ((this.correctionRound == CorrectionRound.REVIEW) && !this.config.isReview()) {
+        if (this.correctionRound == CorrectionRound.REVIEW && !this.config.isReview()) {
             throw new IllegalArgumentException("For a review round, the config must be a review config");
+        }
+
+        if (this.correctionRound != CorrectionRound.REVIEW && this.config.isReview()) {
+            throw new IllegalArgumentException("Can't use a review config for a non-review round");
         }
 
         // ensure that the feedbacks are fetched (some api endpoints do not return them)
@@ -139,7 +143,6 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     *
      * @return whether the assessment has already been submitted
      */
     public boolean isSubmitted() {
@@ -225,6 +228,10 @@ public class Assessment extends ArtemisConnectionHolder {
      * @param customMessage May be null if no custom message is provided
      */
     public Annotation addPredefinedAnnotation(MistakeType mistakeType, Location location, String customMessage) {
+        if (this.config.isReview()) {
+            throw new ReviewException("Can't add annotations in review mode");
+        }
+
         if (mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is a custom annotation");
         }
@@ -260,6 +267,10 @@ public class Assessment extends ArtemisConnectionHolder {
      */
     public Annotation addCustomAnnotation(
             MistakeType mistakeType, Location location, String customMessage, double customScore) {
+        if (this.isReview()) {
+            throw new ReviewException("Can't add annotations in review mode");
+        }
+
         if (!mistakeType.isCustomAnnotation()) {
             throw new IllegalArgumentException("Mistake type is not a custom annotation");
         }
@@ -282,6 +293,10 @@ public class Assessment extends ArtemisConnectionHolder {
             String checkName,
             String problemType,
             Integer annotationLimit) {
+        if (this.isReview()) {
+            throw new ReviewException("Can't add annotations in review mode");
+        }
+
         Double customScore = mistakeType.isCustomAnnotation() ? 0.0 : null;
         var annotation = new Annotation(
                 mistakeType,
@@ -300,7 +315,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * If the annotation is not present, nothing happens.
      */
     public void removeAnnotation(Annotation annotation) {
-        if (this.correctionRound == CorrectionRound.REVIEW) {
+        if (this.isReview()) {
             // If the annotation is not present, nothing should happen
             if (this.annotations.contains(annotation)) {
                 annotation.setDeletedInReview(true);
@@ -314,8 +329,8 @@ public class Assessment extends ArtemisConnectionHolder {
      * Clears all annotations from the assessment. This operation is not permitted in review mode.
      */
     public void clearAnnotations() {
-        if (this.correctionRound == CorrectionRound.REVIEW) {
-            throw new IllegalInReviewException("Can't clear annotations in review mode");
+        if (this.isReview()) {
+            throw new ReviewException("Can't clear annotations in review mode");
         }
 
         this.annotations.clear();
@@ -464,6 +479,10 @@ public class Assessment extends ArtemisConnectionHolder {
 
     public List<TestResult> getTestResults() {
         return new ArrayList<>(this.testResults);
+    }
+
+    public boolean isReview() {
+        return this.correctionRound == CorrectionRound.REVIEW;
     }
 
     private void internalSaveOrSubmit(boolean shouldSubmit) throws AnnotationMappingException, ArtemisNetworkException {
