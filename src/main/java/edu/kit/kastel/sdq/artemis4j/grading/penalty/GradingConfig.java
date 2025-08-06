@@ -129,7 +129,7 @@ public final class GradingConfig {
             List<Long> allowedExercises,
             List<RatingGroup.RatingGroupDTO> ratingGroups,
             List<MistakeType.MistakeTypeDTO> mistakeTypes,
-            @JsonProperty(defaultValue = "false") boolean review) {
+            boolean review) {
         public boolean isAllowedForExercise(long exerciseId) {
             // no allowed exercises means it is valid for all exercises
             return this.allowedExercises() == null
