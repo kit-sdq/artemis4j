@@ -22,4 +22,5 @@ public record AnnotationDTO(
         @JsonProperty AnnotationSource source,
         @JsonProperty List<String> classifiers,
         @JsonProperty Integer annotationLimit,
-        @JsonProperty Boolean deletedInReview) {}
+        @JsonProperty Long createdByUserId,
+        @JsonProperty Long suppressedByUserId) {}

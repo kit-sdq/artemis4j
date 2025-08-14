@@ -17,6 +17,10 @@ public record AssessmentStatsDTO(
                 .executeAndDecode(client, AssessmentStatsDTO.class);
     }
 
+    public static AssessmentStatsDTO empty() {
+        return new AssessmentStatsDTO(new Timing(0, 0), List.of(), 0);
+    }
+
     public record Timing(@JsonProperty int inTime, @JsonProperty int late) {
         public int total() {
             return inTime + late;

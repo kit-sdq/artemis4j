@@ -87,6 +87,7 @@ public class Assessment extends ArtemisConnectionHolder {
     private final GradingConfig config;
     private final CorrectionRound correctionRound;
     private final Locale studentLocale;
+    private final long assessorId;
 
     public Assessment(
             ResultDTO result,
@@ -119,6 +120,8 @@ public class Assessment extends ArtemisConnectionHolder {
             throw new IllegalArgumentException("Can't use a review config for a non-review round");
         }
 
+        this.assessorId = getConnection().getAssessor().getId();
+
         // ensure that the feedbacks are fetched (some api endpoints do not return them)
         // and for long feedbacks, we need to fetch the detailed feedbacks
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
@@ -150,32 +153,35 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
+     * Get all annotations, INCLUDING ONES THAT WERE SUPPRESSED IN REVIEW.
+     * Use the add/remove methods to modify the list of annotations.
+     *
+     * @return An unmodifiable list of annotations.
+     */
+    public List<Annotation> getAllAnnotations() {
+        return this.getAllAnnotations(true);
+    }
+
+    /**
      * Get all annotations, including ones that were deleted in review. Use the add/remove methods to modify
      * the list of annotations.
      *
      * @return An unmodifiable list of annotations.
      */
-    public List<Annotation> getAllAnnotations() {
-        return Collections.unmodifiableList(this.annotations);
+    public List<Annotation> getAllAnnotations(boolean includeSuppressed) {
+        if (includeSuppressed) {
+            return Collections.unmodifiableList(this.annotations);
+        } else {
+            return this.streamAllAnnotations(false).toList();
+        }
     }
 
-    /**
-     * Get the annotations that were not deleted in review. Use the add/remove methods to modify
-     * the list of annotations.
-     *
-     * @return An unmodifiable list of annotations.
-     */
-    public List<Annotation> getNonDeletedAnnotations() {
-        return this.streamNonDeletedAnnotations().toList();
-    }
-
-    /**
-     * Stream the annotations that were not deleted in review.
-     *
-     * @return A stream of annotations.
-     */
-    public Stream<Annotation> streamNonDeletedAnnotations() {
-        return this.annotations.stream().filter(a -> !a.isDeletedInReview());
+    public Stream<Annotation> streamAllAnnotations(boolean includeSuppressed) {
+        if (includeSuppressed) {
+            return this.annotations.stream();
+        } else {
+            return this.annotations.stream().filter(a -> !a.isSuppressed());
+        }
     }
 
     /**
@@ -184,30 +190,42 @@ public class Assessment extends ArtemisConnectionHolder {
      *
      * @return An unmodifiable list of annotations, possibly empty but never null.
      */
-    public List<Annotation> getAnnotations(MistakeType mistakeType) {
-        return this.getAnnotations(mistakeType, this.annotations);
+    public List<Annotation> getAllAnnotations(MistakeType mistakeType, boolean includeSuppressed) {
+        return this.streamAllAnnotations(mistakeType, includeSuppressed).toList();
     }
 
-    private List<Annotation> getAnnotations(MistakeType mistakeType, Collection<Annotation> annotations) {
-        return annotations.stream()
-                .filter(a -> a.getMistakeType().equals(mistakeType))
-                .toList();
-    }
-
-    public Stream<Annotation> streamAllAnnotations(MistakeType mistakeType) {
-        return this.annotations.stream().filter(a -> a.getMistakeType().equals(mistakeType));
+    /**
+     * Streams all annotations associated with the specified mistake type. The mistake
+     * type must be associated with the same grading config as this assessment.
+     *
+     * @return A stream of annotations, possibly empty but never null.
+     */
+    public Stream<Annotation> streamAllAnnotations(MistakeType mistakeType, boolean includeSuppressed) {
+        var annotations =
+                this.annotations.stream().filter(a -> a.getMistakeType().equals(mistakeType));
+        if (!includeSuppressed) {
+            annotations = annotations.filter(a -> !a.isSuppressed());
+        }
+        return annotations;
     }
 
     /**
      * Gets all annotations associated with the specified rating group. The rating
      * group must be associated with the same grading config as this assessment.
-     * This method includes annotations that were deleted in review.
      *
      * @return A stream of annotations, possibly empty but never null.
      */
-    public Stream<Annotation> getAllAnnotations(RatingGroup ratingGroup) {
-        return this.annotations.stream()
+    public Stream<Annotation> getAllAnnotations(RatingGroup ratingGroup, boolean includeSuppressed) {
+        return this.streamAllAnnotations(ratingGroup, includeSuppressed);
+    }
+
+    public Stream<Annotation> streamAllAnnotations(RatingGroup ratingGroup, boolean includeSuppressed) {
+        var annotations = this.annotations.stream()
                 .filter(annotation -> annotation.getMistakeType().isAssociatedWith(ratingGroup));
+        if (!includeSuppressed) {
+            annotations = annotations.filter(a -> !a.isSuppressed());
+        }
+        return annotations;
     }
 
     /**
@@ -228,7 +246,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * @param customMessage May be null if no custom message is provided
      */
     public Annotation addPredefinedAnnotation(MistakeType mistakeType, Location location, String customMessage) {
-        if (this.config.isReview()) {
+        if (this.isReview()) {
             throw new ReviewException("Can't add annotations in review mode");
         }
 
@@ -237,7 +255,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var source = this.correctionRound.toAnnotationSource();
-        var annotation = new Annotation(mistakeType, location, customMessage, null, source);
+        var annotation = new Annotation(mistakeType, location, customMessage, null, source, this.assessorId);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -281,7 +299,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var source = this.correctionRound.toAnnotationSource();
-        var annotation = new Annotation(mistakeType, location, customMessage, customScore, source);
+        var annotation = new Annotation(mistakeType, location, customMessage, customScore, source, this.assessorId);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -304,6 +322,7 @@ public class Assessment extends ArtemisConnectionHolder {
                 explanation,
                 customScore,
                 AnnotationSource.AUTOGRADER,
+                this.assessorId,
                 List.of(checkName, problemType),
                 annotationLimit);
         this.annotations.add(annotation);
@@ -311,18 +330,41 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Removes an annotation from the assessment, or marks it as deleted if in review mode.
-     * If the annotation is not present, nothing happens.
+     * Removes an annotation from the assessment. If the annotation is not present, nothing happens.
+     * This operation is not available in review mode
      */
     public void removeAnnotation(Annotation annotation) {
         if (this.isReview()) {
-            // If the annotation is not present, nothing should happen
-            if (this.annotations.contains(annotation)) {
-                annotation.setDeletedInReview(true);
-            }
-        } else {
-            this.annotations.remove(annotation);
+            throw new ReviewException("Can't remove annotations in review mode");
         }
+
+        this.annotations.remove(annotation);
+    }
+
+    /**
+     * Suppresses the annotation. The annotation is still part of the assessment,
+     * but will not deduct points and will not be shown to the student.
+     * This operation is only available in review mode.
+     */
+    public void suppressAnnotation(Annotation annotation) {
+        if (!this.isReview()) {
+            throw new ReviewException("Can only suppress annotations in review mode");
+        }
+
+        annotation.suppress(this.assessorId);
+    }
+
+    /**
+     * Unsuppresses the annotation. The annotation will again be part of point calculations and will be shown
+     * to the student.
+     * This operation is only available in review mode.
+     */
+    public void unsuppressAnnotation(Annotation annotation) {
+        if (!this.isReview()) {
+            throw new ReviewException("Can only suppress annotations in review mode");
+        }
+
+        annotation.unsuppress();
     }
 
     /**
@@ -437,9 +479,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * total points for the annotations.
      */
     public Optional<Points> calculatePointsForMistakeType(MistakeType mistakeType) {
-        var annotationsWithType = this.streamAllAnnotations(mistakeType)
-                .filter(a -> !a.isDeletedInReview())
-                .toList();
+        var annotationsWithType = this.getAllAnnotations(mistakeType, false);
         if (annotationsWithType.isEmpty()) {
             return Optional.empty();
         }
@@ -459,7 +499,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         // Now add the points of the annotations that are part of this rating group and not in a subgroup:
-        points += this.streamNonDeletedAnnotations()
+        points += this.streamAllAnnotations(false)
                 .filter(a -> a.getMistakeType().getRatingGroup().equals(ratingGroup))
                 .filter(a -> a.getMistakeType().shouldScore())
                 .collect(Collectors.groupingBy(Annotation::getMistakeType))
@@ -518,6 +558,15 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     private List<FeedbackDTO> packAssessmentForArtemis() throws AnnotationMappingException {
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++
+        // ++++++++++++++++++++ IMPORTANT ++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++
+        // IMPORTANT Be careful to not include deleted annotations in visible feedback / point calculations!!!
+        // Otherwise, students may see annotations that were deleted in review
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++
+        // ++++++++++++++++++++ IMPORTANT ++++++++++++++++++++
+        // +++++++++++++++++++++++++++++++++++++++++++++++++++
+
         // We need all automatic feedback
         List<FeedbackDTO> feedbacks = new ArrayList<>(
                 this.testResults.stream().map(TestResult::getDto).toList());
@@ -527,14 +576,14 @@ public class Assessment extends ArtemisConnectionHolder {
         //
         // The code is mainly intended to group annotations created by the autograder, but will work
         // for any annotation that has the classifiers set.
-        List<Annotation> allAnnotations =
-                AnnotationMerger.mergeAnnotations(this.annotations, DEFAULT_ANNOTATION_LIMIT, this.studentLocale);
+        List<Annotation> mergedAnnotations = AnnotationMerger.mergeAnnotations(
+                this.getAllAnnotations(false), DEFAULT_ANNOTATION_LIMIT, this.studentLocale);
 
         // For each annotation we have a manual feedback at the respective line
         // These feedbacks deduct no points. They are just for the student to see in the
         // Artemis code viewer
         // We group annotations by file and line to have at most one annotation per line
-        feedbacks.addAll(allAnnotations.stream()
+        feedbacks.addAll(mergedAnnotations.stream()
                 .collect(
                         Collectors.groupingBy(Annotation::getFilePath, Collectors.groupingBy(Annotation::getStartLine)))
                 .entrySet()
@@ -549,16 +598,18 @@ public class Assessment extends ArtemisConnectionHolder {
                 .flatMap(r -> this.createGlobalFeedback(r).stream())
                 .toList());
 
-        // All feedbacks that are created after this point are either invisible to the
-        // student or test results
-        // We should add a dummy feedback so that the student will see at least one
-        // feedback
+        // If there are no other visible feedbacks, add a dummy feedback
+        // so that the student will see at least one feedback
         if (feedbacks.isEmpty()) {
             feedbacks.add(FeedbackDTO.newVisibleManualUnreferenced(
                     0.0, null, NO_FEEDBACK_DUMMY.format().translateTo(studentLocale)));
         }
 
+        // All feedbacks that are created after this point are either invisible to the
+        // student or test results
+
         // Add the meta feedback(s)
+        // Make sure to include suppressed annotations
         feedbacks.addAll(MetaFeedbackMapper.createMetaFeedbacks(this.annotations));
 
         log.info(
@@ -663,7 +714,7 @@ public class Assessment extends ArtemisConnectionHolder {
         // group annotations by mistake type
         List<Map.Entry<MistakeType, List<Annotation>>> annotationsByType = new ArrayList<>();
         for (var mistakeType : ratingGroup.getAllMistakeTypes()) {
-            var annotationsWithType = this.getAnnotations(mistakeType, this.annotations);
+            var annotationsWithType = this.getAllAnnotations(mistakeType, false);
             if (!annotationsWithType.isEmpty()) {
                 annotationsByType.add(Map.entry(mistakeType, annotationsWithType));
             }
@@ -736,7 +787,6 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var annotationsByFilePath = annotationsWithType.stream()
-                .filter(a -> !a.isDeletedInReview())
                 .collect(Collectors.groupingBy(Annotation::getFilePath, LinkedHashMap::new, Collectors.toList()));
 
         for (var annotationsForPath : annotationsByFilePath.values()) {

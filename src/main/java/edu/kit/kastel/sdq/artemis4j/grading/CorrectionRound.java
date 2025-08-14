@@ -19,7 +19,7 @@ public enum CorrectionRound {
         return switch (this) {
             case FIRST -> AnnotationSource.MANUAL_FIRST_ROUND;
             case SECOND -> AnnotationSource.MANUAL_SECOND_ROUND;
-            case REVIEW -> AnnotationSource.REVIEW;
+            case REVIEW -> throw new IllegalStateException("Annotations with REVIEW source cannot exist");
         };
     }
 }

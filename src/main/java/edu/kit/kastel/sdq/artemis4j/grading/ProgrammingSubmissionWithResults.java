@@ -9,40 +9,34 @@ import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 public class ProgrammingSubmissionWithResults {
     private final ProgrammingSubmission submission;
     private final ResultDTO automaticResult;
-    private final PackedAssessment firstRoundAssessment;
-    private final PackedAssessment secondRoundAssessment;
-    private final PackedAssessment reviewAssessment;
+    private final ResultDTO firstRoundResult;
+    private final ResultDTO secondRoundResult;
 
     public ProgrammingSubmissionWithResults(ProgrammingSubmission submission) {
         this.submission = submission;
 
         // Find the latest automatic result
         ResultDTO automaticResult = null;
-        for (var result : submission.getDTO().results()) {
-            if (result.assessmentType() == AssessmentType.AUTOMATIC) {
-                automaticResult = result;
+        // the results are sometimes null if there is not even an automatic result (yet)
+        if (submission.getDTO().results() != null) {
+            for (var result : submission.getDTO().results()) {
+                if (result.assessmentType() == AssessmentType.AUTOMATIC) {
+                    automaticResult = result;
+                }
             }
         }
         this.automaticResult = automaticResult;
 
         var results = submission.getDTO().nonAutomaticResults();
         if (results.isEmpty()) {
-            this.firstRoundAssessment = null;
-            this.secondRoundAssessment = null;
-            this.reviewAssessment = null;
+            this.firstRoundResult = null;
+            this.secondRoundResult = null;
         } else if (results.size() == 1) {
-            this.firstRoundAssessment = new PackedAssessment(results.get(0), CorrectionRound.FIRST, submission);
-            this.secondRoundAssessment = null;
-            this.reviewAssessment = null;
+            this.firstRoundResult = results.get(0);
+            this.secondRoundResult = null;
         } else if (results.size() == 2) {
-            this.firstRoundAssessment = new PackedAssessment(results.get(0), CorrectionRound.FIRST, submission);
-            this.secondRoundAssessment = new PackedAssessment(results.get(1), CorrectionRound.SECOND, submission);
-
-            if (secondRoundAssessment.isSubmitted()) {
-                reviewAssessment = new PackedAssessment(results.get(1), CorrectionRound.REVIEW, submission);
-            } else {
-                reviewAssessment = null;
-            }
+            this.firstRoundResult = results.get(0);
+            this.secondRoundResult = results.get(1);
         } else {
             throw new IllegalStateException("Submission has more than two non-automatic results");
         }
@@ -56,15 +50,41 @@ public class ProgrammingSubmissionWithResults {
         return Optional.ofNullable(automaticResult);
     }
 
+    public boolean isFirstRoundStarted() {
+        return firstRoundResult != null;
+    }
+
+    public boolean isFirstRoundFinished() {
+        return firstRoundResult != null && firstRoundResult.completionDate() != null;
+    }
+
     public PackedAssessment getFirstRoundAssessment() {
-        return firstRoundAssessment;
+        if (firstRoundResult == null) {
+            return null;
+        }
+        return new PackedAssessment(firstRoundResult, CorrectionRound.FIRST, submission);
+    }
+
+    public boolean isSecondRoundStarted() {
+        return secondRoundResult != null;
+    }
+
+    public boolean isSecondRoundFinished() {
+        return secondRoundResult != null && secondRoundResult.completionDate() != null;
     }
 
     public PackedAssessment getSecondRoundAssessment() {
-        return secondRoundAssessment;
+        if (secondRoundResult == null) {
+            return null;
+        }
+        return new PackedAssessment(secondRoundResult, CorrectionRound.SECOND, submission);
     }
 
     public PackedAssessment getReviewAssessment() {
-        return reviewAssessment;
+        if (secondRoundResult == null) {
+            return null;
+        }
+
+        return new PackedAssessment(secondRoundResult, CorrectionRound.REVIEW, submission);
     }
 }

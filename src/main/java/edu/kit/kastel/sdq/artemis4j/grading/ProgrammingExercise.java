@@ -139,12 +139,32 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
         var assessments = new ArrayList<PackedAssessment>(submissions.size());
         for (var submission : submissions) {
-            // TODO this may return more than one result for instructors
+            // For a non-instructor this returns only one result
+            // For an instructor, this returns all results!
+            // There is one caveat: Sometimes, there are multiple semiautomatic results
+            // for the same correction round (no idea why). In this case, the following
+            // logic breaks.
             var results = submission.getDTO().nonAutomaticResults();
-            if (results.size() != 1) {
-                throw new IllegalStateException("Too many non-automatic results");
+
+            if (results.size() > 2) {
+                throw new IllegalStateException("Submission %d has more than two non-automatic results: %s"
+                        .formatted(submission.getId(), results));
             }
-            assessments.add(new PackedAssessment(results.get(0), correctionRound, submission));
+
+            ResultDTO relevantResult;
+            if (results.size() == 1) {
+                relevantResult = results.get(0);
+            } else {
+                var assessor = this.getConnection().getAssessor();
+                if (this.course.isInstructor(assessor)) {
+                    // Instructors can see all results, so select the relevant one
+                    relevantResult = results.get(correctionRound.toArtemis());
+                } else {
+                    throw new IllegalStateException(
+                            "Too many non-automatic results for a non-instructor: " + results.size());
+                }
+            }
+            assessments.add(new PackedAssessment(relevantResult, correctionRound, submission));
         }
         return assessments;
     }
