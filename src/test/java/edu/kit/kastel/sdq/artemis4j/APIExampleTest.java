@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -10,6 +10,7 @@ import java.util.Locale;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
+import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderFailedException;
 import edu.kit.kastel.sdq.artemis4j.grading.autograder.AutograderRunner;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
@@ -46,8 +47,9 @@ class APIExampleTest {
         // Check how many locks we hold across the entire course
         System.out.println("Currently " + course.fetchLockedSubmissionCount() + " submissions locked in the course");
         // We can also look at this value for a specific exercise
-        System.out.println("Currently " + course.getProgrammingExerciseById(47).fetchLockedSubmissionCount(0)
-                + " submissions locked in exercise");
+        System.out.println(
+                "Currently " + course.getProgrammingExerciseById(47).fetchLockedSubmissionCount(CorrectionRound.FIRST)
+                        + " submissions locked in exercise");
 
         // Get the first exercise (not the exercise with id 0!) in the course
         var exercise = course.getProgrammingExercises().get(0);
@@ -64,7 +66,8 @@ class APIExampleTest {
         // You can also use tryLockNextSubmission(correctionRound, gradingConfig) to
         // request the next submission to grade
         // without supplying an id
-        var assessment = exercise.tryLockSubmission(538, 0, gradingConfig).orElseThrow();
+        var assessment = exercise.tryLockSubmission(538, CorrectionRound.FIRST, gradingConfig)
+                .orElseThrow();
         assessment.clearAnnotations();
 
         // Let's clone the test repository & submission into a temporary directory

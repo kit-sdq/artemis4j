@@ -129,7 +129,8 @@ final class AnnotationMerger {
                 firstAnnotation.getLocation(),
                 customMessage,
                 firstAnnotation.getCustomScore().orElse(null),
-                firstAnnotation.getSource()));
+                firstAnnotation.getSource(),
+                firstAnnotation.getCreatorId().orElse(null)));
 
         return result;
     }
