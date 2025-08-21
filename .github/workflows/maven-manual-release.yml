@@ -43,7 +43,7 @@ jobs:
           id: jve            
           
         - name: Set up JDK
-          uses: actions/setup-java@v4
+          uses: actions/setup-java@v5
           with:
             distribution: 'temurin'
             java-version: ${{ steps.jve.outputs.java_major_version }}

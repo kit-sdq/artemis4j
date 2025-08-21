@@ -48,7 +48,7 @@ jobs:
     - uses: joshlong/java-version-export-github-action@v28
       id: jve
 
-    - uses: actions/setup-java@v4
+    - uses: actions/setup-java@v5
       with:
         java-version: ${{ steps.jve.outputs.java_major_version }}
         distribution: 'temurin'
