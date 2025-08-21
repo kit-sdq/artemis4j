@@ -21,4 +21,6 @@ public record AnnotationDTO(
         @JsonProperty Double customPenaltyForJSON,
         @JsonProperty AnnotationSource source,
         @JsonProperty List<String> classifiers,
-        @JsonProperty Integer annotationLimit) {}
+        @JsonProperty Integer annotationLimit,
+        @JsonProperty Long createdByUserId,
+        @JsonProperty Long suppressedByUserId) {}
