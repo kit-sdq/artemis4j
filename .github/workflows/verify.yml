@@ -54,7 +54,7 @@ jobs:
       id: jve
 
     - name: Java with Cache
-      uses: actions/setup-java@v4
+      uses: actions/setup-java@v5
       with:
         java-version: ${{ steps.jve.outputs.java_major_version }}
         distribution: 'temurin'
