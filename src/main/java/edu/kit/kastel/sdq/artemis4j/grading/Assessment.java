@@ -587,7 +587,7 @@ public class Assessment extends ArtemisConnectionHolder {
         // ++++++++++++++++++++ IMPORTANT ++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++
         // IMPORTANT Be careful to not include deleted annotations in visible feedback / point calculations!!!
-        // Otherwise, students may see annotations that were deleted in review
+        // Otherwise, students may see annotations that were suppressed in review
         // +++++++++++++++++++++++++++++++++++++++++++++++++++
         // ++++++++++++++++++++ IMPORTANT ++++++++++++++++++++
         // +++++++++++++++++++++++++++++++++++++++++++++++++++
