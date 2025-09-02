@@ -94,7 +94,7 @@ class SubgroupTest {
                 .orElseThrow();
         this.assessment.clearAnnotations();
 
-        Assertions.assertTrue(this.assessment.getAllAnnotations().isEmpty());
+        Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
     }
 
     /**

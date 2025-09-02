@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
+import edu.kit.kastel.sdq.artemis4j.client.AssessmentType;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
@@ -112,6 +113,10 @@ public class Assessment extends ArtemisConnectionHolder {
         this.correctionRound = correctionRound;
         this.studentLocale = studentLocale;
 
+        if (this.result.assessmentType() == AssessmentType.AUTOMATIC) {
+            throw new IllegalArgumentException("Can't create an assessment for an automatic submission");
+        }
+
         if (this.correctionRound == CorrectionRound.REVIEW && !this.config.isReview()) {
             throw new IllegalArgumentException("For a review round, the config must be a review config");
         }
@@ -153,13 +158,13 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
-     * Get all annotations, INCLUDING ONES THAT WERE SUPPRESSED IN REVIEW.
+     * Get all annotations, not including ones that where suppressed in review.
      * Use the add/remove methods to modify the list of annotations.
      *
      * @return An unmodifiable list of annotations.
      */
-    public List<Annotation> getAllAnnotations() {
-        return this.getAllAnnotations(true);
+    public List<Annotation> getAnnotations() {
+        return this.getAnnotations(false);
     }
 
     /**
@@ -168,7 +173,7 @@ public class Assessment extends ArtemisConnectionHolder {
      *
      * @return An unmodifiable list of annotations.
      */
-    public List<Annotation> getAllAnnotations(boolean includeSuppressed) {
+    public List<Annotation> getAnnotations(boolean includeSuppressed) {
         if (includeSuppressed) {
             return Collections.unmodifiableList(this.annotations);
         } else {
@@ -185,12 +190,22 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
+     * Gets all annotations associated with the specified mistake type, not including suppressed ones.
+     * The mistake type must be associated with the same grading config as this assessment.
+     *
+     * @return An unmodifiable list of annotations, possibly empty but never null.
+     */
+    public List<Annotation> getAnnotations(MistakeType mistakeType) {
+        return this.streamAllAnnotations(mistakeType, false).toList();
+    }
+
+    /**
      * Gets all annotations associated with the specified mistake type. The mistake
      * type must be associated with the same grading config as this assessment.
      *
      * @return An unmodifiable list of annotations, possibly empty but never null.
      */
-    public List<Annotation> getAllAnnotations(MistakeType mistakeType, boolean includeSuppressed) {
+    public List<Annotation> getAnnotations(MistakeType mistakeType, boolean includeSuppressed) {
         return this.streamAllAnnotations(mistakeType, includeSuppressed).toList();
     }
 
@@ -210,13 +225,23 @@ public class Assessment extends ArtemisConnectionHolder {
     }
 
     /**
+     * Gets all annotations associated with the specified rating group, not including suppressed ones.
+     * The rating group must be associated with the same grading config as this assessment.
+     *
+     * @return An unmodifiable list of annotations, possibly empty but never null.
+     */
+    public List<Annotation> getAnnotations(RatingGroup ratingGroup) {
+        return this.streamAllAnnotations(ratingGroup, false).toList();
+    }
+
+    /**
      * Gets all annotations associated with the specified rating group. The rating
      * group must be associated with the same grading config as this assessment.
      *
-     * @return A stream of annotations, possibly empty but never null.
+     * @return An unmodifiable list of annotations, possibly empty but never null.
      */
-    public Stream<Annotation> getAllAnnotations(RatingGroup ratingGroup, boolean includeSuppressed) {
-        return this.streamAllAnnotations(ratingGroup, includeSuppressed);
+    public List<Annotation> getAnnotations(RatingGroup ratingGroup, boolean includeSuppressed) {
+        return this.streamAllAnnotations(ratingGroup, includeSuppressed).toList();
     }
 
     public Stream<Annotation> streamAllAnnotations(RatingGroup ratingGroup, boolean includeSuppressed) {
@@ -479,7 +504,7 @@ public class Assessment extends ArtemisConnectionHolder {
      * total points for the annotations.
      */
     public Optional<Points> calculatePointsForMistakeType(MistakeType mistakeType) {
-        var annotationsWithType = this.getAllAnnotations(mistakeType, false);
+        var annotationsWithType = this.getAnnotations(mistakeType, false);
         if (annotationsWithType.isEmpty()) {
             return Optional.empty();
         }
@@ -577,7 +602,7 @@ public class Assessment extends ArtemisConnectionHolder {
         // The code is mainly intended to group annotations created by the autograder, but will work
         // for any annotation that has the classifiers set.
         List<Annotation> mergedAnnotations = AnnotationMerger.mergeAnnotations(
-                this.getAllAnnotations(false), DEFAULT_ANNOTATION_LIMIT, this.studentLocale);
+                this.getAnnotations(false), DEFAULT_ANNOTATION_LIMIT, this.studentLocale);
 
         // For each annotation we have a manual feedback at the respective line
         // These feedbacks deduct no points. They are just for the student to see in the
@@ -714,7 +739,7 @@ public class Assessment extends ArtemisConnectionHolder {
         // group annotations by mistake type
         List<Map.Entry<MistakeType, List<Annotation>>> annotationsByType = new ArrayList<>();
         for (var mistakeType : ratingGroup.getAllMistakeTypes()) {
-            var annotationsWithType = this.getAllAnnotations(mistakeType, false);
+            var annotationsWithType = this.getAnnotations(mistakeType, false);
             if (!annotationsWithType.isEmpty()) {
                 annotationsByType.add(Map.entry(mistakeType, annotationsWithType));
             }

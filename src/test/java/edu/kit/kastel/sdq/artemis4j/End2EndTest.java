@@ -97,7 +97,7 @@ class End2EndTest {
                 .orElseThrow();
         this.assessment.clearAnnotations();
 
-        Assertions.assertTrue(this.assessment.getAllAnnotations().isEmpty());
+        Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
     }
 
     @Test
@@ -123,10 +123,10 @@ class End2EndTest {
         List<TestResult> tests = this.assessment.getTestResults();
         assertEquals(13, tests.size());
 
-        assertEquals(1, this.assessment.getAllAnnotations().size());
+        assertEquals(1, this.assessment.getAnnotations().size());
         assertEquals(
                 AnnotationSource.MANUAL_FIRST_ROUND,
-                this.assessment.getAllAnnotations().get(0).getSource());
+                this.assessment.getAnnotations().get(0).getSource());
     }
 
     @Test
@@ -146,8 +146,8 @@ class End2EndTest {
         List<TestResult> tests = this.assessment.getTestResults();
         assertEquals(13, tests.size());
 
-        assertEquals(1, this.assessment.getAllAnnotations().size());
-        var annotation = this.assessment.getAllAnnotations().get(0);
+        assertEquals(1, this.assessment.getAnnotations().size());
+        var annotation = this.assessment.getAnnotations().get(0);
         assertEquals(AnnotationSource.MANUAL_FIRST_ROUND, annotation.getSource());
         assertEquals(Optional.of(-2.0), annotation.getCustomScore());
         assertEquals(Optional.of(FEEDBACK_TEXT), annotation.getCustomMessage());
@@ -158,16 +158,16 @@ class End2EndTest {
         MistakeType mistakeType = this.gradingConfig.getMistakeTypes().get(1);
 
         this.assessment.addPredefinedAnnotation(mistakeType, "src/edu/kit/informatik/BubbleSort.java", 1, 2, null);
-        assertEquals(1, this.assessment.getAllAnnotations().size());
-        var oldAnnotations = this.assessment.getAllAnnotations();
+        assertEquals(1, this.assessment.getAnnotations().size());
+        var oldAnnotations = this.assessment.getAnnotations();
 
         String exportedAssessment = this.assessment.exportAssessment();
 
         this.assessment.clearAnnotations();
-        assertEquals(0, this.assessment.getAllAnnotations().size());
+        assertEquals(0, this.assessment.getAnnotations().size());
 
         this.assessment.importAssessment(exportedAssessment);
-        assertEquals(oldAnnotations, this.assessment.getAllAnnotations());
+        assertEquals(oldAnnotations, this.assessment.getAnnotations());
     }
 
     @Test
@@ -195,7 +195,7 @@ class End2EndTest {
                 .getFirstRoundAssessment()
                 .lockAndOpen(this.gradingConfig)
                 .orElseThrow();
-        Assertions.assertEquals(1, newAssessment.getAllAnnotations().size());
+        Assertions.assertEquals(1, newAssessment.getAnnotations().size());
     }
 
     @Test
@@ -228,7 +228,7 @@ class End2EndTest {
         }
 
         // create a copy of all annotations before submitting (which will merge them)
-        List<Annotation> currentAnnotations = new ArrayList<>(this.assessment.getAllAnnotations());
+        List<Annotation> currentAnnotations = new ArrayList<>(this.assessment.getAnnotations());
         this.assessment.submit();
 
         // Check Assessments
@@ -237,7 +237,7 @@ class End2EndTest {
                 .lockAndOpen(this.gradingConfig)
                 .orElseThrow();
 
-        for (Annotation annotation : this.assessment.getAllAnnotations()) {
+        for (Annotation annotation : this.assessment.getAnnotations()) {
             Assertions.assertTrue(
                     currentAnnotations.contains(annotation),
                     "Annotation \"%s\" is missing after submission".formatted(annotation));
