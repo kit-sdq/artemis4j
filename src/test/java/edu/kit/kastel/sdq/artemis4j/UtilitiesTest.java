@@ -51,7 +51,7 @@ class UtilitiesTest {
         int toggleSucceeded = 0;
         List<String> toggleFailed = new ArrayList<>();
         for (var studentExam : studentExams) {
-            if (studentExam.submitted()) {
+            if (studentExam.submitted() || !studentExam.started()) {
                 continue;
             }
             try {
@@ -92,7 +92,7 @@ class UtilitiesTest {
         var submissions =
                 new ArrayList<>(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), correctionRound, false));
         for (var submission : submissions) {
-            var latestResult = submission.results().get(submission.results().size() - 1);
+            var latestResult = submission.results().getLast();
             if (latestResult == null) {
                 log.warn("No result for submission {}", submission.id());
                 continue;
@@ -105,7 +105,7 @@ class UtilitiesTest {
                         submission.participation().participantIdentifier());
                 var lockingResult = ProgrammingSubmissionDTO.lock(client, submission.id(), correctionRound)
                         .results()
-                        .get(0);
+                        .getFirst();
                 var newResult = ResultDTO.forAssessmentSubmission(
                         submission.id(), 0.0, lockingResult.feedbacks(), lockingResult);
                 ProgrammingSubmissionDTO.saveAssessment(

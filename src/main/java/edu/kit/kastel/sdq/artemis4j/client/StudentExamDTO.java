@@ -7,7 +7,11 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 
-public record StudentExamDTO(@JsonProperty long id, @JsonProperty boolean submitted, @JsonProperty UserDTO user) {
+public record StudentExamDTO(
+        @JsonProperty long id,
+        @JsonProperty boolean submitted,
+        @JsonProperty boolean started,
+        @JsonProperty UserDTO user) {
     public static List<StudentExamDTO> fetchAll(ArtemisClient client, int courseId, long examId)
             throws ArtemisNetworkException {
         return Arrays.asList(ArtemisRequest.get()
