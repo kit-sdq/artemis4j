@@ -11,6 +11,8 @@ import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A single annotation as part of an assessment. Annotations may be manually
@@ -19,10 +21,14 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
  * assessment's methods.
  */
 public final class Annotation {
+    private static final Logger log = LoggerFactory.getLogger(Annotation.class);
+
     private final String uuid;
     private final MistakeType type;
     private final Location location;
     private final AnnotationSource source;
+    private final Long createdByUserId; // null -> unknown creator
+    private Long suppressedByUserId; // null -> not suppressed
     private String customMessage;
     private Double customScore;
     // If not empty, this list contains classifiers that are used to group annotations.
@@ -49,15 +55,8 @@ public final class Annotation {
         this.customScore = dto.customPenaltyForJSON();
         this.classifiers = dto.classifiers() != null ? dto.classifiers() : List.of();
         this.annotationLimit = dto.annotationLimit();
-    }
-
-    Annotation(
-            MistakeType mistakeType,
-            Location location,
-            String customMessage,
-            Double customScore,
-            AnnotationSource source) {
-        this(mistakeType, location, customMessage, customScore, source, List.of(), null);
+        this.createdByUserId = dto.createdByUserId();
+        this.suppressedByUserId = dto.suppressedByUserId();
     }
 
     Annotation(
@@ -66,6 +65,17 @@ public final class Annotation {
             String customMessage,
             Double customScore,
             AnnotationSource source,
+            Long createdByUserId) {
+        this(mistakeType, location, customMessage, customScore, source, createdByUserId, List.of(), null);
+    }
+
+    Annotation(
+            MistakeType mistakeType,
+            Location location,
+            String customMessage,
+            Double customScore,
+            AnnotationSource source,
+            Long createdByUserId,
             List<String> classifiers,
             Integer annotationLimit) {
         // Validate custom penalty and message
@@ -80,12 +90,18 @@ public final class Annotation {
             throw new IllegalArgumentException("A custom penalty is not allowed for non-custom annotation types.");
         }
 
+        if (createdByUserId == null) {
+            log.warn("Creator user id is null, this annotation will not be associated with a user.");
+        }
+
         this.uuid = generateUUID();
         this.type = mistakeType;
         this.location = location;
         this.customMessage = customMessage;
         this.customScore = customScore;
         this.source = source;
+        this.createdByUserId = createdByUserId;
+        this.suppressedByUserId = null; // Not suppressed
         this.classifiers = new ArrayList<>(classifiers);
         this.annotationLimit = annotationLimit;
     }
@@ -158,6 +174,9 @@ public final class Annotation {
         if (this.type.isCustomAnnotation() && message == null) {
             throw new IllegalArgumentException("A custom message is required for custom annotation types.");
         }
+        if (this.isSuppressed()) {
+            throw new ReviewException("Can't change the custom message of a suppressed annotation.");
+        }
 
         this.customMessage = message;
     }
@@ -197,12 +216,35 @@ public final class Annotation {
         if (this.type.isCustomAnnotation() && score == null) {
             throw new IllegalArgumentException("A custom score is required for custom annotation types.");
         }
+        if (this.isSuppressed()) {
+            throw new ReviewException("Can't change the custom score of a suppressed annotation.");
+        }
 
         this.customScore = score;
     }
 
     public AnnotationSource getSource() {
         return source;
+    }
+
+    public Optional<Long> getCreatorId() {
+        return Optional.ofNullable(createdByUserId);
+    }
+
+    public void suppress(long userId) {
+        this.suppressedByUserId = userId;
+    }
+
+    public void unsuppress() {
+        this.suppressedByUserId = null;
+    }
+
+    public boolean isSuppressed() {
+        return this.suppressedByUserId != null;
+    }
+
+    public Optional<Long> getSuppressorId() {
+        return Optional.ofNullable(suppressedByUserId);
     }
 
     /**
@@ -219,7 +261,9 @@ public final class Annotation {
                 customScore,
                 source,
                 classifiers,
-                annotationLimit);
+                annotationLimit,
+                createdByUserId,
+                suppressedByUserId);
     }
 
     @Override

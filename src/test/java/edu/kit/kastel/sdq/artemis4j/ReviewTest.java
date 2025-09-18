@@ -22,7 +22,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import org.junit.jupiter.api.Test;
 
-class ExamTest {
+class ReviewTest {
     private static final String ROUND_ONE_FEEDBACK = "feedback round 1";
     private static final String ROUND_TWO_FEEDBACK = "feedback round 2";
 
@@ -72,8 +72,13 @@ class ExamTest {
                 3,
                 ROUND_TWO_FEEDBACK,
                 -1.0);
+        roundTwoAssessment.submit();
 
-        var annotations = roundTwoAssessment.getAnnotations();
+        GradingConfig reviewConfig = GradingConfig.readFromString(
+                Files.readString(Path.of("src/test/resources/config_review.json")), exercise);
+        Assessment reviewAssessment =
+                submission.getReviewAssessment().lockAndOpen(reviewConfig).orElseThrow();
+        var annotations = reviewAssessment.getAnnotations(true);
         assertEquals(2, annotations.size());
         assertTrue(annotations.stream()
                 .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_FIRST_ROUND
@@ -82,7 +87,46 @@ class ExamTest {
                 .anyMatch(a -> a.getSource() == AnnotationSource.MANUAL_SECOND_ROUND
                         && a.getCustomMessage().equals(Optional.of(ROUND_TWO_FEEDBACK))));
 
-        roundTwoAssessment.submit();
+        // Assessor tracking
+        for (var annotation : annotations) {
+            assertEquals(
+                    connection.getAssessor().getId(), annotation.getCreatorId().orElseThrow());
+        }
+
+        assertEquals(-3.0, reviewAssessment.calculateTotalPointsOfAnnotations());
+
+        // Suppression
+        reviewAssessment.suppressAnnotation(annotations.getFirst());
+        assertEquals(
+                connection.getAssessor().getId(),
+                annotations.getFirst().getSuppressorId().orElseThrow());
+        assertEquals(-1.0, reviewAssessment.calculateTotalPointsOfAnnotations());
+        assertEquals(1, reviewAssessment.getAnnotations().size());
+        assertEquals(2, reviewAssessment.getAnnotations(true).size());
+
+        // Unsuppression
+        reviewAssessment.unsuppressAnnotation(annotations.getFirst());
+        assertEquals(Optional.empty(), annotations.getFirst().getSuppressorId());
+        assertEquals(-3.0, reviewAssessment.calculateTotalPointsOfAnnotations());
+        assertEquals(2, reviewAssessment.getAnnotations().size());
+        assertEquals(2, reviewAssessment.getAnnotations(true).size());
+
+        // Suppress again and submit
+        reviewAssessment.suppressAnnotation(annotations.getFirst());
+        reviewAssessment.submit();
+
+        // Fetch again and see if the suppression is still there
+        reviewAssessment =
+                submission.getReviewAssessment().lockAndOpen(reviewConfig).orElseThrow();
+        assertEquals(1, reviewAssessment.getAnnotations().size());
+        assertEquals(2, reviewAssessment.getAnnotations(true).size());
+        annotations = reviewAssessment.getAnnotations(true);
+        assertEquals(2, annotations.size());
+        assertEquals(
+                connection.getAssessor().getId(),
+                annotations.getFirst().getSuppressorId().orElseThrow());
+        assertEquals(Optional.empty(), annotations.get(1).getSuppressorId());
+        assertEquals(-1.0, reviewAssessment.calculateTotalPointsOfAnnotations());
     }
 
     private ProgrammingSubmissionWithResults findSubmission(

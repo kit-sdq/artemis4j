@@ -17,13 +17,19 @@ public final class GradingConfig {
     private final List<RatingGroup> ratingGroups;
     private final long validExerciseId;
     private final boolean positiveFeedbackAllowed;
+    private final boolean review;
 
     private GradingConfig(
-            String shortName, boolean positiveFeedbackAllowed, List<RatingGroup> ratingGroups, long validExerciseId) {
+            String shortName,
+            boolean positiveFeedbackAllowed,
+            List<RatingGroup> ratingGroups,
+            long validExerciseId,
+            boolean review) {
         this.shortName = shortName;
         this.ratingGroups = ratingGroups;
         this.validExerciseId = validExerciseId;
         this.positiveFeedbackAllowed = positiveFeedbackAllowed;
+        this.review = review;
     }
 
     public static GradingConfig fromDTO(GradingConfigDTO configDTO, ProgrammingExercise exercise)
@@ -50,7 +56,11 @@ public final class GradingConfig {
         }
 
         var config = new GradingConfig(
-                configDTO.shortName(), configDTO.positiveFeedbackAllowed(), ratingGroups, exercise.getId());
+                configDTO.shortName(),
+                configDTO.positiveFeedbackAllowed(),
+                ratingGroups,
+                exercise.getId(),
+                configDTO.review());
         log.info(
                 "Parsed grading config for exercise '{}' and found {} mistake types",
                 config.getShortName(),
@@ -100,6 +110,10 @@ public final class GradingConfig {
         return positiveFeedbackAllowed;
     }
 
+    public boolean isReview() {
+        return review;
+    }
+
     @Override
     public String toString() {
         return "GradingConfig[" + "shortName=" + shortName + ", " + "ratingGroups=" + ratingGroups + ']';
@@ -114,7 +128,8 @@ public final class GradingConfig {
             Boolean positiveFeedbackAllowed,
             List<Long> allowedExercises,
             List<RatingGroup.RatingGroupDTO> ratingGroups,
-            List<MistakeType.MistakeTypeDTO> mistakeTypes) {
+            List<MistakeType.MistakeTypeDTO> mistakeTypes,
+            boolean review) {
         public boolean isAllowedForExercise(long exerciseId) {
             // no allowed exercises means it is valid for all exercises
             return this.allowedExercises() == null

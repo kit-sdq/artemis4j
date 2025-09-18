@@ -19,7 +19,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
-import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmission;
+import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.InvalidGradingConfigException;
@@ -49,7 +49,7 @@ class SubgroupTest {
     private ArtemisConnection connection;
     private Course course;
     private ProgrammingExercise exercise;
-    private ProgrammingSubmission programmingSubmission;
+    private ProgrammingSubmissionWithResults programmingSubmission;
     private Assessment assessment;
     private GradingConfig gradingConfig;
 
@@ -78,9 +78,9 @@ class SubgroupTest {
                 .findFirst()
                 .orElseThrow();
 
-        var submissions = this.exercise.fetchSubmissions();
+        var submissions = this.exercise.fetchAllSubmissions();
         this.programmingSubmission = submissions.stream()
-                .filter(a -> a.getParticipantIdentifier().equals(STUDENT_USER))
+                .filter(s -> s.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
                 .findFirst()
                 .orElseThrow();
 
@@ -88,7 +88,10 @@ class SubgroupTest {
                 Files.readString(Path.of("src/test/resources/config.json")), this.exercise);
 
         // ensure that the submission is locked
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
         this.assessment.clearAnnotations();
 
         Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
@@ -101,36 +104,36 @@ class SubgroupTest {
     void testSubgroupWithoutParent() {
         var configString =
                 """
-            {
-                "shortName": "E2E",
-                "positiveFeedbackAllowed": true,
-                "ratingGroups": [
-                    {
-                        "shortName": "functionality::quality",
-                        "displayName": "Code Qualität",
-                        "additionalDisplayNames": {
-                            "en": "Code Quality"
-                        },
-                        "negativeLimit": -3,
-                        "positiveLimit": null
-                    }
-                ],
-                "mistakeTypes": [
-                    {
-                        "shortName": "unused",
-                        "button": "Unused Element",
-                        "message": "Das Element wird nicht verwendet",
-                        "penaltyRule": {
-                            "shortName": "thresholdPenalty",
-                            "threshold": 1,
-                            "penalty": 1.0
-                        },
-                        "appliesTo": "functionality::quality"
-                    }
-                ]
-            }
+                        {
+                            "shortName": "E2E",
+                            "positiveFeedbackAllowed": true,
+                            "ratingGroups": [
+                                {
+                                    "shortName": "functionality::quality",
+                                    "displayName": "Code Qualität",
+                                    "additionalDisplayNames": {
+                                        "en": "Code Quality"
+                                    },
+                                    "negativeLimit": -3,
+                                    "positiveLimit": null
+                                }
+                            ],
+                            "mistakeTypes": [
+                                {
+                                    "shortName": "unused",
+                                    "button": "Unused Element",
+                                    "message": "Das Element wird nicht verwendet",
+                                    "penaltyRule": {
+                                        "shortName": "thresholdPenalty",
+                                        "threshold": 1,
+                                        "penalty": 1.0
+                                    },
+                                    "appliesTo": "functionality::quality"
+                                }
+                            ]
+                        }
 
-            """;
+                        """;
 
         assertThrowsExactly(
                 InvalidGradingConfigException.class,
@@ -146,54 +149,54 @@ class SubgroupTest {
     void testNestedSubgroup() {
         var configString =
                 """
-            {
-                "shortName": "E2E",
-                "positiveFeedbackAllowed": true,
-                "ratingGroups": [
-                    {
-                        "shortName": "functionality",
-                        "displayName": "Code Qualität",
-                        "additionalDisplayNames": {
-                            "en": "Code Quality"
-                        },
-                        "negativeLimit": -3,
-                        "positiveLimit": null
-                    },
-                    {
-                        "shortName": "functionality::quality",
-                        "displayName": "Code Qualität",
-                        "additionalDisplayNames": {
-                            "en": "Code Quality"
-                        },
-                        "negativeLimit": -3,
-                        "positiveLimit": null
-                    },
-                    {
-                        "shortName": "functionality::quality::extra",
-                        "displayName": "Code Qualität",
-                        "additionalDisplayNames": {
-                            "en": "Code Quality"
-                        },
-                        "negativeLimit": -3,
-                        "positiveLimit": null
-                    }
-                ],
-                "mistakeTypes": [
-                    {
-                        "shortName": "unused",
-                        "button": "Unused Element",
-                        "message": "Das Element wird nicht verwendet",
-                        "penaltyRule": {
-                            "shortName": "thresholdPenalty",
-                            "threshold": 1,
-                            "penalty": 1.0
-                        },
-                        "appliesTo": "functionality::quality"
-                    }
-                ]
-            }
+                        {
+                            "shortName": "E2E",
+                            "positiveFeedbackAllowed": true,
+                            "ratingGroups": [
+                                {
+                                    "shortName": "functionality",
+                                    "displayName": "Code Qualität",
+                                    "additionalDisplayNames": {
+                                        "en": "Code Quality"
+                                    },
+                                    "negativeLimit": -3,
+                                    "positiveLimit": null
+                                },
+                                {
+                                    "shortName": "functionality::quality",
+                                    "displayName": "Code Qualität",
+                                    "additionalDisplayNames": {
+                                        "en": "Code Quality"
+                                    },
+                                    "negativeLimit": -3,
+                                    "positiveLimit": null
+                                },
+                                {
+                                    "shortName": "functionality::quality::extra",
+                                    "displayName": "Code Qualität",
+                                    "additionalDisplayNames": {
+                                        "en": "Code Quality"
+                                    },
+                                    "negativeLimit": -3,
+                                    "positiveLimit": null
+                                }
+                            ],
+                            "mistakeTypes": [
+                                {
+                                    "shortName": "unused",
+                                    "button": "Unused Element",
+                                    "message": "Das Element wird nicht verwendet",
+                                    "penaltyRule": {
+                                        "shortName": "thresholdPenalty",
+                                        "threshold": 1,
+                                        "penalty": 1.0
+                                    },
+                                    "appliesTo": "functionality::quality"
+                                }
+                            ]
+                        }
 
-            """;
+                        """;
 
         assertThrowsExactly(
                 IllegalArgumentException.class,
@@ -204,13 +207,17 @@ class SubgroupTest {
     private List<String> getGlobalFeedbackLines() throws ArtemisClientException {
         this.assessment.submit();
         // after submitting, we need to check that the global feedback looks as expected
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
-        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        ResultDTO resultDTO =
+                this.programmingSubmission.getFirstRoundAssessment().result();
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
                 this.connection.getClient(),
                 resultDTO.id(),
-                this.programmingSubmission.getParticipationId(),
+                this.programmingSubmission.getSubmission().getParticipationId(),
                 resultDTO.feedbacks());
 
         List<String> globalFeedbackLines = new ArrayList<>();
@@ -361,15 +368,19 @@ class SubgroupTest {
         this.assessment.submit();
 
         // the assessment will not show the merged annotations (it will unmerge them after loading)
-        this.assessment = this.programmingSubmission.tryLock(this.gradingConfig).orElseThrow();
+        this.assessment = this.programmingSubmission
+                .getFirstRoundAssessment()
+                .lockAndOpen(this.gradingConfig)
+                .orElseThrow();
 
         // so we need to check the submission itself:
 
-        ResultDTO resultDTO = this.programmingSubmission.getRelevantResult().orElseThrow();
+        ResultDTO resultDTO =
+                this.programmingSubmission.getFirstRoundAssessment().result();
         var feedbacks = ResultDTO.fetchDetailedFeedbacks(
                 this.connection.getClient(),
                 resultDTO.id(),
-                this.programmingSubmission.getParticipationId(),
+                this.programmingSubmission.getSubmission().getParticipationId(),
                 resultDTO.feedbacks());
 
         List<String> feedbackTexts = new ArrayList<>();
