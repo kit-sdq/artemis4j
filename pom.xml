@@ -54,7 +54,7 @@
 
     <spotless.version>3.0.0</spotless.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <okhttp.version>4.12.0</okhttp.version>
+    <okhttp.version>5.1.0</okhttp.version>
     <autograder.version>6.8.10</autograder.version>
     <jgit.version>7.4.0.202509020913-r</jgit.version>
     <junit.version>6.0.0</junit.version>
