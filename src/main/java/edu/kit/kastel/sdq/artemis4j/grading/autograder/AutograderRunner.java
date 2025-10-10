@@ -7,6 +7,7 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
+import de.firemage.autograder.api.AbstractCodePosition;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.CheckConfiguration;
@@ -27,7 +28,7 @@ public final class AutograderRunner {
             ClonedProgrammingSubmission submission,
             Locale locale,
             int threads,
-            Consumer<String> statusConsumer)
+            Consumer<? super String> statusConsumer)
             throws AutograderFailedException {
         if (!assessment.getSubmission().equals(submission.getSubmission())) {
             throw new IllegalArgumentException("The assessment and submission do not match");
@@ -71,12 +72,10 @@ public final class AutograderRunner {
             for (AbstractProblem problem : problems) {
                 var mistakeType = problemTypesMap.get(problem.getType());
                 var position = problem.getPosition();
+
                 assessment.addAutograderAnnotation(
                         mistakeType,
-                        new Location(
-                                "src/" + position.path().toString(),
-                                new LineColumn(position.startLine() - 1, position.startColumn() - 1),
-                                new LineColumn(position.endLine() - 1, position.endColumn() - 1)),
+                        translateToLocation(position),
                         autograder.translateMessage(problem.getExplanation()),
                         problem.getCheckName(),
                         problem.getType(),
@@ -87,5 +86,23 @@ public final class AutograderRunner {
         } catch (IOException | LinterException e) {
             throw new AutograderFailedException(e);
         }
+    }
+
+    private static Location translateToLocation(AbstractCodePosition position) {
+        // The Autograder emits a CodePosition which is based on the SourcePosition type defined by spoon.
+        //
+        // For some things the autograder emits a code position where the start/end line and start/end column
+        // are equal like L10:5 - L10:5.
+        //
+        // For everything else, it will simply emit the positions defined in spoon.
+        //
+        // For the SourcePosition type the start and end line/column are 1-based.
+        // In addition to that, the end line and column are inclusive as well.
+        //
+        // The translation to Location is just converting the 1-based start and end line/column to 0-based
+        var start = new LineColumn(position.startLine() - 1, position.startColumn() - 1);
+        var end = new LineColumn(position.endLine() - 1, position.endColumn() - 1);
+
+        return new Location("src/" + position.path().toString(), start, end);
     }
 }
