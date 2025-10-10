@@ -8,6 +8,9 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
 
+/**
+ * Represents a user in Artemis.
+ */
 public class User {
     private final UserDTO dto;
 
@@ -25,6 +28,22 @@ public class User {
 
     public String getLangKey() {
         return this.dto.langKey();
+    }
+
+    /**
+     * Get the first name of the user.
+     * @return the first name
+     */
+    public String getFirstName() {
+        return this.dto.firstName();
+    }
+
+    /**
+     * Get the last name of the user.
+     * @return the last name
+     */
+    public String getLastName() {
+        return this.dto.lastName();
     }
 
     public Optional<String> getGitToken() {
