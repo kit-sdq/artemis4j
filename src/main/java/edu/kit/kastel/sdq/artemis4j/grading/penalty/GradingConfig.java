@@ -8,6 +8,7 @@ import java.util.stream.Stream;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,8 +126,8 @@ public final class GradingConfig {
 
     public record GradingConfigDTO(
             String shortName,
-            Boolean positiveFeedbackAllowed,
-            List<Long> allowedExercises,
+            @Nullable Boolean positiveFeedbackAllowed,
+            @Nullable List<Long> allowedExercises,
             List<RatingGroup.RatingGroupDTO> ratingGroups,
             List<MistakeType.MistakeTypeDTO> mistakeTypes,
             boolean review) {

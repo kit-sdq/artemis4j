@@ -5,13 +5,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 /**
  * There are many more fields in the actual entity that are added as needed
  *
  * @param sshCloneURLTemplate Base URL for cloning repositories via SSH
  */
-public record ManagementInfoDTO(@JsonProperty String sshCloneURLTemplate) {
+public record ManagementInfoDTO(@JsonProperty @Nullable String sshCloneURLTemplate) {
     public static ManagementInfoDTO fetch(ArtemisClient client) throws ArtemisNetworkException {
         return ArtemisRequest.get()
                 .path(List.of("management", "info"))

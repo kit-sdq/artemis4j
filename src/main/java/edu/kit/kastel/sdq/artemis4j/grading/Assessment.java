@@ -33,6 +33,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.Points;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.RatingGroup;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 
 /**
@@ -335,7 +336,7 @@ public class Assessment extends ArtemisConnectionHolder {
             String explanation,
             String checkName,
             String problemType,
-            Integer annotationLimit) {
+            @Nullable Integer annotationLimit) {
         if (this.isReview()) {
             throw new ReviewException("Can't add annotations in review mode");
         }

@@ -12,6 +12,7 @@ import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A student's programming submission. A submission essentially consists of the
@@ -21,7 +22,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingSubmissionDTO dto;
 
-    private final User student;
+    private final @Nullable User student;
     private final ProgrammingExercise exercise;
 
     public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise) {
