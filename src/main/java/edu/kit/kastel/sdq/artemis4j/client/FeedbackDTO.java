@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Corresponds to an annotation as part of an assessment
@@ -28,14 +29,14 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
  */
 public record FeedbackDTO(
         @JsonProperty FeedbackType type,
-        @JsonProperty Integer id,
+        @JsonProperty @Nullable Integer id,
         @JsonProperty double credits,
         @JsonProperty Boolean positive,
         @JsonProperty String visibility,
         @JsonProperty String text,
         @JsonProperty String reference,
         @JsonProperty String detailText,
-        @JsonProperty Boolean hasLongFeedbackText,
+        @JsonProperty @Nullable Boolean hasLongFeedbackText,
         @JsonProperty TestCaseDTO testCase) {
 
     /**
@@ -44,11 +45,11 @@ public record FeedbackDTO(
      */
     public static final int DETAIL_TEXT_MAX_CHARACTERS = 5000;
 
-    public static FeedbackDTO newManual(double credits, String text, String reference, String detailText) {
+    public static FeedbackDTO newManual(double credits, @Nullable String text, String reference, String detailText) {
         return new FeedbackDTO(FeedbackType.MANUAL, null, credits, null, null, text, reference, detailText, null, null);
     }
 
-    public static FeedbackDTO newVisibleManualUnreferenced(double credits, String text, String detailText) {
+    public static FeedbackDTO newVisibleManualUnreferenced(double credits, @Nullable String text, String detailText) {
         return new FeedbackDTO(
                 FeedbackType.MANUAL_UNREFERENCED, null, credits, null, null, text, null, detailText, null, null);
     }

@@ -13,6 +13,7 @@ import java.util.function.BiFunction;
 
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
+import org.jspecify.annotations.Nullable;
 
 public final class RatingGroup {
     // Subgroups are indicated by a double colon "::" in the id.
@@ -25,10 +26,12 @@ public final class RatingGroup {
     private final double maxPenalty;
     private final List<MistakeType> mistakeTypes;
     private final Map<String, RatingGroup> subRatingGroups;
-    private final RatingGroup parentRatingGroup;
+    private final @Nullable RatingGroup parentRatingGroup;
 
     private static double parseLimit(
-            double limit, Double parentLimit, BiFunction<? super Double, ? super Double, String> errorMessageBuilder) {
+            double limit,
+            @Nullable Double parentLimit,
+            BiFunction<? super Double, ? super Double, String> errorMessageBuilder) {
         // This ensures that the limit is always positive. When there is a negative limit,
         // negate it to make it positive and then later negate it again.
         //
@@ -64,7 +67,7 @@ public final class RatingGroup {
         return result;
     }
 
-    private RatingGroup(RatingGroupDTO dto, RatingGroup parentRatingGroup) {
+    private RatingGroup(RatingGroupDTO dto, @Nullable RatingGroup parentRatingGroup) {
         // The negative limit defines the amount of points that can be subtracted at most.
         double negativeLimit = parseLimit(
                 dto.negativeLimit() == null ? Double.NEGATIVE_INFINITY : dto.negativeLimit(),
@@ -194,7 +197,7 @@ public final class RatingGroup {
      *
      * @return the parent group or null if this is a top-level group
      */
-    public RatingGroup getParent() {
+    public @Nullable RatingGroup getParent() {
         return this.parentRatingGroup;
     }
 
@@ -296,7 +299,7 @@ public final class RatingGroup {
     record RatingGroupDTO(
             String shortName,
             String displayName,
-            Double positiveLimit,
-            Double negativeLimit,
+            @Nullable Double positiveLimit,
+            @Nullable Double negativeLimit,
             Map<String, String> additionalDisplayNames) {}
 }

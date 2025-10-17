@@ -122,7 +122,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
             ResultDTO relevantResult;
             if (results.size() == 1) {
-                relevantResult = results.get(0);
+                relevantResult = results.getFirst();
             } else {
                 var assessor = this.getConnection().getAssessor();
                 if (this.course.isInstructor(assessor)) {
@@ -207,7 +207,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             throw new IllegalStateException("Locking returned %d results, expected 1"
                     .formatted(locked.results().size()));
         }
-        var result = locked.results().get(0);
+        var result = locked.results().getFirst();
 
         if (!this.canAssess(result)) {
             return Optional.empty();

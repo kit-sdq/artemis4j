@@ -41,3 +41,4 @@ build/
 
 env
 .env
+package-info.java

@@ -10,6 +10,7 @@ import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.transport.CredentialsProvider;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -21,7 +22,8 @@ public class VCSTokenCloningStrategy implements CloningStrategy {
 
     private final CredentialsProvider credentialsProvider;
 
-    public VCSTokenCloningStrategy(String tokenOverride, ArtemisConnection connection) throws ArtemisNetworkException {
+    public VCSTokenCloningStrategy(@Nullable String tokenOverride, ArtemisConnection connection)
+            throws ArtemisNetworkException {
         var assessor = connection.getAssessor();
 
         String token;

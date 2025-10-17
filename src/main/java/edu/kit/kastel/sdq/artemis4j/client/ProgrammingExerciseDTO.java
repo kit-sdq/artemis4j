@@ -6,13 +6,14 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 public record ProgrammingExerciseDTO(
         @JsonProperty long id,
         @JsonProperty String title,
         @JsonProperty String shortName,
         @JsonProperty String testRepositoryUri,
-        @JsonProperty Boolean secondCorrectionEnabled,
+        @JsonProperty @Nullable Boolean secondCorrectionEnabled,
         @JsonProperty String exerciseType,
         @JsonProperty String assessmentType,
         @JsonProperty double maxPoints,

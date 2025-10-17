@@ -6,6 +6,7 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 public record UserDTO(
         @JsonProperty long id,
@@ -19,9 +20,9 @@ public record UserDTO(
         @JsonProperty String name,
         @JsonProperty String participantIdentifier,
         @JsonProperty List<String> groups,
-        @JsonProperty String vcsAccessToken,
-        @JsonProperty ZonedDateTime vcsAccessTokenExpiryDate,
-        @JsonProperty String sshPublicKey) {
+        @JsonProperty @Nullable String vcsAccessToken,
+        @JsonProperty @Nullable ZonedDateTime vcsAccessTokenExpiryDate,
+        @JsonProperty @Nullable String sshPublicKey) {
     public UserDTO {
         if (groups == null) {
             // when a user is not in any group, artemis returns null

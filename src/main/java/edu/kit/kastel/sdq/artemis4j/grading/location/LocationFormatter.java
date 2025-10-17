@@ -11,12 +11,14 @@ import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import org.jspecify.annotations.Nullable;
+
 /**
  * Makes multiple locations more readable by intelligently merging them.
  */
 public class LocationFormatter implements Comparable<LocationFormatter> {
     private final SequencedSet<PathSegment> segments;
-    private Function<Location, String> locationToString;
+    private @Nullable Function<Location, String> locationToString;
     private Predicate<String> shouldRemoveSharedPrefix;
     private boolean shouldRemoveExtension;
     private boolean shouldMergeLines;

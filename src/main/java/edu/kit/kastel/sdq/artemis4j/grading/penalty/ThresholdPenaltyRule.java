@@ -7,6 +7,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
+import org.jspecify.annotations.Nullable;
 
 public final class ThresholdPenaltyRule implements PenaltyRule {
     private final int threshold;
@@ -17,7 +18,7 @@ public final class ThresholdPenaltyRule implements PenaltyRule {
     public ThresholdPenaltyRule(
             @JsonProperty("threshold") int threshold,
             @JsonProperty(value = "penalty", required = true) double penalty,
-            @JsonProperty("repetitions") Integer repetitions) {
+            @JsonProperty("repetitions") @Nullable Integer repetitions) {
         this.threshold = threshold;
         // It is not defined how the code should behave if the threshold is 0 or negative, therefore an exception is
         // thrown here.

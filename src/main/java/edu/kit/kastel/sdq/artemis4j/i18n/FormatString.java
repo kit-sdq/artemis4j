@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.i18n;
 
 import java.text.MessageFormat;
@@ -7,6 +7,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.jspecify.annotations.Nullable;
 
 public class FormatString {
     public static final Locale DEFAULT_LOCALE = Locale.ENGLISH;
@@ -23,7 +25,7 @@ public class FormatString {
         this.translations = Map.of();
     }
 
-    public FormatString(String defaultTranslation, Map<String, String> additionalTranslations) {
+    public FormatString(String defaultTranslation, @Nullable Map<String, String> additionalTranslations) {
         this(
                 escapeStringForMessageFormat(defaultTranslation, DEFAULT_LOCALE),
                 additionalTranslations == null
@@ -35,7 +37,7 @@ public class FormatString {
                                                 e.getValue(), Locale.forLanguageTag(e.getKey())))));
     }
 
-    public FormatString(MessageFormat defaultTranslation, Map<Locale, MessageFormat> additionalTranslations) {
+    public FormatString(MessageFormat defaultTranslation, @Nullable Map<Locale, MessageFormat> additionalTranslations) {
         this.defaultTranslation = defaultTranslation;
         if (additionalTranslations == null) {
             this.translations = Map.of();
@@ -48,7 +50,7 @@ public class FormatString {
         return new TranslatableString(this, args);
     }
 
-    String translateTo(Locale locale, Object... args) {
+    String translateTo(@Nullable Locale locale, Object... args) {
         if (locale == null) {
             return this.defaultTranslation.format(args);
         }

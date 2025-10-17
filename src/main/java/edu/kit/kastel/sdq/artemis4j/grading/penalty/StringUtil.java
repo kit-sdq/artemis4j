@@ -1,5 +1,7 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
+
+import org.jspecify.annotations.Nullable;
 
 public final class StringUtil {
     private StringUtil() {
@@ -15,7 +17,7 @@ public final class StringUtil {
      * @return True if the pattern is null or the string s matches the pattern,
      *         false otherwise
      */
-    public static boolean matchMaybe(String s, String pattern) {
+    public static boolean matchMaybe(String s, @Nullable String pattern) {
         return pattern == null || s.matches(pattern);
     }
 }

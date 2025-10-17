@@ -9,6 +9,7 @@ import java.util.Objects;
 import com.fasterxml.jackson.annotation.JsonValue;
 import edu.kit.kastel.sdq.artemis4j.i18n.FormatString;
 import edu.kit.kastel.sdq.artemis4j.i18n.TranslatableString;
+import org.jspecify.annotations.Nullable;
 
 public final class MistakeType {
     private final String id;
@@ -160,6 +161,6 @@ public final class MistakeType {
             String enabledPenaltyForExercises,
             Map<String, String> additionalButtonTexts,
             Map<String, String> additionalMessages,
-            List<String> autograderProblemTypes,
+            @Nullable List<String> autograderProblemTypes,
             Highlight highlight) {}
 }
