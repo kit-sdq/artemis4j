@@ -54,7 +54,7 @@
 
     <spotless.version>3.0.0</spotless.version>
     <slf4j.version>2.0.17</slf4j.version>
-    <autograder.version>6.8.10</autograder.version>
+    <autograder.version>0.7.0</autograder.version>
     <jgit.version>7.4.0.202509020913-r</jgit.version>
     <junit.version>6.0.0</junit.version>
     <archunit.version>1.4.1</archunit.version>
@@ -124,7 +124,7 @@
 
     <!-- Autograder -->
     <dependency>
-      <groupId>de.firemage.autograder</groupId>
+      <groupId>edu.kit.kastel.sdq</groupId>
       <artifactId>autograder-api</artifactId>
       <version>${autograder.version}</version>
     </dependency>
