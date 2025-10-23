@@ -11,6 +11,7 @@ import de.firemage.autograder.api.AbstractCodePosition;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.FailureInformation;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.Translatable;
@@ -29,6 +30,18 @@ public final class AutograderRunner {
             Locale locale,
             int threads,
             Consumer<? super String> statusConsumer)
+            throws AutograderFailedException {
+        return runAutograderFallible(
+                assessment, submission, locale, threads, statusConsumer, FailureInformation.failFastConsumer());
+    }
+
+    public static AutograderStats runAutograderFallible(
+            Assessment assessment,
+            ClonedProgrammingSubmission submission,
+            Locale locale,
+            int threads,
+            Consumer<? super String> statusConsumer,
+            Consumer<FailureInformation> failureConsumer)
             throws AutograderFailedException {
         if (!assessment.getSubmission().equals(submission.getSubmission())) {
             throw new IllegalArgumentException("The assessment and submission do not match");
@@ -63,11 +76,12 @@ public final class AutograderRunner {
             Consumer<Translatable> statusConsumerWrapper =
                     status -> statusConsumer.accept(autograder.translateMessage(status));
 
-            var problems = autograder.checkFile(
+            var problems = autograder.checkFileFallible(
                     submission.getSubmissionSourcePath(),
                     JavaVersion.JAVA_21,
                     checkConfiguration,
-                    statusConsumerWrapper);
+                    statusConsumerWrapper,
+                    failureConsumer);
 
             for (AbstractProblem problem : problems) {
                 var mistakeType = problemTypesMap.get(problem.getType());
