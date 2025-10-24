@@ -19,6 +19,7 @@ import org.eclipse.jgit.transport.SshTransport;
 import org.eclipse.jgit.transport.URIish;
 import org.eclipse.jgit.transport.sshd.SshdSessionFactoryBuilder;
 import org.eclipse.jgit.util.FS;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,6 +49,7 @@ public class SSHCloningStrategy implements CloningStrategy {
     public void performClone(String repositoryUrl, CloneCommand command, ArtemisConnection connection)
             throws ArtemisNetworkException, GitAPIException {
         String sshTemplate = connection.getManagementInfo().sshCloneURLTemplate();
+        assert sshTemplate != null;
         String sshUrl = createSSHUrl(repositoryUrl, sshTemplate);
         log.info("Cloning repository via SSH from {}", sshUrl);
 
@@ -105,7 +107,7 @@ public class SSHCloningStrategy implements CloningStrategy {
     }
 
     private static final class InteractiveCredentialsProvider extends CredentialsProvider {
-        private String passphrase;
+        private @Nullable String passphrase;
 
         @Override
         public boolean isInteractive() {

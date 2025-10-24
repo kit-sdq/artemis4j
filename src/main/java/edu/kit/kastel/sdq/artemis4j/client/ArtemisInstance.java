@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.List;
@@ -6,6 +6,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import okhttp3.HttpUrl;
+import org.jspecify.annotations.Nullable;
 
 public class ArtemisInstance {
     // e.g. https://
@@ -45,14 +46,16 @@ public class ArtemisInstance {
         return this.protocol + this.domain + "/management";
     }
 
-    public HttpUrl url(List<Object> pathComponents, Map<String, Object> queryParams) {
+    public HttpUrl url(List<Object> pathComponents, @Nullable Map<String, Object> queryParams) {
         return this.url(pathComponents, queryParams, false);
     }
 
-    public HttpUrl url(List<Object> pathComponents, Map<String, Object> queryParams, boolean managementRequest) {
+    public HttpUrl url(
+            List<Object> pathComponents, @Nullable Map<String, Object> queryParams, boolean managementRequest) {
         String baseUrl = managementRequest ? this.getManagementBaseURL() : this.getAPIBaseURL();
         String path = pathComponents.stream().map(Object::toString).collect(Collectors.joining("/"));
         var url = HttpUrl.parse(baseUrl + "/" + path);
+        assert url != null;
         if (queryParams != null && !queryParams.isEmpty()) {
             var builder = url.newBuilder();
             queryParams.forEach((p, v) -> builder.addQueryParameter(p, v.toString()));

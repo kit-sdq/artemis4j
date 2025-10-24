@@ -11,6 +11,7 @@ import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -27,10 +28,10 @@ public final class Annotation {
     private final MistakeType type;
     private final Location location;
     private final AnnotationSource source;
-    private final Long createdByUserId; // null -> unknown creator
-    private Long suppressedByUserId; // null -> not suppressed
-    private String customMessage;
-    private Double customScore;
+    private final @Nullable Long createdByUserId; // null -> unknown creator
+    private @Nullable Long suppressedByUserId; // null -> not suppressed
+    private @Nullable String customMessage;
+    private @Nullable Double customScore;
     // If not empty, this list contains classifiers that are used to group annotations.
     // For example, all annotations that are related, could have the classifier ["a"],
     // then they would be grouped together.
@@ -41,7 +42,7 @@ public final class Annotation {
     // with the classifier "a", it would merge all annotations with the classifiers ["a", "b"]
     // and all annotations with the classifiers ["a", "c"].
     private final List<String> classifiers;
-    private final Integer annotationLimit;
+    private final @Nullable Integer annotationLimit;
 
     /**
      * Deserializes an annotation from its metajson format
@@ -62,22 +63,22 @@ public final class Annotation {
     Annotation(
             MistakeType mistakeType,
             Location location,
-            String customMessage,
-            Double customScore,
+            @Nullable String customMessage,
+            @Nullable Double customScore,
             AnnotationSource source,
-            Long createdByUserId) {
+            @Nullable Long createdByUserId) {
         this(mistakeType, location, customMessage, customScore, source, createdByUserId, List.of(), null);
     }
 
     Annotation(
             MistakeType mistakeType,
             Location location,
-            String customMessage,
-            Double customScore,
+            @Nullable String customMessage,
+            @Nullable Double customScore,
             AnnotationSource source,
-            Long createdByUserId,
+            @Nullable Long createdByUserId,
             List<String> classifiers,
-            Integer annotationLimit) {
+            @Nullable Integer annotationLimit) {
         // Validate custom penalty and message
         if (mistakeType.isCustomAnnotation()) {
             if (customScore == null) {
@@ -170,7 +171,7 @@ public final class Annotation {
         return Optional.ofNullable(customMessage);
     }
 
-    public void setCustomMessage(String message) {
+    public void setCustomMessage(@Nullable String message) {
         if (this.type.isCustomAnnotation() && message == null) {
             throw new IllegalArgumentException("A custom message is required for custom annotation types.");
         }
@@ -209,7 +210,7 @@ public final class Annotation {
         return Optional.ofNullable(customScore);
     }
 
-    public void setCustomScore(Double score) {
+    public void setCustomScore(@Nullable Double score) {
         if (!this.type.isCustomAnnotation() && score != null) {
             throw new IllegalArgumentException("A custom score is not allowed for non-custom annotation types.");
         }
