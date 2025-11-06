@@ -95,7 +95,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
      * @param tokenOverride (optional) The git password to use for cloning. If not set, the PAT is used (and created if necessary)
      * @return The path to the actual submission within the target location
      */
-    public ClonedProgrammingSubmission cloneViaVCSTokenInto(Path target, String tokenOverride)
+    public ClonedProgrammingSubmission cloneViaVCSTokenInto(Path target, @Nullable String tokenOverride)
             throws ArtemisClientException {
         return ClonedProgrammingSubmission.cloneSubmissionViaVCSToken(this, target, tokenOverride);
     }

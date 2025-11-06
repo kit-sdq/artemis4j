@@ -13,6 +13,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.git.VCSTokenCloningStrategy;
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a submission and associated tests repository that has been cloned
@@ -32,7 +33,8 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
     }
 
     static ClonedProgrammingSubmission cloneSubmissionViaVCSToken(
-            ProgrammingSubmission submission, Path target, String tokenOverride) throws ArtemisClientException {
+            ProgrammingSubmission submission, Path target, @Nullable String tokenOverride)
+            throws ArtemisClientException {
         var strategy = new VCSTokenCloningStrategy(tokenOverride, submission.getConnection());
         return cloneSubmissionInternal(submission, target, strategy);
     }
