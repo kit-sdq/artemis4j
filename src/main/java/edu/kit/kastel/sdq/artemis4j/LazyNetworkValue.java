@@ -12,7 +12,7 @@ public class LazyNetworkValue<T> {
         this.supplier = supplier;
     }
 
-    public @Nullable T get() throws ArtemisNetworkException {
+    public T get() throws ArtemisNetworkException {
         // Store the value in a local variable to avoid invalidation between the null check and the return
         T localValue = this.value;
 
@@ -27,6 +27,7 @@ public class LazyNetworkValue<T> {
             }
         }
 
+        assert localValue != null;
         return localValue;
     }
 
