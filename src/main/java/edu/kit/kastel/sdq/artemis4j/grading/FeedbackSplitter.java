@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
@@ -37,12 +37,12 @@ final class FeedbackSplitter {
                 perFeedbackLines.add(new ArrayList<>());
                 currentLength = translatedHeader.length();
             }
-            perFeedbackLines.get(perFeedbackLines.size() - 1).add(line);
+            perFeedbackLines.getLast().add(line);
             currentLength += line.length();
         }
 
         if (perFeedbackLines.size() == 1) {
-            return List.of(translatedHeader + LINE_SEPARATOR + String.join("", perFeedbackLines.get(0)));
+            return List.of(translatedHeader + LINE_SEPARATOR + String.join("", perFeedbackLines.getFirst()));
         } else {
             // We have more than one feedback to create
             // To make it easier for students, each feedback gets a running index

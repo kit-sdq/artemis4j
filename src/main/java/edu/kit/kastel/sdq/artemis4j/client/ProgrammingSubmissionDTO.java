@@ -10,13 +10,14 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.grading.Exercise;
+import org.jspecify.annotations.Nullable;
 
 public record ProgrammingSubmissionDTO(
         @JsonProperty long id,
         @JsonProperty ParticipationDTO participation,
         @JsonProperty String commitHash,
         @JsonProperty boolean buildFailed,
-        @JsonProperty List<ResultDTO> results,
+        @JsonProperty @Nullable List<ResultDTO> results,
         @JsonProperty ZonedDateTime submissionDate) {
     /**
      * Fetch all programming submissions for an exercise.

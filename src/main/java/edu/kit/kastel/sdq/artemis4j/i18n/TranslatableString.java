@@ -1,7 +1,9 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.i18n;
 
 import java.util.Locale;
+
+import org.jspecify.annotations.Nullable;
 
 public class TranslatableString {
     private final FormatString formatString;
@@ -12,7 +14,7 @@ public class TranslatableString {
         this.args = args;
     }
 
-    public String translateTo(Locale locale) {
+    public String translateTo(@Nullable Locale locale) {
         // Translate all sub-strings
         var translatedArgs = new Object[this.args.length];
         for (int i = 0; i < this.args.length; i++) {

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.ArrayList;
@@ -10,6 +10,7 @@ import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A course, containing exercises.
@@ -46,7 +47,7 @@ public class Course extends ArtemisConnectionHolder {
      * @param user the user to check
      * @return true if the user is an instructor, false otherwise
      */
-    public boolean isInstructor(User user) {
+    public boolean isInstructor(@Nullable User user) {
         return user != null && user.getGroups().contains(this.dto.instructorGroupName());
     }
 

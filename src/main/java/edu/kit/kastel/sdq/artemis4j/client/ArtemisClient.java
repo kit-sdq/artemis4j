@@ -26,6 +26,7 @@ import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -38,7 +39,7 @@ public class ArtemisClient {
 
     private final ArtemisInstance artemis;
     private final String jwtToken;
-    private final String password;
+    private final @Nullable String password;
     private final OkHttpClient client;
 
     public static ArtemisClient fromUsernamePassword(ArtemisInstance artemis, String username, String password)
@@ -85,7 +86,7 @@ public class ArtemisClient {
      * @param password (optional) an Artemis password. May be null if not used (e.g.
      *                 for auth via Shibboleth).
      */
-    public ArtemisClient(ArtemisInstance artemis, String jwtToken, String password) {
+    public ArtemisClient(ArtemisInstance artemis, String jwtToken, @Nullable String password) {
         this.artemis = Objects.requireNonNull(artemis);
         this.jwtToken = Objects.requireNonNull(jwtToken);
         this.password = password;
@@ -104,7 +105,7 @@ public class ArtemisClient {
         return this.artemis;
     }
 
-    public <R> R call(Request request, Class<R> resultClass) throws ArtemisNetworkException {
+    public <R> @Nullable R call(Request request, @Nullable Class<R> resultClass) throws ArtemisNetworkException {
         log.info("{} request to '{}'", request.method(), request.url());
         try (var response = client.newCall(request).execute()) {
             log.info("Got response code {}", response.code());
@@ -132,7 +133,7 @@ public class ArtemisClient {
         }
     }
 
-    public static <E> RequestBody encodeJSON(E entity) throws ArtemisNetworkException {
+    public static <E> RequestBody encodeJSON(@Nullable E entity) throws ArtemisNetworkException {
         if (entity == null) {
             // Artemis allows empty bodies, okhttp doesn't for anything else than GET
             return RequestBody.create("", JSON);
@@ -164,7 +165,7 @@ public class ArtemisClient {
                 .addModule(new JavaTimeModule())
                 .addModule(new ParameterNamesModule())
                 .build()
-                .setSerializationInclusion(JsonInclude.Include.NON_NULL)
+                .setDefaultPropertyInclusion(JsonInclude.Include.NON_NULL)
                 .registerModule(new Jdk8Module());
 
         oom.setVisibility(oom.getSerializationConfig()

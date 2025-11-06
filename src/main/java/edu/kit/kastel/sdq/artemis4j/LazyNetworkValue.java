@@ -1,10 +1,12 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j;
+
+import org.jspecify.annotations.Nullable;
 
 public class LazyNetworkValue<T> {
     private final NetworkSupplier<T> supplier;
     // Must be volatile to avoid reordering of the checks in get()
-    private volatile T value;
+    private volatile @Nullable T value;
 
     public LazyNetworkValue(NetworkSupplier<T> supplier) {
         this.supplier = supplier;
@@ -25,6 +27,7 @@ public class LazyNetworkValue<T> {
             }
         }
 
+        assert localValue != null;
         return localValue;
     }
 

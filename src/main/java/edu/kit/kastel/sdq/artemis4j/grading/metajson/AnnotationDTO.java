@@ -6,6 +6,7 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.grading.location.LineColumn;
+import org.jspecify.annotations.Nullable;
 
 /**
  * This class is not part of the Artemis API. We save it as JSON in a
@@ -17,10 +18,10 @@ public record AnnotationDTO(
         @JsonProperty LineColumn start,
         @JsonProperty LineColumn end,
         @JsonProperty String classFilePath,
-        @JsonProperty String customMessageForJSON,
-        @JsonProperty Double customPenaltyForJSON,
-        @JsonProperty AnnotationSource source,
-        @JsonProperty List<String> classifiers,
-        @JsonProperty Integer annotationLimit,
-        @JsonProperty Long createdByUserId,
-        @JsonProperty Long suppressedByUserId) {}
+        @JsonProperty @Nullable String customMessageForJSON,
+        @JsonProperty @Nullable Double customPenaltyForJSON,
+        @JsonProperty @Nullable AnnotationSource source,
+        @JsonProperty @Nullable List<String> classifiers,
+        @JsonProperty @Nullable Integer annotationLimit,
+        @JsonProperty @Nullable Long createdByUserId,
+        @JsonProperty @Nullable Long suppressedByUserId) {}

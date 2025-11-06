@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2025. */
 package edu.kit.kastel.sdq.artemis4j.grading.penalty;
 
 import java.util.List;
@@ -6,15 +6,16 @@ import java.util.List;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
+import org.jspecify.annotations.Nullable;
 
 public final class StackingPenaltyRule implements PenaltyRule {
     private final double penalty;
-    private final Integer maxUses;
+    private final @Nullable Integer maxUses;
 
     @JsonCreator
     public StackingPenaltyRule(
             @JsonProperty(value = "penalty", required = true) double penalty,
-            @JsonProperty("maxUses") Integer maxUses) {
+            @JsonProperty("maxUses") @Nullable Integer maxUses) {
         this.penalty = penalty;
         this.maxUses = maxUses;
     }

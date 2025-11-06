@@ -54,7 +54,7 @@ final class AnnotationMerger {
             // otherwise use the upper limit
             int targetNumberOfAnnotations = Math.min(
                     upperAnnotationLimit,
-                    annotationsForClassifier.get(0).getAnnotationLimit().orElse(upperAnnotationLimit));
+                    annotationsForClassifier.getFirst().getAnnotationLimit().orElse(upperAnnotationLimit));
 
             if (annotationsForClassifier.size() <= targetNumberOfAnnotations) {
                 result.addAll(annotationsForClassifier);

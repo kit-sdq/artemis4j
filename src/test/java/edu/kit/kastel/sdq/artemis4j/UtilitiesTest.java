@@ -81,7 +81,7 @@ class UtilitiesTest {
         for (var exercise : exercises) {
             System.out.println("Exercise: " + exercise.title());
             markMandatoryFailedAsFailedForCorrectionRound(exercise, 0);
-            if (exercise.secondCorrectionEnabled()) {
+            if (exercise.secondCorrectionEnabled() != null && exercise.secondCorrectionEnabled()) {
                 markMandatoryFailedAsFailedForCorrectionRound(exercise, 1);
             }
         }
