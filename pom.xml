@@ -58,7 +58,7 @@
     <jgit.version>7.4.0.202509020913-r</jgit.version>
     <junit.version>6.1.0-M1</junit.version>
     <archunit.version>1.4.1</archunit.version>
-    <versions-maven-plugin.version>2.20.0</versions-maven-plugin.version>
+    <versions-maven-plugin.version>2.20.1</versions-maven-plugin.version>
   </properties>
 
   <dependencyManagement>
