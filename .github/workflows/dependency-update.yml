@@ -11,7 +11,7 @@ env:
   INSTRUCTOR_USER: "instructor_e2e"
   INSTRUCTOR_PASSWORD: ${{ secrets.INSTRUCTOR_PASSWORD }}
   STUDENT_USER: "student_e2e"
-  ARTEMIS_URL: "https://artemis-test.sdq.kastel.kit.edu"
+  ARTEMIS_URL: "https://test-artemis.studium.kit.edu"
   COURSE_ID: "4"
   PROGRAMMING_EXERCISE_ID: "41"
   EXAM_ID: "5"
