@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -33,7 +33,7 @@ public record TextExerciseDTO(
                 .executeAndDecode(client, ExerciseWrapperDTO.class);
         // Remove all non-text exercises
         return exercises.exercises().stream()
-                .filter(e -> e.exerciseType().equals("TEXT"))
+                .filter(e -> e.exerciseType().equalsIgnoreCase("text"))
                 .toList();
     }
 
