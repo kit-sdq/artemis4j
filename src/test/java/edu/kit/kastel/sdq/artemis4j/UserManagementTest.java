@@ -30,9 +30,12 @@ class UserManagementTest {
 
     @BeforeAll
     static void setup() throws ArtemisClientException {
-        Assertions.assertNotNull(ADMIN_USER);
-        Assertions.assertNotNull(ADMIN_PASSWORD);
+        hasAdminPermissions = ADMIN_USER != null && ADMIN_PASSWORD != null;
         Assertions.assertNotNull(ARTEMIS_URL);
+
+        if (!hasAdminPermissions) {
+            return;
+        }
 
         ArtemisInstance artemisInstance = new ArtemisInstance(ARTEMIS_URL);
         connection = ArtemisConnection.connectWithUsernamePassword(artemisInstance, ADMIN_USER, ADMIN_PASSWORD);
