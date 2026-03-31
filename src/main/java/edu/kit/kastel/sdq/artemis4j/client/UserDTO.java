@@ -1,7 +1,8 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -53,8 +54,36 @@ public record UserDTO(
 
     public static void deleteUser(ArtemisClient client, String username) throws ArtemisNetworkException {
         ArtemisRequest.delete()
-                .path(List.of("core", "admin", "users"))
-                .param("login", username)
+                .path(List.of("core", "admin", "users", username))
                 .execute(client);
+    }
+
+    public static List<UserDTO> getAllUsers(ArtemisClient client) throws ArtemisNetworkException {
+        List<UserDTO> result = new ArrayList<>();
+
+        List<UserDTO> page;
+        int i = 0;
+        do {
+            page = List.of(ArtemisRequest.get()
+                    .path(List.of("core", "admin", "users"))
+                    .param("page", i)
+                    .param("pageSize", 100)
+                    .param("searchTerm", "")
+                    .param("sortingOrder", "ASCENDING")
+                    .param("sortedColumn", "id")
+                    .param("registrationNumbers", "")
+                    .executeAndDecode(client, UserDTO[].class));
+            result.addAll(page);
+            i += 1;
+        } while (!page.isEmpty());
+
+        return result;
+    }
+
+    public static UserDTO createUser(ArtemisClient client, UserCreateDTO userCreateDTO) throws ArtemisNetworkException {
+        return ArtemisRequest.post()
+                .path(List.of("core", "admin", "users"))
+                .body(userCreateDTO)
+                .executeAndDecode(client, UserDTO.class);
     }
 }

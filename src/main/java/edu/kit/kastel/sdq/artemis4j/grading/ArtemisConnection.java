@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.Collections;
@@ -10,6 +10,7 @@ import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ManagementInfoDTO;
+import edu.kit.kastel.sdq.artemis4j.client.UserCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
 
 /**
@@ -66,5 +67,31 @@ public final class ArtemisConnection {
                 .filter(c -> c.getId() == id)
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("No course with id " + id + " found"));
+    }
+
+    /**
+     * Retrieves all users. Note that this requires admin permissions.
+     * @return A list of all users.
+     */
+    public List<User> getAllUsers() throws ArtemisNetworkException {
+        return UserDTO.getAllUsers(this.client).stream().map(User::new).toList();
+    }
+
+    /**
+     * Creates a new user. Note that this requires admin permissions.
+     * @param userCreateDTO The data for the new user.
+     * @return The created user.
+     */
+    public User createUser(UserCreateDTO userCreateDTO) throws ArtemisNetworkException {
+        UserDTO created = UserDTO.createUser(this.client, userCreateDTO);
+        return new User(created);
+    }
+
+    /**
+     * Deletes a user by their login. Note that this requires admin permissions.
+     * @param username The login of the user to delete.
+     */
+    public void deleteUser(String username) throws ArtemisNetworkException {
+        UserDTO.deleteUser(this.client, username);
     }
 }
