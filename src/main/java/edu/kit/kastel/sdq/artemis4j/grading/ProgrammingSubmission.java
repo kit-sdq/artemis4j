@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.nio.file.Path;
@@ -53,7 +53,11 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     public String getRepositoryUrl() {
-        return this.dto.participation().userIndependentRepositoryUri();
+        return this.dto
+                .participation()
+                .repositoryUrl()
+                .orElseThrow(() -> new IllegalStateException("No repository URL available for participation "
+                        + this.dto.participation().id()));
     }
 
     public String getCommitHash() {

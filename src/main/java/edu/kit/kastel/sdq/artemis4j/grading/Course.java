@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.ArrayList;
@@ -7,6 +7,7 @@ import java.util.List;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
@@ -115,6 +116,18 @@ public class Course extends ArtemisConnectionHolder {
     public int fetchLockedSubmissionCount() throws ArtemisNetworkException {
         return CourseDTO.fetchLockedSubmissions(this.getConnection().getClient(), this.getId())
                 .size();
+    }
+
+    public void enrollSelf() throws ArtemisNetworkException {
+        long courseId = this.getId();
+        var client = this.getConnection().getClient();
+        CourseDTO.enrollInCourse(client, courseId);
+    }
+
+    public void assignUser(String userLogin, CourseRole role) throws ArtemisNetworkException {
+        long courseId = this.getId();
+        var client = this.getConnection().getClient();
+        CourseDTO.assignUserToCourse(client, courseId, userLogin, role);
     }
 
     public int getNumberOfStudents() {
