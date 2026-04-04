@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.Arrays;
@@ -24,11 +24,45 @@ public record CourseDTO(
         return Arrays.asList(courses);
     }
 
+    public static List<CourseDTO> fetchForEnrollment(ArtemisClient client) throws ArtemisNetworkException {
+        var courses = ArtemisRequest.get()
+                .path(List.of("core", "courses", "for-enrollment"))
+                .executeAndDecode(client, CourseDTO[].class);
+        return Arrays.asList(courses);
+    }
+
+    public static List<CourseDTO> fetchForDashboard(ArtemisClient client) throws ArtemisNetworkException {
+        var courses = ArtemisRequest.get()
+                .path(List.of("core", "courses", "for-dashboard"))
+                .executeAndDecode(client, CourseDTO[].class);
+        return Arrays.asList(courses);
+    }
+
+    public static void enrollInCourse(ArtemisClient client, long courseId) throws ArtemisNetworkException {
+        ArtemisRequest.post()
+                .path(List.of("core", "courses", courseId, "enroll"))
+                .execute(client);
+    }
+
+    public static void assignUserToCourse(ArtemisClient client, long courseId, String userLogin, CourseRole role)
+            throws ArtemisNetworkException {
+        ArtemisRequest.post()
+                .path(List.of("core", "courses", courseId, role.toString(), userLogin))
+                .execute(client);
+    }
+
     public static List<UserDTO> fetchAllTutors(ArtemisClient client, long courseId) throws ArtemisNetworkException {
         var tutors = ArtemisRequest.get()
                 .path(List.of("core", "courses", courseId, "tutors"))
                 .executeAndDecode(client, UserDTO[].class);
         return Arrays.asList(tutors);
+    }
+
+    public static List<UserDTO> fetchAllStudents(ArtemisClient client, long courseId) throws ArtemisNetworkException {
+        var students = ArtemisRequest.get()
+                .path(List.of("core", "courses", courseId, "students"))
+                .executeAndDecode(client, UserDTO[].class);
+        return Arrays.asList(students);
     }
 
     public static void removeTutor(ArtemisClient client, int courseId, String tutorLogin)

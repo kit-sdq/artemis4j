@@ -36,9 +36,18 @@ public final class ArtemisConnection {
         this.client = client;
         this.managementInfo = new LazyNetworkValue<>(() -> ManagementInfoDTO.fetch(this.client));
         this.assessor = new LazyNetworkValue<>(() -> new User(UserDTO.getAssessingUser(this.client)));
-        this.courses = new LazyNetworkValue<>(() -> CourseDTO.fetchAll(this.client).stream()
-                .map(dto -> new Course(dto, this))
-                .toList());
+        this.courses = new LazyNetworkValue<>(() ->
+                this.fetchCourses().stream().map(dto -> new Course(dto, this)).toList());
+    }
+
+    private List<CourseDTO> fetchCourses() throws ArtemisNetworkException {
+        try {
+            return CourseDTO.fetchAll(this.client);
+        } catch (ArtemisNetworkException exception) {
+            // This call might fail if the user is a student, in that case build the courses from the dashboard
+            // endpoint:
+            return CourseDTO.fetchForDashboard(this.client);
+        }
     }
 
     public ArtemisClient getClient() {
@@ -60,6 +69,12 @@ public final class ArtemisConnection {
 
     public List<Course> getCourses() throws ArtemisNetworkException {
         return Collections.unmodifiableList(courses.get());
+    }
+
+    public List<Course> getCoursesForEnrollment() throws ArtemisNetworkException {
+        return CourseDTO.fetchForEnrollment(this.client).stream()
+                .map(dto -> new Course(dto, this))
+                .toList();
     }
 
     public Course getCourseById(int id) throws ArtemisNetworkException {
