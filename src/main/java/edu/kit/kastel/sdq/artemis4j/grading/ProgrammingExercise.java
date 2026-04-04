@@ -82,8 +82,9 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
                 .toList();
     }
 
-    public ParticipationDTO startParticipation() throws ArtemisNetworkException {
-        return ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId());
+    public Participation startParticipation() throws ArtemisNetworkException {
+        return new Participation(
+                ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId()), this);
     }
 
     public List<PackedAssessment> fetchMyAssessments() throws ArtemisNetworkException {

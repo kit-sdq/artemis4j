@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.time.ZonedDateTime;
@@ -9,6 +9,7 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextBlockDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextSubmissionDTO;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A text submission for a {@link TextExercise}.
@@ -17,7 +18,8 @@ public class TextSubmission extends ArtemisConnectionHolder {
     private final TextSubmissionDTO dto;
 
     private final int correctionRound;
-    private final User student;
+    private final Participation participation;
+    private final @Nullable User student;
     private final TextExercise exercise;
 
     /**
@@ -32,19 +34,8 @@ public class TextSubmission extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercise = exercise;
-
-        // The student is only present for instructors
-        if (dto.participation() != null) {
-            var studentDto = dto.participation().student();
-            if (studentDto != null) {
-                this.student = new User(studentDto);
-            } else {
-                this.student = null;
-            }
-        } else {
-            this.student = null;
-        }
-
+        this.participation = new Participation(dto.participation(), this);
+        this.student = this.participation.getStudent().orElse(null);
         this.correctionRound = correctionRound;
     }
 
@@ -57,11 +48,15 @@ public class TextSubmission extends ArtemisConnectionHolder {
     }
 
     public long getParticipationId() {
-        return this.dto.participation().id();
+        return this.getParticipation().getId();
     }
 
     public String getParticipantIdentifier() {
-        return this.dto.participation().participantIdentifier();
+        return this.getParticipation().getParticipantIdentifier();
+    }
+
+    public Participation getParticipation() {
+        return this.participation;
     }
 
     /**
@@ -112,7 +107,7 @@ public class TextSubmission extends ArtemisConnectionHolder {
         submissionWithResults = new TextSubmissionDTO(
                 submissionWithResults.id(),
                 submissionWithResults.submitted(),
-                this.dto.participation(),
+                this.getParticipation().getDTO(),
                 submissionWithResults.commitHash(),
                 submissionWithResults.buildFailed(),
                 submissionWithResults.results(),
