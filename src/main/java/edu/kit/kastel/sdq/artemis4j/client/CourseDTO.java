@@ -31,6 +31,13 @@ public record CourseDTO(
         return Arrays.asList(courses);
     }
 
+    public static List<CourseDTO> fetchForDashboard(ArtemisClient client) throws ArtemisNetworkException {
+        var courses = ArtemisRequest.get()
+                .path(List.of("core", "courses", "for-dashboard"))
+                .executeAndDecode(client, CourseDTO[].class);
+        return Arrays.asList(courses);
+    }
+
     public static void enrollInCourse(ArtemisClient client, long courseId) throws ArtemisNetworkException {
         ArtemisRequest.post()
                 .path(List.of("core", "courses", courseId, "enroll"))
