@@ -29,6 +29,10 @@ public class Participation extends ArtemisConnectionHolder {
         return this.dto.participantIdentifier();
     }
 
+    public Optional<String> getRepositoryUri() {
+        return Optional.ofNullable(this.dto.repositoryUri());
+    }
+
     public Optional<String> getRepositoryUrl() {
         return this.dto.repositoryUrl();
     }
