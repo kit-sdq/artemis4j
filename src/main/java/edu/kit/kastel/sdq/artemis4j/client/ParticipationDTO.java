@@ -22,6 +22,14 @@ public record ParticipationDTO(
                 .executeAndDecode(client, ParticipationDTO.class);
     }
 
+    public static String getVcsAccessToken(ArtemisClient client, long participationId) throws ArtemisNetworkException {
+        // This token is scoped to one participation and is required for clone/push access.
+        return ArtemisRequest.get()
+                .path(List.of("core", "account", "participation-vcs-access-token"))
+                .param("participationId", participationId)
+                .executeAndDecode(client, String.class);
+    }
+
     public Optional<String> repositoryUrl() {
         if (userIndependentRepositoryUri != null && !userIndependentRepositoryUri.isBlank()) {
             return Optional.of(userIndependentRepositoryUri);

@@ -16,12 +16,12 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A student's programming submission. A submission essentially consists of the
- * URL of a student's Git repository, along with a commit hash. We do not model
- * the separate 'participation' entity in Artemis.
+ * URL of a student's Git repository, a commit hash, and the corresponding participation.
  */
 public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingSubmissionDTO dto;
 
+    private final Participation participation;
     private final @Nullable User student;
     private final ProgrammingExercise exercise;
 
@@ -30,14 +30,10 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercise = exercise;
+        this.participation = new Participation(dto.participation(), this);
 
         // The student is only present for instructors
-        var studentDto = dto.participation().student();
-        if (studentDto != null) {
-            this.student = new User(studentDto);
-        } else {
-            this.student = null;
-        }
+        this.student = this.participation.getStudent().orElse(null);
     }
 
     public long getId() {
@@ -45,19 +41,22 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     public long getParticipationId() {
-        return this.dto.participation().id();
+        return this.participation.getId();
     }
 
     public String getParticipantIdentifier() {
-        return this.dto.participation().participantIdentifier();
+        return this.participation.getParticipantIdentifier();
     }
 
     public String getRepositoryUrl() {
-        return this.dto
-                .participation()
-                .repositoryUrl()
-                .orElseThrow(() -> new IllegalStateException("No repository URL available for participation "
-                        + this.dto.participation().id()));
+        return this.participation
+                .getRepositoryUrl()
+                .orElseThrow(() -> new IllegalStateException(
+                        "No repository URL available for participation " + this.participation.getId()));
+    }
+
+    public Participation getParticipation() {
+        return this.participation;
     }
 
     public String getCommitHash() {

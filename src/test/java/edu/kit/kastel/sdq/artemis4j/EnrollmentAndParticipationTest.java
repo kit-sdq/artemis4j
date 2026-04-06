@@ -19,6 +19,7 @@ import edu.kit.kastel.sdq.artemis4j.client.UserCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
+import edu.kit.kastel.sdq.artemis4j.grading.Participation;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
@@ -102,12 +103,14 @@ class EnrollmentAndParticipationTest {
 
             ArtemisClient studentClient =
                     ArtemisClient.fromUsernamePassword(new ArtemisInstance(ARTEMIS_URL), login, userData.password());
+            ArtemisConnection studentConnection = new ArtemisConnection(studentClient);
 
-            ParticipationDTO participation = null;
+            Participation participation = null;
 
             for (var exercise : course.getProgrammingExercises()) {
                 try {
-                    participation = exercise.startParticipation();
+                    participation = new Participation(
+                            ParticipationDTO.startExercise(studentClient, exercise.getId()), studentConnection);
                     break;
                 } catch (ArtemisNetworkException ignored) {
                     // Try the next exercise. Some exercises cannot be started due to date/state restrictions.
@@ -116,7 +119,7 @@ class EnrollmentAndParticipationTest {
 
             Assumptions.assumeTrue(
                     participation != null, "Could not start any programming exercise in the selected course");
-            String repositoryUrl = participation.repositoryUrl().orElseThrow();
+            String repositoryUrl = participation.getRepositoryUrl().orElseThrow();
 
             UserDTO user = UserDTO.getAssessingUser(studentClient);
             if (user.vcsAccessToken() == null || user.vcsAccessToken().isBlank()) {
@@ -125,10 +128,49 @@ class EnrollmentAndParticipationTest {
             }
 
             assertNotNull(participation);
-            assertTrue(participation.id() > 0, "Participation id should be positive");
+            assertTrue(participation.getId() > 0, "Participation id should be positive");
             assertFalse(repositoryUrl.isBlank(), "Repository URL should not be blank");
             assertNotNull(user.vcsAccessToken(), "VCS token should exist after creation");
             assertFalse(user.vcsAccessToken().isBlank(), "VCS token should not be blank");
+        } finally {
+            cleanupUser(login);
+        }
+    }
+
+    @Test
+    void testStudentCanFetchParticipationVcsAccessToken() throws ArtemisClientException {
+        UserCreateDTO userData = randomUser("vcs");
+        String login = userData.login();
+
+        try {
+            adminConnection.createUser(userData);
+
+            Course course = pickAnyCourseWithProgrammingExercise(adminConnection)
+                    .orElseThrow(() -> new ArtemisClientException("No course with programming exercise available."));
+            course.assignUser(login, CourseRole.STUDENT);
+
+            ArtemisClient studentClient =
+                    ArtemisClient.fromUsernamePassword(new ArtemisInstance(ARTEMIS_URL), login, userData.password());
+            ArtemisConnection studentConnection = new ArtemisConnection(studentClient);
+
+            Participation participation = null;
+            for (var exercise : course.getProgrammingExercises()) {
+                try {
+                    participation = new Participation(
+                            ParticipationDTO.startExercise(studentClient, exercise.getId()), studentConnection);
+                    break;
+                } catch (ArtemisNetworkException ignored) {
+                    // Try the next exercise. Some exercises cannot be started due to date/state restrictions.
+                }
+            }
+
+            Assumptions.assumeTrue(
+                    participation != null, "Could not start any programming exercise in the selected course");
+
+            String participationToken = participation.getVcsAccessToken();
+
+            assertNotNull(participationToken, "Participation VCS access token should not be null");
+            assertFalse(participationToken.isBlank(), "Participation VCS access token should not be blank");
         } finally {
             cleanupUser(login);
         }
