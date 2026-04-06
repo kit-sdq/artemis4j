@@ -9,10 +9,12 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.client.CourseCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ManagementInfoDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a connection to Artemis, holding the client and providing access
@@ -105,7 +107,9 @@ public final class ArtemisConnection {
             return Optional.of(currentUser);
         }
 
-        return this.getAllUsers().stream().filter(user -> user.getId() == userId).findFirst();
+        return this.getAllUsers().stream()
+                .filter(user -> user.getId() == userId)
+                .findFirst();
     }
 
     /**
@@ -116,6 +120,37 @@ public final class ArtemisConnection {
     public User createUser(UserCreateDTO userCreateDTO) throws ArtemisNetworkException {
         UserDTO created = UserDTO.createUser(this.client, userCreateDTO);
         return new User(created);
+    }
+
+    /**
+     * Creates a course. Note that this requires admin permissions.
+     */
+    public Course createCourse(CourseCreateDTO courseCreateDTO) throws ArtemisNetworkException {
+        CourseDTO created = CourseDTO.createCourse(this.client, courseCreateDTO);
+        this.courses.invalidate();
+        return new Course(created, this);
+    }
+
+    /**
+     * Creates a course with an optional icon upload. Note that this requires admin permissions.
+     */
+    public Course createCourse(
+            CourseCreateDTO courseCreateDTO,
+            byte @Nullable [] courseIcon,
+            @Nullable String filename,
+            @Nullable String mediaType)
+            throws ArtemisNetworkException {
+        CourseDTO created = CourseDTO.createCourse(this.client, courseCreateDTO, courseIcon, filename, mediaType);
+        this.courses.invalidate();
+        return new Course(created, this);
+    }
+
+    /**
+     * Deletes a course. Note that this requires admin permissions.
+     */
+    public void deleteCourse(long courseId) throws ArtemisNetworkException {
+        CourseDTO.deleteCourse(this.client, courseId);
+        this.courses.invalidate();
     }
 
     /**

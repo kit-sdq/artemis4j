@@ -6,6 +6,10 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import okhttp3.MultipartBody;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import org.jspecify.annotations.Nullable;
 
 public record CourseDTO(
         @JsonProperty int id,
@@ -36,6 +40,43 @@ public record CourseDTO(
                 .path(List.of("core", "courses", "for-dashboard"))
                 .executeAndDecode(client, CourseDTO[].class);
         return Arrays.asList(courses);
+    }
+
+    public static @Nullable CourseDTO createCourse(ArtemisClient client, CourseCreateDTO courseCreateDTO)
+            throws ArtemisNetworkException {
+        return createCourse(client, courseCreateDTO, null, null, null);
+    }
+
+    public static @Nullable CourseDTO createCourse(
+            ArtemisClient client,
+            CourseCreateDTO courseCreateDTO,
+            byte @Nullable [] courseIcon,
+            @Nullable String filename,
+            @Nullable String mediaType)
+            throws ArtemisNetworkException {
+        RequestBody courseBody = ArtemisClient.encodeJSON(courseCreateDTO);
+        var multipartBuilder = new MultipartBody.Builder()
+                .setType(MultipartBody.FORM)
+                .addFormDataPart("course", "course.json", courseBody);
+
+        if (courseIcon != null && courseIcon.length > 0) {
+            var iconType = mediaType != null ? mediaType : "application/octet-stream";
+            var iconName = filename != null && !filename.isBlank() ? filename : "course-icon.bin";
+            multipartBuilder.addFormDataPart(
+                    "file", iconName, RequestBody.create(courseIcon, okhttp3.MediaType.get(iconType)));
+        }
+
+        var request = new Request.Builder()
+                .url(client.getInstance().url(List.of("core", "admin", "courses"), null))
+                .post(multipartBuilder.build())
+                .build();
+        return client.call(request, CourseDTO.class);
+    }
+
+    public static void deleteCourse(ArtemisClient client, long courseId) throws ArtemisNetworkException {
+        ArtemisRequest.delete()
+                .path(List.of("core", "admin", "courses", courseId))
+                .execute(client);
     }
 
     public static void enrollInCourse(ArtemisClient client, long courseId) throws ArtemisNetworkException {
