@@ -14,7 +14,7 @@ import org.jspecify.annotations.Nullable;
 
 public record ProgrammingSubmissionDTO(
         @JsonProperty long id,
-        @JsonProperty ParticipationDTO participation,
+        @JsonProperty @Nullable ParticipationDTO participation,
         @JsonProperty String commitHash,
         @JsonProperty boolean buildFailed,
         @JsonProperty @Nullable List<ResultDTO> results,

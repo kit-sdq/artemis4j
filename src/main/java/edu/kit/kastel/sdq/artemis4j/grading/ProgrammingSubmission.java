@@ -21,7 +21,7 @@ import org.jspecify.annotations.Nullable;
 public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingSubmissionDTO dto;
 
-    private final Participation participation;
+    private final @Nullable Participation participation;
     private final @Nullable User student;
     private final ProgrammingExercise exercise;
 
@@ -30,7 +30,11 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercise = exercise;
-        this.participation = new Participation(dto.participation(), this);
+        if (dto.participation() != null) {
+            this.participation = new Participation(dto.participation(), this);
+        } else {
+            this.participation = null;
+        }
 
         // The student is only present for instructors
         this.student = this.participation.getStudent().orElse(null);
