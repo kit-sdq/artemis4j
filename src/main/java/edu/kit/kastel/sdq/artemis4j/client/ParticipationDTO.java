@@ -31,8 +31,8 @@ public record ParticipationDTO(
                 .executeAndDecode(client, String.class);
     }
 
-    public static List<ParticipationDTO> fetchForExercise(ArtemisClient client, long exerciseId, boolean withLatestResults)
-            throws ArtemisNetworkException {
+    public static List<ParticipationDTO> fetchForExercise(
+            ArtemisClient client, long exerciseId, boolean withLatestResults) throws ArtemisNetworkException {
         return Arrays.asList(ArtemisRequest.get()
                 .path(List.of("exercise", "exercises", exerciseId, "participations"))
                 .param("withLatestResults", withLatestResults)

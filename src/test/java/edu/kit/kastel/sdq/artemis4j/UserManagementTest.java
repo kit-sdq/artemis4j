@@ -30,7 +30,8 @@ class UserManagementTest {
 
     @BeforeAll
     static void setup() throws ArtemisClientException {
-        Assumptions.assumeTrue(ARTEMIS_URL != null && !ARTEMIS_URL.isBlank(), "ARTEMIS_URL must be configured for integration tests");
+        Assumptions.assumeTrue(
+                ARTEMIS_URL != null && !ARTEMIS_URL.isBlank(), "ARTEMIS_URL must be configured for integration tests");
         hasAdminPermissions = ADMIN_USER != null && ADMIN_PASSWORD != null;
 
         if (!hasAdminPermissions) {
@@ -104,7 +105,9 @@ class UserManagementTest {
                         "Deleted user should not appear in the list of all users");
 
                 if (createdUserId > 0) {
-                    assertTrue(connection.findUserById(createdUserId).isEmpty(), "Deleted user should not be resolvable by id");
+                    assertTrue(
+                            connection.findUserById(createdUserId).isEmpty(),
+                            "Deleted user should not be resolvable by id");
                 }
 
             } catch (Exception e) {

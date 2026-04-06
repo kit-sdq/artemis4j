@@ -31,6 +31,24 @@ public record ProgrammingExerciseDTO(
                 .toList();
     }
 
+    public static ProgrammingExerciseDTO create(
+            ArtemisClient client, ProgrammingExerciseCreateDTO exerciseCreateDTO, boolean emptyRepositories)
+            throws ArtemisNetworkException {
+        return ArtemisRequest.post()
+                .path(List.of("programming", "programming-exercises", "setup"))
+                .param("emptyRepositories", emptyRepositories)
+                .body(exerciseCreateDTO)
+                .executeAndDecode(client, ProgrammingExerciseDTO.class);
+    }
+
+    public static void delete(ArtemisClient client, long exerciseId, boolean deleteBaseReposBuildPlans)
+            throws ArtemisNetworkException {
+        ArtemisRequest.delete()
+                .path(List.of("programming", "programming-exercises", exerciseId))
+                .param("deleteBaseReposBuildPlans", deleteBaseReposBuildPlans)
+                .execute(client);
+    }
+
     /**
      * Artemis doesn't return the list of exercises directly, but only the list a
      * specific course with the exercises attached. We don't care about the course

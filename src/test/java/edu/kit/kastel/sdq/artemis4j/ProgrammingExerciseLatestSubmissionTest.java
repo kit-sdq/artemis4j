@@ -41,7 +41,8 @@ class ProgrammingExerciseLatestSubmissionTest {
         Assumptions.assumeTrue(ARTEMIS_URL != null && !ARTEMIS_URL.isBlank(), "ARTEMIS_URL not configured");
         Assumptions.assumeTrue(COURSE_ID != null && !COURSE_ID.isBlank(), "COURSE_ID not configured");
         Assumptions.assumeTrue(
-                PROGRAMMING_EXERCISE_ID != null && !PROGRAMMING_EXERCISE_ID.isBlank(), "PROGRAMMING_EXERCISE_ID not configured");
+                PROGRAMMING_EXERCISE_ID != null && !PROGRAMMING_EXERCISE_ID.isBlank(),
+                "PROGRAMMING_EXERCISE_ID not configured");
 
         this.connection = ArtemisConnection.connectWithUsernamePassword(
                 new ArtemisInstance(ARTEMIS_URL), INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
@@ -56,7 +57,8 @@ class ProgrammingExerciseLatestSubmissionTest {
     }
 
     @Test
-    void fetchLatestSubmissionWithResultsForUserIdReturnsSubmissionWithResultAndFeedback() throws ArtemisNetworkException {
+    void fetchLatestSubmissionWithResultsForUserIdReturnsSubmissionWithResultAndFeedback()
+            throws ArtemisNetworkException {
         var latestSubmission = this.exercise.fetchLatestSubmissionFor(this.studentId);
         Assumptions.assumeTrue(
                 latestSubmission.isPresent(), "No latest submission with result available for configured student");
@@ -64,14 +66,18 @@ class ProgrammingExerciseLatestSubmissionTest {
         var submissionWithResults = latestSubmission.orElseThrow();
         assertEquals(STUDENT_USER, submissionWithResults.getSubmission().getParticipantIdentifier());
         assertEquals(submissionWithResults.getSubmission().getCommitHash(), submissionWithResults.getCommitHash());
-        assertTrue(submissionWithResults.getCommitHashForLatestResult().isPresent(), "Expected commit hash for latest result");
+        assertTrue(
+                submissionWithResults.getCommitHashForLatestResult().isPresent(),
+                "Expected commit hash for latest result");
         assertEquals(
                 submissionWithResults.getSubmission().getCommitHash(),
                 submissionWithResults.getCommitHashForLatestResult().orElseThrow());
 
         var latestResult = submissionWithResults.getLatestResult().orElseThrow();
         assertNotNull(latestResult.feedbacks(), "Expected detailed feedback list on latest result");
-        assertTrue(latestResult.feedbacks().stream().noneMatch(Objects::isNull), "Feedback list must not contain null entries");
+        assertTrue(
+                latestResult.feedbacks().stream().noneMatch(Objects::isNull),
+                "Feedback list must not contain null entries");
     }
 
     @Test

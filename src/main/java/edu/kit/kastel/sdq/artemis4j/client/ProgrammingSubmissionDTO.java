@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -99,8 +99,8 @@ public record ProgrammingSubmissionDTO(
                 submission.submissionDate()));
     }
 
-    public static ProgrammingSubmissionDTO withDetailedFeedbacks(ArtemisClient client, ProgrammingSubmissionDTO submission)
-            throws ArtemisNetworkException {
+    public static ProgrammingSubmissionDTO withDetailedFeedbacks(
+            ArtemisClient client, ProgrammingSubmissionDTO submission) throws ArtemisNetworkException {
         if (submission.results() == null || submission.results().isEmpty()) {
             return submission;
         }
@@ -111,7 +111,8 @@ public record ProgrammingSubmissionDTO(
                 continue;
             }
 
-            var feedbacks = ResultDTO.fetchDetailedFeedbacks(client, result.id(), submission.participation().id(), result.feedbacks());
+            var feedbacks = ResultDTO.fetchDetailedFeedbacks(
+                    client, result.id(), submission.participation().id(), result.feedbacks());
             detailedResults.add(new ResultDTO(
                     result.id(),
                     result.completionDate(),

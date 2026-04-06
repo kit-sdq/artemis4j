@@ -9,6 +9,7 @@ import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
 import org.jspecify.annotations.Nullable;
@@ -128,6 +129,29 @@ public class Course extends ArtemisConnectionHolder {
         long courseId = this.getId();
         var client = this.getConnection().getClient();
         CourseDTO.assignUserToCourse(client, courseId, userLogin, role);
+    }
+
+    public ProgrammingExercise createProgrammingExercise(ProgrammingExerciseCreateDTO exerciseCreateDTO)
+            throws ArtemisNetworkException {
+        return this.createProgrammingExercise(exerciseCreateDTO, false);
+    }
+
+    public ProgrammingExercise createProgrammingExercise(
+            ProgrammingExerciseCreateDTO exerciseCreateDTO, boolean emptyRepositories) throws ArtemisNetworkException {
+        var created = ProgrammingExerciseDTO.create(
+                this.getConnection().getClient(), exerciseCreateDTO.forCourse(this.getId()), emptyRepositories);
+        this.exercises.invalidate();
+        return new ProgrammingExercise(created, this);
+    }
+
+    public void deleteProgrammingExercise(long exerciseId) throws ArtemisNetworkException {
+        this.deleteProgrammingExercise(exerciseId, true);
+    }
+
+    public void deleteProgrammingExercise(long exerciseId, boolean deleteBaseReposBuildPlans)
+            throws ArtemisNetworkException {
+        ProgrammingExerciseDTO.delete(this.getConnection().getClient(), exerciseId, deleteBaseReposBuildPlans);
+        this.exercises.invalidate();
     }
 
     public int getNumberOfStudents() {

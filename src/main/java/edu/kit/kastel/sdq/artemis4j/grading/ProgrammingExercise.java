@@ -89,19 +89,20 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         var participations = ParticipationDTO.fetchForExercise(client, this.getId(), true);
 
         var participation = participations.stream()
-            .filter(participationDTO -> participationDTO.student() != null && participationDTO.student().id() == userId)
-            .findAny();
+                .filter(participationDTO -> participationDTO.student() != null
+                        && participationDTO.student().id() == userId)
+                .findAny();
 
         if (participation.isEmpty()) {
             // This is very slow, hence this is only a fallback
             String userLogin = this.getConnection()
-                .findUserById(userId)
-                .map(User::getLogin)
-                .orElse(null);
+                    .findUserById(userId)
+                    .map(User::getLogin)
+                    .orElse(null);
             if (userLogin != null) {
                 participation = participations.stream()
-                    .filter(participationDTO -> userLogin.equals(participationDTO.participantIdentifier()))
-                    .findAny();
+                        .filter(participationDTO -> userLogin.equals(participationDTO.participantIdentifier()))
+                        .findAny();
             }
 
             if (participation.isEmpty()) {
@@ -109,13 +110,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
             }
         }
 
-        var submission = ProgrammingSubmissionDTO.fetchLatestWithFeedbacksForParticipation(client, participation.get().id());
+        var submission = ProgrammingSubmissionDTO.fetchLatestWithFeedbacksForParticipation(
+                client, participation.get().id());
         if (submission.isEmpty()) {
             return Optional.empty();
         }
 
         var submissionWithDetailedFeedbacks = ProgrammingSubmissionDTO.withDetailedFeedbacks(client, submission.get());
-        return Optional.of(new ProgrammingSubmissionWithResults(new ProgrammingSubmission(submissionWithDetailedFeedbacks, this)));
+        return Optional.of(
+                new ProgrammingSubmissionWithResults(new ProgrammingSubmission(submissionWithDetailedFeedbacks, this)));
     }
 
     public Participation startParticipation() throws ArtemisNetworkException {
