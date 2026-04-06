@@ -62,6 +62,12 @@ public final class ArtemisConnection {
         return Collections.unmodifiableList(courses.get());
     }
 
+    public List<Course> getCoursesForEnrollment() throws ArtemisNetworkException {
+        return CourseDTO.fetchForEnrollment(this.client).stream()
+                .map(dto -> new Course(dto, this))
+                .toList();
+    }
+
     public Course getCourseById(int id) throws ArtemisNetworkException {
         return courses.get().stream()
                 .filter(c -> c.getId() == id)

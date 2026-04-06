@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.time.ZonedDateTime;
@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
@@ -79,6 +80,10 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), 0, false).stream()
                 .map(dto -> new ProgrammingSubmissionWithResults(new ProgrammingSubmission(dto, this)))
                 .toList();
+    }
+
+    public ParticipationDTO startParticipation() throws ArtemisNetworkException {
+        return ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId());
     }
 
     public List<PackedAssessment> fetchMyAssessments() throws ArtemisNetworkException {
