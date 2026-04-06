@@ -1,6 +1,7 @@
 /* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -28,6 +29,14 @@ public record ParticipationDTO(
                 .path(List.of("core", "account", "participation-vcs-access-token"))
                 .param("participationId", participationId)
                 .executeAndDecode(client, String.class);
+    }
+
+    public static List<ParticipationDTO> fetchForExercise(ArtemisClient client, long exerciseId, boolean withLatestResults)
+            throws ArtemisNetworkException {
+        return Arrays.asList(ArtemisRequest.get()
+                .path(List.of("exercise", "exercises", exerciseId, "participations"))
+                .param("withLatestResults", withLatestResults)
+                .executeAndDecode(client, ParticipationDTO[].class));
     }
 
     public Optional<String> repositoryUrl() {

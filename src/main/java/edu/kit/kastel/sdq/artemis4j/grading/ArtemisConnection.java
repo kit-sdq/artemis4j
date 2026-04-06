@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
@@ -90,6 +91,21 @@ public final class ArtemisConnection {
      */
     public List<User> getAllUsers() throws ArtemisNetworkException {
         return UserDTO.getAllUsers(this.client).stream().map(User::new).toList();
+    }
+
+    /**
+     * Finds a user by id.
+     * <p>
+     * This always works for the currently authenticated user. Looking up arbitrary
+     * users requires admin permissions.
+     */
+    public Optional<User> findUserById(long userId) throws ArtemisNetworkException {
+        var currentUser = this.getAssessor();
+        if (currentUser.getId() == userId) {
+            return Optional.of(currentUser);
+        }
+
+        return this.getAllUsers().stream().filter(user -> user.getId() == userId).findFirst();
     }
 
     /**

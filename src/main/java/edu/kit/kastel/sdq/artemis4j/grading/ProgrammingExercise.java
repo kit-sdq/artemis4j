@@ -82,6 +82,42 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
                 .toList();
     }
 
+    public Optional<ProgrammingSubmissionWithResults> fetchLatestSubmissionFor(long userId)
+            throws ArtemisNetworkException {
+        var client = this.getConnection().getClient();
+
+        var participations = ParticipationDTO.fetchForExercise(client, this.getId(), true);
+
+        var participation = participations.stream()
+            .filter(participationDTO -> participationDTO.student() != null && participationDTO.student().id() == userId)
+            .findAny();
+
+        if (participation.isEmpty()) {
+            // This is very slow, hence this is only a fallback
+            String userLogin = this.getConnection()
+                .findUserById(userId)
+                .map(User::getLogin)
+                .orElse(null);
+            if (userLogin != null) {
+                participation = participations.stream()
+                    .filter(participationDTO -> userLogin.equals(participationDTO.participantIdentifier()))
+                    .findAny();
+            }
+
+            if (participation.isEmpty()) {
+                return Optional.empty();
+            }
+        }
+
+        var submission = ProgrammingSubmissionDTO.fetchLatestWithFeedbacksForParticipation(client, participation.get().id());
+        if (submission.isEmpty()) {
+            return Optional.empty();
+        }
+
+        var submissionWithDetailedFeedbacks = ProgrammingSubmissionDTO.withDetailedFeedbacks(client, submission.get());
+        return Optional.of(new ProgrammingSubmissionWithResults(new ProgrammingSubmission(submissionWithDetailedFeedbacks, this)));
+    }
+
     public Participation startParticipation() throws ArtemisNetworkException {
         return new Participation(
                 ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId()), this);

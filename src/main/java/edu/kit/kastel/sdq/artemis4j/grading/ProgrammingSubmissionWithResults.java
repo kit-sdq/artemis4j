@@ -51,6 +51,18 @@ public class ProgrammingSubmissionWithResults {
         return Optional.ofNullable(automaticResult);
     }
 
+    public Optional<ResultDTO> getLatestResult() {
+        return submission.getLatestResult();
+    }
+
+    public String getCommitHash() {
+        return this.submission.getCommitHash();
+    }
+
+    public Optional<String> getCommitHashForLatestResult() {
+        return this.getLatestResult().map(ignored -> this.getCommitHash());
+    }
+
     public boolean isFirstRoundStarted() {
         return firstRoundResult != null;
     }

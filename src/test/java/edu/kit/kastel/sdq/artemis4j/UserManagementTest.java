@@ -30,8 +30,8 @@ class UserManagementTest {
 
     @BeforeAll
     static void setup() throws ArtemisClientException {
+        Assumptions.assumeTrue(ARTEMIS_URL != null && !ARTEMIS_URL.isBlank(), "ARTEMIS_URL must be configured for integration tests");
         hasAdminPermissions = ADMIN_USER != null && ADMIN_PASSWORD != null;
-        Assertions.assertNotNull(ARTEMIS_URL);
 
         if (!hasAdminPermissions) {
             return;
@@ -69,6 +69,7 @@ class UserManagementTest {
         String testFirstName = "Test";
         String testLastName = "User";
         String testPassword = "TempPassword123!";
+        long createdUserId = -1;
 
         try {
             // Create the user
@@ -76,10 +77,15 @@ class UserManagementTest {
                     new UserCreateDTO(testUsername, testFirstName, testLastName, testEmail, testPassword, "en");
 
             User createdUser = connection.createUser(userCreateDTO);
+            createdUserId = createdUser.getId();
 
             // Verify the user was created
             assertNotNull(createdUser);
             Assertions.assertEquals(testUsername, createdUser.getLogin());
+
+            var foundById = connection.findUserById(createdUserId);
+            assertTrue(foundById.isPresent(), "Created user should be resolvable by id");
+            Assertions.assertEquals(testUsername, foundById.orElseThrow().getLogin());
 
             // The list of users seems to not reliably update right away or there are too many.
             // Let's at least check the API can list it if it does
@@ -96,6 +102,10 @@ class UserManagementTest {
                 assertTrue(
                         allUsers.stream().noneMatch(u -> u.getLogin().equals(testUsername)),
                         "Deleted user should not appear in the list of all users");
+
+                if (createdUserId > 0) {
+                    assertTrue(connection.findUserById(createdUserId).isEmpty(), "Deleted user should not be resolvable by id");
+                }
 
             } catch (Exception e) {
                 System.out.println("Failed to delete user in finally block: " + e.getMessage());
