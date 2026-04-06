@@ -76,27 +76,28 @@ public record ProgrammingSubmissionDTO(
 
     public static Optional<ProgrammingSubmissionDTO> fetchLatestWithFeedbacksForParticipation(
             ArtemisClient client, long participationId) throws ArtemisNetworkException {
-        var result = ArtemisRequest.get()
+        return ArtemisRequest.get()
                 .path(List.of(
                         "programming",
                         "programming-exercise-participations",
                         participationId,
                         "latest-result-with-feedbacks"))
                 .param("withSubmission", true)
-                .executeAndDecode(client, ResultWithSubmissionDTO.class);
+                .executeAndDecodeMaybe(client, ResultWithSubmissionDTO.class)
+                .flatMap(result -> {
+                    var submission = result.submission();
+                    if (submission == null) {
+                        return Optional.empty();
+                    }
 
-        if (result == null || result.submission() == null) {
-            return Optional.empty();
-        }
-
-        var submission = result.submission();
-        return Optional.of(new ProgrammingSubmissionDTO(
-                submission.id(),
-                submission.participation(),
-                submission.commitHash(),
-                submission.buildFailed(),
-                List.of(result.toResultDTO()),
-                submission.submissionDate()));
+                    return Optional.of(new ProgrammingSubmissionDTO(
+                            submission.id(),
+                            submission.participation(),
+                            submission.commitHash(),
+                            submission.buildFailed(),
+                            List.of(result.toResultDTO()),
+                            submission.submissionDate()));
+                });
     }
 
     public static ProgrammingSubmissionDTO withDetailedFeedbacks(
