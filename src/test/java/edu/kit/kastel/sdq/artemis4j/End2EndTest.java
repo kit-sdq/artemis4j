@@ -1,7 +1,8 @@
-/* Licensed under EPL-2.0 2023-2025. */
+/* Licensed under EPL-2.0 2023-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -11,12 +12,15 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
+import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
@@ -196,6 +200,66 @@ class End2EndTest {
                 .lockAndOpen(this.gradingConfig)
                 .orElseThrow();
         Assertions.assertEquals(1, newAssessment.getAnnotations().size());
+    }
+
+    @Test
+    void fetchLatestSubmissionWithResultsForUserIdReturnsSubmissionWithResultAndFeedback()
+            throws ArtemisClientException, ArtemisNetworkException {
+        var student = this.programmingSubmission.getSubmission().getStudent().orElseThrow();
+        var latestSubmission = this.exercise.fetchLatestSubmissionFor(student.getId());
+        Assumptions.assumeTrue(
+                latestSubmission.isPresent(), "No latest submission with result available for configured student");
+
+        var submissionWithResults = latestSubmission.orElseThrow();
+        assertEquals(student.getLogin(), submissionWithResults.getSubmission().getParticipantIdentifier());
+        assertEquals(submissionWithResults.getSubmission().getCommitHash(), submissionWithResults.getCommitHash());
+        assertTrue(
+                submissionWithResults.getCommitHashForLatestResult().isPresent(),
+                "Expected commit hash for latest result");
+        assertEquals(
+                submissionWithResults.getSubmission().getCommitHash(),
+                submissionWithResults.getCommitHashForLatestResult().orElseThrow());
+
+        var latestResult = submissionWithResults.getLatestResult().orElseThrow();
+        assertNotNull(latestResult.feedbacks(), "Expected detailed feedback list on latest result");
+        assertTrue(
+                latestResult.feedbacks().stream().noneMatch(Objects::isNull),
+                "Feedback list must not contain null entries");
+    }
+
+    @Test
+    void fetchLatestSubmissionWithResultsForUnknownUserIdReturnsEmpty() throws ArtemisNetworkException {
+        var latestSubmission = this.exercise.fetchLatestSubmissionFor(Long.MAX_VALUE);
+        assertTrue(latestSubmission.isEmpty());
+    }
+
+    @Test
+    void fetchLatestResultForParticipationReturnsEmptyWhenArtemisRespondsWithEmptyBody()
+            throws ArtemisNetworkException {
+        var participation = this.findParticipationWithoutLatestResult();
+
+        assertTrue(
+                participation.isPresent(),
+                "Expected a participation without a latest result on the configured Artemis instance");
+
+        var latestResult =
+                Assertions.assertDoesNotThrow(() -> ProgrammingSubmissionDTO.fetchLatestWithFeedbacksForParticipation(
+                        this.connection.getClient(), participation.orElseThrow().id()));
+
+        assertTrue(latestResult.isEmpty(), "Expected Optional.empty() for Artemis' empty response body");
+    }
+
+    private Optional<ParticipationDTO> findParticipationWithoutLatestResult() throws ArtemisNetworkException {
+        for (ProgrammingExercise exercise : this.course.getProgrammingExercises()) {
+            for (ParticipationDTO participation :
+                    ParticipationDTO.fetchForExercise(this.connection.getClient(), exercise.getId(), true)) {
+                if (participation.student() != null && participation.results().isEmpty()) {
+                    return Optional.of(participation);
+                }
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Test
@@ -487,8 +551,7 @@ class End2EndTest {
      */
     @Test
     void testPositiveFeedbackAllowedByDefault() throws ArtemisClientException {
-        var minimalGradingConfig = GradingConfig.readDTOFromString(
-                """
+        var minimalGradingConfig = GradingConfig.readDTOFromString("""
             {
                 "shortName": "E2E",
                 "ratingGroups": [],
