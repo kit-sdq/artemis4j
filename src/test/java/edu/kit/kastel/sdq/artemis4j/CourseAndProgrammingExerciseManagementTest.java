@@ -1,6 +1,8 @@
 /* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import java.util.UUID;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
@@ -13,8 +15,6 @@ import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 class CourseAndProgrammingExerciseManagementTest {
 
