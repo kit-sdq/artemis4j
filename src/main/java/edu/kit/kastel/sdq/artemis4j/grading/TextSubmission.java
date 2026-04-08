@@ -34,7 +34,7 @@ public class TextSubmission extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercise = exercise;
-        this.participation = new Participation(dto.participation(), this);
+        this.participation = new Participation(dto.participation(), this.getConnection(), this.exercise);
         this.student = this.participation.getStudent().orElse(null);
         this.correctionRound = correctionRound;
     }
@@ -107,7 +107,7 @@ public class TextSubmission extends ArtemisConnectionHolder {
         submissionWithResults = new TextSubmissionDTO(
                 submissionWithResults.id(),
                 submissionWithResults.submitted(),
-                this.getParticipation().getDTO(),
+                this.getParticipation().toDTO(),
                 submissionWithResults.commitHash(),
                 submissionWithResults.buildFailed(),
                 submissionWithResults.results(),

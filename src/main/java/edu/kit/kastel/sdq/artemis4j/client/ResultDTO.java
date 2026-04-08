@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -53,6 +53,29 @@ public record ResultDTO(
                 lockingResult.testCaseCount(),
                 lockingResult.passedTestCaseCount(),
                 lockingResult.codeIssueCount());
+    }
+
+    /**
+     * Delete an assessment of a given submission.
+     *
+     * @param client the client to use
+     * @param resultId the id of the result that should be deleted
+     * @param participationId the participation to the submission
+     * @param submissionId the submission for which the result should be deleted
+     * @throws ArtemisNetworkException if the current user is not allowed to perform this action
+     */
+    public static void delete(ArtemisClient client, long resultId, long participationId, long submissionId)
+            throws ArtemisNetworkException {
+        ArtemisRequest.delete()
+                .path(List.of(
+                        "programming",
+                        "participations",
+                        participationId,
+                        "programming-submissions",
+                        submissionId,
+                        "results",
+                        resultId))
+                .execute(client);
     }
 
     private static List<FeedbackDTO> fetchFeedbacks(ArtemisClient client, long resultId, long participationId)

@@ -16,7 +16,11 @@ import org.jspecify.annotations.Nullable;
 
 /**
  * A student's programming submission. A submission essentially consists of the
- * URL of a student's Git repository, a commit hash, and the corresponding participation.
+ * URL of a student's Git repository, a commit hash, and a reference to
+ * the corresponding {@link Participation} this submission belongs to.
+ * <p>
+ * When a new commit is pushed, a new submission is created by artemis belonging
+ * to the student's {@link Participation}.
  */
 public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingSubmissionDTO dto;
@@ -26,18 +30,26 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     private final ProgrammingExercise exercise;
 
     public ProgrammingSubmission(ProgrammingSubmissionDTO dto, ProgrammingExercise exercise) {
+        this(
+                dto,
+                exercise,
+                dto.participation() == null
+                        ? null
+                        : new Participation(dto.participation(), exercise.getConnection(), exercise));
+    }
+
+    public ProgrammingSubmission(
+            ProgrammingSubmissionDTO dto, ProgrammingExercise exercise, @Nullable Participation participation) {
         super(exercise);
 
         this.dto = dto;
         this.exercise = exercise;
-        if (dto.participation() != null) {
-            this.participation = new Participation(dto.participation(), this);
-        } else {
-            this.participation = null;
-        }
+        this.participation = participation;
 
         // The student is only present for instructors
-        this.student = this.participation.getStudent().orElse(null);
+        this.student = Optional.ofNullable(this.participation)
+                .flatMap(Participation::getStudent)
+                .orElse(null);
     }
 
     public long getId() {
@@ -45,21 +57,21 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
     }
 
     public long getParticipationId() {
-        return this.participation.getId();
+        return this.getParticipation().getId();
     }
 
     public String getParticipantIdentifier() {
-        return this.participation.getParticipantIdentifier();
+        return this.getParticipation().getParticipantIdentifier();
     }
 
     public String getRepositoryUrl() {
-        return this.participation
-                .getRepositoryUrl()
+        return this.getParticipation()
+                .getUserIndependentRepositoryUri()
                 .orElseThrow(() -> new IllegalStateException(
                         "No repository URL available for participation " + this.participation.getId()));
     }
 
-    public Participation getParticipation() {
+    public @Nullable Participation getParticipation() {
         return this.participation;
     }
 
@@ -88,7 +100,7 @@ public class ProgrammingSubmission extends ArtemisConnectionHolder {
 
     public Optional<ResultDTO> getLatestResult() {
         if (this.dto.results() != null && !this.dto.results().isEmpty()) {
-            return Optional.of(this.dto.results().get(this.dto.results().size() - 1));
+            return Optional.ofNullable(this.dto.results().get(this.dto.results().size() - 1));
         } else {
             return Optional.empty();
         }

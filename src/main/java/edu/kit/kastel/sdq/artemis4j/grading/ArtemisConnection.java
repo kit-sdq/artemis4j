@@ -80,7 +80,7 @@ public final class ArtemisConnection {
                 .toList();
     }
 
-    public Course getCourseById(int id) throws ArtemisNetworkException {
+    public Course getCourseById(long id) throws ArtemisNetworkException {
         return courses.get().stream()
                 .filter(c -> c.getId() == id)
                 .findAny()
@@ -96,19 +96,34 @@ public final class ArtemisConnection {
     }
 
     /**
-     * Finds a user by id.
-     * <p>
-     * This always works for the currently authenticated user. Looking up arbitrary
-     * users requires admin permissions.
+     * Finds a user based on their login name.
+     *
+     * @param login the login name, must not be empty, null and should be at least 3 characters long.
+     *              It will only return a result if an exact match has been found.
+     * @return the user instance or empty if it could not be found.
+     * @throws ArtemisNetworkException if the login name is not a valid search term, or it failed to make the request
      */
-    public Optional<User> findUserById(long userId) throws ArtemisNetworkException {
+    public Optional<User> findUserByLogin(String login) throws ArtemisNetworkException {
         var currentUser = this.getAssessor();
-        if (currentUser.getId() == userId) {
+        if (login.equals(currentUser.getLogin())) {
             return Optional.of(currentUser);
         }
 
+        // This requires at least student privileges in the relevant courses:
+        for (var course : this.getCourses()) {
+            if (course.getRoles(login).isEmpty()) {
+                continue;
+            }
+
+            var user = course.findUserByLogin(login)
+                    .orElseThrow(() -> new IllegalArgumentException(
+                            "User with login %s not found in course %d, but has role in the course"
+                                    .formatted(login, course.getId())));
+            return Optional.of(user);
+        }
+
         return this.getAllUsers().stream()
-                .filter(user -> user.getId() == userId)
+                .filter(user -> login.equals(user.getLogin()))
                 .findFirst();
     }
 
@@ -123,16 +138,9 @@ public final class ArtemisConnection {
     }
 
     /**
-     * Creates a course. Note that this requires admin permissions.
-     */
-    public Course createCourse(CourseCreateDTO courseCreateDTO) throws ArtemisNetworkException {
-        CourseDTO created = CourseDTO.createCourse(this.client, courseCreateDTO);
-        this.courses.invalidate();
-        return new Course(created, this);
-    }
-
-    /**
-     * Creates a course with an optional icon upload. Note that this requires admin permissions.
+     * Creates a course with an optional icon for the course.
+     * <p>
+     * Note that this requires admin permissions.
      */
     public Course createCourse(
             CourseCreateDTO courseCreateDTO,
@@ -141,6 +149,10 @@ public final class ArtemisConnection {
             @Nullable String mediaType)
             throws ArtemisNetworkException {
         CourseDTO created = CourseDTO.createCourse(this.client, courseCreateDTO, courseIcon, filename, mediaType);
+        if (created == null) {
+            throw new IllegalStateException("Failed to create course for " + courseCreateDTO);
+        }
+
         this.courses.invalidate();
         return new Course(created, this);
     }

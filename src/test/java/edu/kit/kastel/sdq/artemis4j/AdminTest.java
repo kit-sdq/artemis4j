@@ -8,7 +8,6 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.time.ZonedDateTime;
 import java.util.List;
-import java.util.Optional;
 import java.util.UUID;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisClient;
@@ -16,7 +15,6 @@ import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
 import edu.kit.kastel.sdq.artemis4j.client.CourseCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
-import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseBuildConfigCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserCreateDTO;
@@ -26,6 +24,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.Course;
 import edu.kit.kastel.sdq.artemis4j.grading.Participation;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.User;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Assumptions;
 import org.junit.jupiter.api.BeforeAll;
@@ -41,14 +40,15 @@ class AdminTest {
 
     private ArtemisConnection adminConnection;
     private boolean hasAdminPermissions = true;
-    private UserCreateDTO preparedUserData;
-    private String login;
-    private long cleanupCreatedUserId = -1;
-    private long cleanupCourseId = -1;
-    private long cleanupExerciseId = -1;
+    private User studentLogin;
+    private String studentPassword;
+    private User unassignedUser;
+    private String unassignedUserPassword;
+    private Course course;
+    private ProgrammingExercise exercise;
 
     @BeforeAll
-    void setup() {
+    void setup() throws ArtemisClientException {
         Assumptions.assumeTrue(
                 ARTEMIS_URL != null && !ARTEMIS_URL.isBlank(), "ARTEMIS_URL must be configured for integration tests");
         hasAdminPermissions =
@@ -72,207 +72,23 @@ class AdminTest {
             Assumptions.abort(
                     "Skipping integration tests: cannot connect to Artemis admin account: " + ex.getMessage());
         }
-    }
 
-    private void skipIfNoAdminPermissions() {
-        if (!hasAdminPermissions) {
-            Assumptions.abort("User does not have admin permissions for admin management endpoints");
-        }
-    }
-
-    @BeforeEach
-    void resetCleanupState() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-        login = null;
-        cleanupCreatedUserId = -1;
-        cleanupCourseId = -1;
-        cleanupExerciseId = -1;
-
-        preparedUserData = randomUser("setup");
-        login = preparedUserData.login();
-        User createdUser = adminConnection.createUser(preparedUserData);
-        cleanupCreatedUserId = createdUser.getId();
-    }
-
-    @AfterEach
-    void cleanupCreatedResources() throws ArtemisClientException {
-        if (cleanupCourseId > 0L && cleanupExerciseId > 0L) {
-            Course course = adminConnection.getCourseById((int) cleanupCourseId);
-            course.deleteProgrammingExercise(cleanupExerciseId);
-        }
-
-        if (cleanupCourseId > 0) {
-            adminConnection.deleteCourse(cleanupCourseId);
-        }
-
-        if (login != null && !login.isBlank()) {
-            adminConnection.deleteUser(login);
-            if (cleanupCreatedUserId > 0) {
-                assertTrue(
-                        adminConnection.findUserById(cleanupCreatedUserId).isEmpty(),
-                        "Deleted user should not be resolvable by id");
-            }
-        }
-    }
-
-    @Test
-    void testAdminCanAssignStudentToCourse() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-        Course course = pickAnyCourseWithProgrammingExercise(adminConnection)
-                .orElseThrow(() -> new ArtemisClientException("No course with programming exercise available."));
-
-        course.assignUser(login, CourseRole.STUDENT);
-
-        List<UserDTO> students = CourseDTO.fetchAllStudents(adminConnection.getClient(), course.getId());
-        boolean assigned = students.stream().anyMatch(u -> u.login().equals(login));
-        assertTrue(assigned, "Assigned student should appear in the course student list");
-    }
-
-    @Test
-    void testStudentCanListAndSelfEnrollInCourse() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-        ArtemisConnection studentConnection = ArtemisConnection.connectWithUsernamePassword(
-                new ArtemisInstance(ARTEMIS_URL), login, preparedUserData.password());
-
-        List<Course> enrollable = studentConnection.getCoursesForEnrollment();
-        Assumptions.assumeFalse(enrollable.isEmpty(), "No self-enrollable courses available on this Artemis instance");
-
-        Course target = enrollable.getFirst();
-        target.enrollSelf();
-
-        List<UserDTO> students = CourseDTO.fetchAllStudents(adminConnection.getClient(), target.getId());
-        boolean enrolled = students.stream().anyMatch(u -> u.login().equals(login));
-        assertTrue(enrolled, "Self-enrolled student should appear in the course student list");
-    }
-
-    @Test
-    void testStudentCanStartExerciseAndReceiveRepositoryAccess() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-        Course course = pickAnyCourseWithProgrammingExercise(adminConnection)
-                .orElseThrow(() -> new ArtemisClientException("No course with programming exercise available."));
-        course.assignUser(login, CourseRole.STUDENT);
-
-        ArtemisClient studentClient = ArtemisClient.fromUsernamePassword(
-                new ArtemisInstance(ARTEMIS_URL), login, preparedUserData.password());
-        ArtemisConnection studentConnection = new ArtemisConnection(studentClient);
-
-        Participation participation = null;
-
-        for (var exercise : course.getProgrammingExercises()) {
-            try {
-                participation = new Participation(
-                        ParticipationDTO.startExercise(studentClient, exercise.getId()), studentConnection);
-                break;
-            } catch (ArtemisNetworkException ignored) {
-                // Try the next exercise. Some exercises cannot be started due to date/state restrictions.
-            }
-        }
-
-        Assumptions.assumeTrue(
-                participation != null, "Could not start any programming exercise in the selected course");
-        String repositoryUrl = participation.getRepositoryUrl().orElseThrow();
-
-        UserDTO user = UserDTO.getAssessingUser(studentClient);
-        if (user.vcsAccessToken() == null || user.vcsAccessToken().isBlank()) {
-            UserDTO.createVCSToken(ZonedDateTime.now().plusDays(7), studentClient);
-            user = UserDTO.getAssessingUser(studentClient);
-        }
-
-        assertNotNull(participation);
-        assertTrue(participation.getId() > 0, "Participation id should be positive");
-        assertFalse(repositoryUrl.isBlank(), "Repository URL should not be blank");
-        assertNotNull(user.vcsAccessToken(), "VCS token should exist after creation");
-        assertFalse(user.vcsAccessToken().isBlank(), "VCS token should not be blank");
-    }
-
-    @Test
-    void testStudentCanFetchParticipationVcsAccessToken() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-        Course course = pickAnyCourseWithProgrammingExercise(adminConnection)
-                .orElseThrow(() -> new ArtemisClientException("No course with programming exercise available."));
-        course.assignUser(login, CourseRole.STUDENT);
-
-        ArtemisClient studentClient = ArtemisClient.fromUsernamePassword(
-                new ArtemisInstance(ARTEMIS_URL), login, preparedUserData.password());
-        ArtemisConnection studentConnection = new ArtemisConnection(studentClient);
-
-        Participation participation = null;
-        for (var exercise : course.getProgrammingExercises()) {
-            try {
-                participation = new Participation(
-                        ParticipationDTO.startExercise(studentClient, exercise.getId()), studentConnection);
-                break;
-            } catch (ArtemisNetworkException ignored) {
-                // Try the next exercise. Some exercises cannot be started due to date/state restrictions.
-            }
-        }
-
-        Assumptions.assumeTrue(
-                participation != null, "Could not start any programming exercise in the selected course");
-
-        String participationToken = participation.getVcsAccessToken();
-
-        assertNotNull(participationToken, "Participation VCS access token should not be null");
-        assertFalse(participationToken.isBlank(), "Participation VCS access token should not be blank");
-    }
-
-    @Test
-    void testAdminFindUserByIdReturnsCurrentUser() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-        var assessor = this.adminConnection.getAssessor();
-        var resolved = this.adminConnection.findUserById(assessor.getId());
-
-        assertTrue(resolved.isPresent());
-        assertEquals(assessor.getId(), resolved.orElseThrow().getId());
-        assertEquals(assessor.getLogin(), resolved.orElseThrow().getLogin());
-    }
-
-    @Test
-    void testAdminCanCreateAndDeleteUser() throws ArtemisClientException {
         skipIfNoAdminPermissions();
 
-        String login = this.login;
-        User createdUser = adminConnection.findUserById(cleanupCreatedUserId).orElseThrow();
-
-        assertNotNull(createdUser);
-        assertEquals(login, createdUser.getLogin());
-
-        var foundById = adminConnection.findUserById(cleanupCreatedUserId);
-        assertTrue(foundById.isPresent(), "Created user should be resolvable by id");
-        assertEquals(login, foundById.orElseThrow().getLogin());
-
-        List<User> allUsers = adminConnection.getAllUsers();
-        boolean found = allUsers.stream().anyMatch(u -> u.getLogin().equals(login));
-        assertTrue(found, "Created user should appear in the list of all users");
-    }
-
-    @Test
-    void testAdminCanListAllUsers() throws ArtemisClientException {
-        skipIfNoAdminPermissions();
-
-        List<User> allUsers = adminConnection.getAllUsers();
-
-        assertNotNull(allUsers);
-        assertFalse(allUsers.isEmpty(), "There should be at least one user in the system");
-        for (User user : allUsers) {
-            assertNotNull(user.getLogin(), "User login should not be null");
-        }
-    }
-
-    @Test
-    void testAdminCanCreateAndDeleteCourseAndProgrammingExerciseWithAdvancedBuildOptions()
-            throws ArtemisClientException {
-        skipIfNoAdminPermissions();
+        // Setup the course:
 
         String suffix = UUID.randomUUID().toString().substring(0, 6);
         String courseShortName = "a4j" + suffix;
         String courseTitle = "Artemis4J Test Course " + suffix;
 
-        Course createdCourse = adminConnection.createCourse(CourseCreateDTO.minimal(courseTitle, courseShortName));
-        cleanupCourseId = createdCourse.getId();
+        this.course = this.adminConnection.createCourse(
+                CourseCreateDTO.minimal(courseTitle, courseShortName), null, null, null);
 
-        assertTrue(cleanupCourseId > 0L, "Expected a persisted course id");
-        assertEquals(courseTitle, createdCourse.getTitle());
+        assertTrue(this.course.getId() > 0L, "Expected a course id");
+        assertEquals(courseTitle, this.course.getTitle());
+        assertEquals(courseShortName, this.course.getShortName());
+
+        // Setup the exercise:
 
         var advancedBuildConfig = new ProgrammingExerciseBuildConfigCreateDTO(
                 true,
@@ -293,38 +109,153 @@ class AdminTest {
         var createExerciseDTO = ProgrammingExerciseCreateDTO.minimalCourseExercise(
                 "Advanced Build Options " + suffix, exerciseShortName, "edu.kit.kastel", advancedBuildConfig);
 
-        ProgrammingExercise createdExercise = createdCourse.createProgrammingExercise(createExerciseDTO, true);
-        cleanupExerciseId = createdExercise.getId();
-        long persistedExerciseId = cleanupExerciseId;
+        this.exercise = this.course.createProgrammingExercise(createExerciseDTO, true);
 
-        assertTrue(cleanupExerciseId > 0, "Expected a persisted exercise id");
-        assertEquals(exerciseShortName, createdExercise.getShortName());
+        assertTrue(this.exercise.getId() > 0L, "Expected an exercise id");
+        assertEquals(exerciseShortName, this.exercise.getShortName());
 
-        boolean exerciseVisible = createdCourse.getProgrammingExercises().stream()
-                .anyMatch(exercise -> exercise.getId() == persistedExerciseId);
+        boolean exerciseVisible = this.course.getProgrammingExercises().stream()
+                .anyMatch(exercise -> exercise.getId() == this.exercise.getId());
         assertTrue(exerciseVisible, "Created exercise should be visible in the course exercise list");
-
-        createdCourse.deleteProgrammingExercise(cleanupExerciseId);
-        cleanupExerciseId = -1;
-
-        boolean stillVisible = createdCourse.getProgrammingExercises().stream()
-                .anyMatch(exercise -> exercise.getId() == createdExercise.getId());
-        assertFalse(stillVisible, "Deleted exercise should not be visible in the course exercise list");
     }
 
-    private Optional<Course> pickAnyCourseWithProgrammingExercise(ArtemisConnection connection)
-            throws ArtemisClientException {
-        for (Course course : connection.getCourses()) {
-            if (!course.getProgrammingExercises().isEmpty()) {
-                return Optional.of(course);
-            }
+    private void skipIfNoAdminPermissions() {
+        if (!hasAdminPermissions) {
+            Assumptions.abort("User does not have admin permissions for admin management endpoints");
         }
-        return Optional.empty();
     }
 
     private UserCreateDTO randomUser(String suffix) {
         String id = UUID.randomUUID().toString().substring(0, 8);
         String login = "a4j_" + suffix + "_" + id;
         return new UserCreateDTO(login, "A4J", "Test", login + "@example.com", "TempPass123!", "en");
+    }
+
+    @BeforeEach
+    void setupCourseExerciseAndStudent() throws ArtemisClientException {
+        skipIfNoAdminPermissions();
+
+        var studentCreateDTO = randomUser("student");
+        var unassignedUserCreateDTO = randomUser("unassigned");
+
+        this.studentLogin = this.adminConnection.createUser(studentCreateDTO);
+        this.unassignedUser = this.adminConnection.createUser(unassignedUserCreateDTO);
+
+        this.studentPassword = studentCreateDTO.password();
+        this.unassignedUserPassword = unassignedUserCreateDTO.password();
+
+        this.course.assignUser(this.studentLogin.getLogin(), CourseRole.STUDENT);
+    }
+
+    @AfterAll
+    void teardown() throws ArtemisClientException {
+        if (this.course == null) {
+            return;
+        }
+
+        if (this.exercise != null) {
+            this.course.deleteProgrammingExercise(this.exercise.getId());
+            boolean stillVisible = this.course.getProgrammingExercises().stream()
+                    .anyMatch(exercise -> exercise.getId() == this.exercise.getId());
+            assertFalse(stillVisible, "Deleted exercise should not be visible in the course exercise list");
+            this.exercise = null;
+        }
+
+        this.adminConnection.deleteCourse(this.course.getId());
+
+        assertTrue(
+                this.adminConnection.getCourses().stream().noneMatch(cour -> cour.getId() == this.course.getId()),
+                "Expecting course to be deleted");
+        this.course = null;
+    }
+
+    @AfterEach
+    void cleanupCreatedResources() throws ArtemisClientException {
+        for (var user : List.of(this.unassignedUser, this.studentLogin)) {
+            if (user == null) {
+                continue;
+            }
+
+            this.adminConnection.deleteUser(user.getLogin());
+            assertTrue(
+                    this.adminConnection.findUserByLogin(user.getLogin()).isEmpty(),
+                    "Deleted user should not be resolvable by id");
+        }
+        this.unassignedUser = null;
+        this.studentLogin = null;
+    }
+
+    @Test
+    void testAdminCanAssignStudentToCourse() throws ArtemisClientException {
+        assertTrue(
+                this.course.fetchAllStudents().stream()
+                        .noneMatch(u -> u.getLogin().equals(this.unassignedUser.getLogin())),
+                "Unassigned user should not be assigned to the course yet");
+
+        this.course.assignUser(this.unassignedUser.getLogin(), CourseRole.STUDENT);
+
+        assertTrue(
+                this.course.fetchAllStudents().stream()
+                        .anyMatch(u -> u.getLogin().equals(this.unassignedUser.getLogin())),
+                "Unassigned user should appear in the course student list");
+    }
+
+    @Test
+    void testStudentCanListAndSelfEnrollInCourse() throws ArtemisClientException {
+        ArtemisConnection studentConnection = ArtemisConnection.connectWithUsernamePassword(
+                new ArtemisInstance(ARTEMIS_URL), this.unassignedUser.getLogin(), this.unassignedUserPassword);
+
+        List<Course> enrollable = studentConnection.getCoursesForEnrollment();
+        Assumptions.assumeFalse(enrollable.isEmpty(), "No self-enrollable courses available on this Artemis instance");
+
+        Course target = enrollable.getFirst();
+        target.enrollSelf();
+
+        List<UserDTO> students = CourseDTO.fetchAllStudents(adminConnection.getClient(), target.getId());
+        boolean enrolled = students.stream().anyMatch(u -> u.login().equals(this.unassignedUser.getLogin()));
+        assertTrue(enrolled, "Self-enrolled student should appear in the course student list");
+    }
+
+    @Test
+    void testStudentCanStartExerciseAndReceiveRepositoryAccess() throws ArtemisClientException {
+        ArtemisClient studentClient = ArtemisClient.fromUsernamePassword(
+                new ArtemisInstance(ARTEMIS_URL), this.studentLogin.getLogin(), this.studentPassword);
+        ArtemisConnection studentConnection = new ArtemisConnection(studentClient);
+
+        var studentCourse = studentConnection.getCourseById(this.course.getId());
+        var studentExercise = studentCourse.getProgrammingExerciseById(this.exercise.getId());
+
+        Participation participation = studentExercise.startParticipation();
+        String repositoryUrl = participation.getUserIndependentRepositoryUri().orElseThrow();
+
+        UserDTO.createVCSToken(ZonedDateTime.now().plusDays(7), studentClient);
+        User user = studentConnection.refreshAssessor();
+
+        assertNotNull(participation);
+        assertTrue(participation.getId() > 0L, "Participation id should be positive");
+        assertFalse(repositoryUrl.isBlank(), "Repository URL should not be blank");
+        assertTrue(user.getVcsAccessToken().isPresent(), "VCS token should exist after creation");
+        assertFalse(user.getVcsAccessToken().get().isBlank(), "VCS token should not be blank");
+    }
+
+    @Test
+    void testUserCanFindThemselves() throws ArtemisClientException {
+        var assessor = this.adminConnection.getAssessor();
+        var resolved = this.adminConnection.findUserByLogin(assessor.getLogin());
+
+        assertTrue(resolved.isPresent());
+        assertEquals(assessor.getId(), resolved.orElseThrow().getId());
+        assertEquals(assessor.getLogin(), resolved.orElseThrow().getLogin());
+    }
+
+    @Test
+    void testAdminCanListAllUsers() throws ArtemisClientException {
+        List<User> allUsers = this.adminConnection.getAllUsers();
+
+        assertNotNull(allUsers);
+        assertFalse(allUsers.isEmpty(), "There should be at least one user in the system");
+        for (User user : allUsers) {
+            assertNotNull(user.getLogin(), "User login should not be null");
+        }
     }
 }

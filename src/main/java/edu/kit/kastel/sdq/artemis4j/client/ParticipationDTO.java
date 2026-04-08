@@ -15,12 +15,62 @@ public record ParticipationDTO(
         @JsonProperty String participantIdentifier,
         @JsonProperty @Nullable String userIndependentRepositoryUri,
         @JsonProperty @Nullable String repositoryUri,
-        @JsonProperty List<ResultDTO> results) {
+        @JsonProperty @Nullable List<ResultDTO> results,
+        @JsonProperty @Nullable List<ProgrammingSubmissionDTO> submissions) {
 
     public static ParticipationDTO startExercise(ArtemisClient client, long exerciseId) throws ArtemisNetworkException {
         return ArtemisRequest.post()
                 .path(List.of("exercise", "exercises", exerciseId, "participations"))
                 .executeAndDecode(client, ParticipationDTO.class);
+    }
+
+    public static boolean hasResult(ArtemisClient client, long participationId) throws ArtemisNetworkException {
+        return ArtemisRequest.get()
+                .path(List.of("programming", "programming-exercise-participations", participationId, "has-result"))
+                .executeAndDecode(client, boolean.class);
+    }
+
+    public static void resetRepository(ArtemisClient client, long participationId, @Nullable Long gradedParticipationId)
+            throws ArtemisNetworkException {
+        ArtemisRequest.post()
+                .path(List.of(
+                        "programming", "programming-exercise-participations", participationId, "reset-repository"))
+                .param("gradedParticipationId", gradedParticipationId)
+                .execute(client);
+    }
+
+    public static Optional<ParticipationDTO> getParticipationWithLatestResult(
+            ArtemisClient client, long participationId) throws ArtemisNetworkException {
+        return ArtemisRequest.get()
+                .path(List.of(
+                        "programming",
+                        "programming-exercise-participations",
+                        participationId,
+                        "student-participation-with-latest-result-and-feedbacks"))
+                .executeAndDecodeMaybe(client, ParticipationDTO.class);
+    }
+
+    public static ParticipationDTO getParticipationWithAllResults(ArtemisClient client, long participationId)
+            throws ArtemisNetworkException {
+        return ArtemisRequest.get()
+                .path(List.of(
+                        "programming",
+                        "programming-exercise-participations",
+                        participationId,
+                        "student-participation-with-all-results"))
+                .executeAndDecode(client, ParticipationDTO.class);
+    }
+
+    public static void delete(ArtemisClient client, long participationId) throws ArtemisNetworkException {
+        ArtemisRequest.delete()
+                .path(List.of("exercise", "participations", participationId))
+                .execute(client);
+    }
+
+    public static void cleanupBuildPlan(ArtemisClient client, long participationId) throws ArtemisNetworkException {
+        ArtemisRequest.put()
+                .path(List.of("exercise", "participations", participationId, "cleanup-build-plan"))
+                .execute(client);
     }
 
     public static String getVcsAccessToken(ArtemisClient client, long participationId) throws ArtemisNetworkException {
@@ -32,20 +82,10 @@ public record ParticipationDTO(
     }
 
     public static List<ParticipationDTO> fetchForExercise(
-            ArtemisClient client, long exerciseId, boolean withLatestResults) throws ArtemisNetworkException {
+            ArtemisClient client, long exerciseId, boolean withLatestResult) throws ArtemisNetworkException {
         return Arrays.asList(ArtemisRequest.get()
                 .path(List.of("exercise", "exercises", exerciseId, "participations"))
-                .param("withLatestResults", withLatestResults)
+                .param("withLatestResults", withLatestResult)
                 .executeAndDecode(client, ParticipationDTO[].class));
-    }
-
-    public Optional<String> repositoryUrl() {
-        if (userIndependentRepositoryUri != null && !userIndependentRepositoryUri.isBlank()) {
-            return Optional.of(userIndependentRepositoryUri);
-        }
-        if (repositoryUri != null && !repositoryUri.isBlank()) {
-            return Optional.of(repositoryUri);
-        }
-        return Optional.empty();
     }
 }

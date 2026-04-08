@@ -1,9 +1,7 @@
 /* Licensed under EPL-2.0 2023-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,14 +10,16 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
-import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
@@ -27,6 +27,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
+import edu.kit.kastel.sdq.artemis4j.grading.Participation;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
@@ -64,10 +65,8 @@ class End2EndTest {
     void checkConfiguration() {
         Assertions.assertNotNull(INSTRUCTOR_USER);
         Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
-        Assertions.assertNotNull(STUDENT_USER);
         Assertions.assertNotNull(ARTEMIS_URL);
         Assertions.assertNotNull(COURSE_ID);
-        Assertions.assertNotNull(PROGRAMMING_EXERCISE_ID);
     }
 
     @BeforeEach
@@ -77,7 +76,7 @@ class End2EndTest {
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
 
         this.course = this.connection.getCourses().stream()
-                .filter(c -> c.getId() == Integer.parseInt(COURSE_ID))
+                .filter(c -> c.getId() == Long.parseLong(COURSE_ID))
                 .findFirst()
                 .orElseThrow();
         this.exercise = this.course.getProgrammingExercises().stream()
@@ -203,57 +202,45 @@ class End2EndTest {
     }
 
     @Test
-    void fetchLatestSubmissionWithResultsForUserIdReturnsSubmissionWithResultAndFeedback()
-            throws ArtemisClientException, ArtemisNetworkException {
+    void testFetchingLatestResultWithSubmission() throws ArtemisClientException {
         var student = this.programmingSubmission.getSubmission().getStudent().orElseThrow();
-        var latestSubmission = this.exercise.fetchLatestSubmissionFor(student.getId());
-        Assumptions.assumeTrue(
-                latestSubmission.isPresent(), "No latest submission with result available for configured student");
+        var participation = this.programmingSubmission.getSubmission().getParticipation();
+        assertNotNull(participation);
 
-        var submissionWithResults = latestSubmission.orElseThrow();
-        assertEquals(student.getLogin(), submissionWithResults.getSubmission().getParticipantIdentifier());
-        assertEquals(submissionWithResults.getSubmission().getCommitHash(), submissionWithResults.getCommitHash());
-        assertTrue(
-                submissionWithResults.getCommitHashForLatestResult().isPresent(),
-                "Expected commit hash for latest result");
-        assertEquals(
-                submissionWithResults.getSubmission().getCommitHash(),
-                submissionWithResults.getCommitHashForLatestResult().orElseThrow());
+        Assumptions.assumeTrue(participation.hasResult(), "Expected student to have at least one result");
+        var submissionWithResults =
+                participation.getLatestSubmissionWithResult().orElse(null);
+        assertNotNull(submissionWithResults);
+
+        assertEquals(student.getLogin(), submissionWithResults.getParticipantIdentifier());
 
         var latestResult = submissionWithResults.getLatestResult().orElseThrow();
         assertNotNull(latestResult.feedbacks(), "Expected detailed feedback list on latest result");
+        assertFalse(latestResult.feedbacks().isEmpty());
         assertTrue(
                 latestResult.feedbacks().stream().noneMatch(Objects::isNull),
                 "Feedback list must not contain null entries");
     }
 
     @Test
-    void fetchLatestSubmissionWithResultsForUnknownUserIdReturnsEmpty() throws ArtemisNetworkException {
-        var latestSubmission = this.exercise.fetchLatestSubmissionFor(Long.MAX_VALUE);
-        assertTrue(latestSubmission.isEmpty());
-    }
-
-    @Test
-    void fetchLatestResultForParticipationReturnsEmptyWhenArtemisRespondsWithEmptyBody()
-            throws ArtemisNetworkException {
+    void testFetchingLatestResultHandlesNoResult() throws ArtemisNetworkException {
         var participation = this.findParticipationWithoutLatestResult();
 
-        assertTrue(
+        Assumptions.assumeTrue(
                 participation.isPresent(),
                 "Expected a participation without a latest result on the configured Artemis instance");
 
-        var latestResult =
-                Assertions.assertDoesNotThrow(() -> ProgrammingSubmissionDTO.fetchLatestWithFeedbacksForParticipation(
-                        this.connection.getClient(), participation.orElseThrow().id()));
+        var latestResult = Assertions.assertDoesNotThrow(() -> ProgrammingSubmissionDTO.getLatestSubmissionWithResult(
+                this.connection.getClient(), participation.orElseThrow().getId()));
 
         assertTrue(latestResult.isEmpty(), "Expected Optional.empty() for Artemis' empty response body");
     }
 
-    private Optional<ParticipationDTO> findParticipationWithoutLatestResult() throws ArtemisNetworkException {
+    private Optional<Participation> findParticipationWithoutLatestResult() throws ArtemisNetworkException {
         for (ProgrammingExercise exercise : this.course.getProgrammingExercises()) {
-            for (ParticipationDTO participation :
-                    ParticipationDTO.fetchForExercise(this.connection.getClient(), exercise.getId(), true)) {
-                if (participation.student() != null && participation.results().isEmpty()) {
+            for (Participation participation : exercise.fetchAllParticipation()) {
+                if (participation.getStudent().isPresent()
+                        && participation.getResults().isEmpty()) {
                     return Optional.of(participation);
                 }
             }
@@ -269,7 +256,7 @@ class End2EndTest {
         try (var clonedSubmission = this.assessment.getSubmission().cloneViaVCSTokenInto(targetPath, null)) {
             Assertions.assertTrue(Files.exists(targetPath));
         }
-        Assertions.assertFalse(Files.exists(targetPath));
+        assertFalse(Files.exists(targetPath));
     }
 
     @Test
@@ -560,5 +547,24 @@ class End2EndTest {
             """);
 
         assertTrue(minimalGradingConfig.positiveFeedbackAllowed());
+    }
+
+    @Test
+    void testCourseRoleForCurrentConnectedUser() throws ArtemisClientException {
+        Map<String, Set<CourseRole>> roles = Map.ofEntries(
+                Map.entry(INSTRUCTOR_USER, Set.of(CourseRole.INSTRUCTOR)),
+                Map.entry(STUDENT_USER, Set.of(CourseRole.STUDENT)));
+
+        var connectedUser = this.connection.getAssessor().getLogin();
+
+        for (var entry : roles.entrySet()) {
+            assertEquals(entry.getValue(), this.course.getRoles(entry.getKey()));
+        }
+
+        if (!roles.containsKey(connectedUser)) {
+            assertFalse(this.course
+                    .getRoles(this.connection.getAssessor().getLogin())
+                    .isEmpty());
+        }
     }
 }

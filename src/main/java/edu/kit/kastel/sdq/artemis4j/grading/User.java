@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.time.ZonedDateTime;
@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
+import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a user in Artemis.
@@ -26,7 +27,7 @@ public class User {
         return this.dto.login();
     }
 
-    public String getLangKey() {
+    public @Nullable String getLangKey() {
         return this.dto.langKey();
     }
 
@@ -34,7 +35,7 @@ public class User {
      * Get the first name of the user.
      * @return the first name
      */
-    public String getFirstName() {
+    public @Nullable String getFirstName() {
         return this.dto.firstName();
     }
 
@@ -42,7 +43,7 @@ public class User {
      * Get the last name of the user.
      * @return the last name
      */
-    public String getLastName() {
+    public @Nullable String getLastName() {
         return this.dto.lastName();
     }
 
@@ -55,7 +56,12 @@ public class User {
     }
 
     public Optional<String> getGitSSHKey() {
-        return Optional.ofNullable(this.dto.sshPublicKey());
+        // TODO: This silently regressed, now on a different endpoint
+        return Optional.empty();
+    }
+
+    public Optional<String> getVcsAccessToken() {
+        return Optional.ofNullable(this.dto.vcsAccessToken());
     }
 
     public List<String> getGroups() {

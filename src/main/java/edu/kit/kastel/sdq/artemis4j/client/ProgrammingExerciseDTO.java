@@ -18,9 +18,10 @@ public record ProgrammingExerciseDTO(
         @JsonProperty String assessmentType,
         @JsonProperty double maxPoints,
         @JsonProperty ZonedDateTime dueDate,
-        @JsonProperty ZonedDateTime startDate) {
+        @JsonProperty ZonedDateTime startDate)
+        implements ExerciseDTO {
 
-    public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, int courseId)
+    public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, long courseId)
             throws ArtemisNetworkException {
         var exercises = ArtemisRequest.get()
                 .path(List.of("core", "courses", courseId, "with-exercises"))

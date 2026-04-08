@@ -82,48 +82,42 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
                 .toList();
     }
 
-    public Optional<ProgrammingSubmissionWithResults> fetchLatestSubmissionFor(long userId)
-            throws ArtemisNetworkException {
-        var client = this.getConnection().getClient();
+    /**
+     * Fetches all participation for this exercise. Each Participation will include the feedback and the latest result.
+     * If you know the participation id, consider using {@link ProgrammingExercise#findParticipationById}. The same restrictions
+     * mentioned in the docs regarding construction of {@link ProgrammingSubmissionWithResults} apply here too.
+     *
+     * @return a list of all participation in this exercise
+     * @throws ArtemisNetworkException if it failed to make the request or the user does not have the appropriate permissions.
+     */
+    public List<Participation> fetchAllParticipation() throws ArtemisNetworkException {
+        return ParticipationDTO.fetchForExercise(this.getConnection().getClient(), this.getId(), true).stream()
+                .map(dto -> new Participation(dto, this.getConnection(), this))
+                .toList();
+    }
 
-        var participations = ParticipationDTO.fetchForExercise(client, this.getId(), true);
-
-        var participation = participations.stream()
-                .filter(participationDTO -> participationDTO.student() != null
-                        && participationDTO.student().id() == userId)
-                .findAny();
-
-        if (participation.isEmpty()) {
-            // This is very slow, hence this is only a fallback
-            String userLogin = this.getConnection()
-                    .findUserById(userId)
-                    .map(User::getLogin)
-                    .orElse(null);
-            if (userLogin != null) {
-                participation = participations.stream()
-                        .filter(participationDTO -> userLogin.equals(participationDTO.participantIdentifier()))
-                        .findAny();
-            }
-
-            if (participation.isEmpty()) {
-                return Optional.empty();
-            }
-        }
-
-        var submission = ProgrammingSubmissionDTO.fetchLatestWithFeedbacksForParticipation(
-                client, participation.get().id());
-        if (submission.isEmpty()) {
-            return Optional.empty();
-        }
-
-        var submissionWithDetailedFeedbacks = ProgrammingSubmissionDTO.withDetailedFeedbacks(client, submission.get());
-        return Optional.of(
-                new ProgrammingSubmissionWithResults(new ProgrammingSubmission(submissionWithDetailedFeedbacks, this)));
+    /**
+     * Finds the participation with the given id.
+     * <p>
+     * The returned participation will contain the lastest result with feedback,
+     * but note that not all results of the participation are included. You should not
+     * build a {@link ProgrammingSubmissionWithResults} from this.
+     *
+     * @param id the id of the participation
+     * @return the participation or empty if it failed to find it
+     * @throws ArtemisNetworkException if it failed to make the request
+     */
+    public Optional<Participation> findParticipationById(long id) throws ArtemisNetworkException {
+        return ParticipationDTO.getParticipationWithLatestResult(
+                        this.getConnection().getClient(), id)
+                .map(dto -> new Participation(dto, this.getConnection(), this));
     }
 
     public Participation startParticipation() throws ArtemisNetworkException {
         return new Participation(
-                ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId()), this);
+                ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId()),
+                this.getConnection(),
+                this);
     }
 
     public List<PackedAssessment> fetchMyAssessments() throws ArtemisNetworkException {

@@ -2,16 +2,23 @@
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Set;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.CourseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.UserPublicInfoDTO;
 import org.jspecify.annotations.Nullable;
 
 /**
@@ -27,6 +34,23 @@ public class Course extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercises = new LazyNetworkValue<>(() -> {
+            // Students do not have permission to use the other endpoint, so they are handled here:
+            if (this.isStudent(this.getConnection().getAssessor())) {
+                List<Exercise> exercises = new ArrayList<>();
+
+                for (ExerciseDTO exerciseDTO :
+                        this.dto.exercises() == null ? new ArrayList<ExerciseDTO>() : this.dto.exercises()) {
+                    exercises.add(
+                            switch (exerciseDTO) {
+                                case ProgrammingExerciseDTO programmingExerciseDTO ->
+                                    new ProgrammingExercise(programmingExerciseDTO, this);
+                                case TextExerciseDTO textExerciseDTO -> new TextExercise(textExerciseDTO, this);
+                            });
+                }
+
+                return exercises;
+            }
+
             List<Exercise> result =
                     new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
                             .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this))
@@ -49,11 +73,54 @@ public class Course extends ArtemisConnectionHolder {
      * @param user the user to check
      * @return true if the user is an instructor, false otherwise
      */
-    public boolean isInstructor(@Nullable User user) {
-        return user != null && user.getGroups().contains(this.dto.instructorGroupName());
+    public boolean isInstructor(@Nullable User user) throws ArtemisNetworkException {
+        return user != null && this.getRoles(user.getLogin()).contains(CourseRole.INSTRUCTOR);
     }
 
-    public int getId() {
+    public boolean isStudent(@Nullable User user) throws ArtemisNetworkException {
+        return user != null && this.getRoles(user.getLogin()).contains(CourseRole.STUDENT);
+    }
+
+    public Set<CourseRole> getRoles(String userLogin) throws ArtemisNetworkException {
+        return this.findUserByLogin(userLogin)
+                .map(user -> user.toDTO().getRoles(this.dto))
+                .orElse(Set.of());
+    }
+
+    public Optional<User> findUserByLogin(String login) throws ArtemisNetworkException {
+        var currentUser = this.getConnection().getAssessor();
+        if (login.equals(currentUser.getLogin())) {
+            return Optional.of(currentUser);
+        }
+
+        for (var publicUserInfo : this.searchUser(login, EnumSet.allOf(CourseRole.class))) {
+            if (publicUserInfo.login().equals(login)) {
+                return Optional.of(new User(publicUserInfo.toUserDTO(this.dto)));
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    /**
+     * This endpoint will search for users with the given login or name in this course and filters them by the given roles.
+     * <p>
+     * Technically this endpoint can return pages of results, but it is a bit broken, so it always returns the first page.
+     * Effectively the results are limited to the first 25 users matching the search criteria.
+     *
+     * @param loginOrName the login or name of the user, note that searching by user id is not possible
+     * @param roles the roles to filter by, must not be empty. If you want to search in all roles, use {@link CourseRole#values}.
+     * @return a list of users matching the search criteria
+     *
+     * @throws ArtemisNetworkException if something went wrong while making the request
+     */
+    public List<UserPublicInfoDTO> searchUser(String loginOrName, Collection<CourseRole> roles)
+            throws ArtemisNetworkException {
+        return CourseDTO.searchUsers(
+                this.getConnection().getClient(), this.getId(), loginOrName, this.dto.mapToGroupNames(roles));
+    }
+
+    public long getId() {
         return this.dto.id();
     }
 
@@ -131,6 +198,18 @@ public class Course extends ArtemisConnectionHolder {
         CourseDTO.assignUserToCourse(client, courseId, userLogin, role);
     }
 
+    public List<User> fetchAllStudents() throws ArtemisNetworkException {
+        return CourseDTO.fetchAllStudents(this.getConnection().getClient(), this.getId()).stream()
+                .map(User::new)
+                .toList();
+    }
+
+    public List<User> fetchAllTutors() throws ArtemisNetworkException {
+        return CourseDTO.fetchAllTutors(this.getConnection().getClient(), this.getId()).stream()
+                .map(User::new)
+                .toList();
+    }
+
     public ProgrammingExercise createProgrammingExercise(ProgrammingExerciseCreateDTO exerciseCreateDTO)
             throws ArtemisNetworkException {
         return this.createProgrammingExercise(exerciseCreateDTO, false);
@@ -155,7 +234,7 @@ public class Course extends ArtemisConnectionHolder {
     }
 
     public int getNumberOfStudents() {
-        return this.dto.numberOfStudents();
+        return Objects.requireNonNull(this.dto.numberOfStudents(), "Number of students in the course is null");
     }
 
     @Override

@@ -17,7 +17,7 @@ public record ProgrammingSubmissionDTO(
         @JsonProperty @Nullable ParticipationDTO participation,
         @JsonProperty String commitHash,
         @JsonProperty boolean buildFailed,
-        @JsonProperty @Nullable List<ResultDTO> results,
+        @JsonProperty @Nullable List<@Nullable ResultDTO> results,
         @JsonProperty ZonedDateTime submissionDate) {
     /**
      * Fetch all programming submissions for an exercise.
@@ -74,7 +74,7 @@ public record ProgrammingSubmissionDTO(
                 .execute(client);
     }
 
-    public static Optional<ProgrammingSubmissionDTO> fetchLatestWithFeedbacksForParticipation(
+    public static Optional<ProgrammingSubmissionDTO> getLatestSubmissionWithResult(
             ArtemisClient client, long participationId) throws ArtemisNetworkException {
         return ArtemisRequest.get()
                 .path(List.of(
@@ -98,43 +98,6 @@ public record ProgrammingSubmissionDTO(
                             List.of(result.toResultDTO()),
                             submission.submissionDate()));
                 });
-    }
-
-    public static ProgrammingSubmissionDTO withDetailedFeedbacks(
-            ArtemisClient client, ProgrammingSubmissionDTO submission) throws ArtemisNetworkException {
-        if (submission.results() == null || submission.results().isEmpty()) {
-            return submission;
-        }
-
-        var detailedResults = new ArrayList<ResultDTO>(submission.results().size());
-        for (var result : submission.results()) {
-            if (result == null) {
-                continue;
-            }
-
-            var feedbacks = ResultDTO.fetchDetailedFeedbacks(
-                    client, result.id(), submission.participation().id(), result.feedbacks());
-            detailedResults.add(new ResultDTO(
-                    result.id(),
-                    result.completionDate(),
-                    result.successful(),
-                    result.score(),
-                    result.rated(),
-                    feedbacks,
-                    result.assessor(),
-                    result.assessmentType(),
-                    result.testCaseCount(),
-                    result.passedTestCaseCount(),
-                    result.codeIssueCount()));
-        }
-
-        return new ProgrammingSubmissionDTO(
-                submission.id(),
-                submission.participation(),
-                submission.commitHash(),
-                submission.buildFailed(),
-                detailedResults,
-                submission.submissionDate());
     }
 
     public List<ResultDTO> nonAutomaticResults() {

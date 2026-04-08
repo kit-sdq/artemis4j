@@ -7,6 +7,15 @@ import edu.kit.kastel.sdq.artemis4j.client.AssessmentType;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import org.jspecify.annotations.Nullable;
 
+/**
+ * This represents a submission which has {@link ResultDTO}s.
+ * <p>
+ * A {@link ResultDTO} is an assessment of a submission, created
+ * automatically by artemis or manually by a tutor. A submission can have
+ * multiple results, for example one automatic result (created by artemis ci),
+ * one result for the first grading round and another one for the second grading
+ * round.
+ */
 public class ProgrammingSubmissionWithResults {
     private final ProgrammingSubmission submission;
     private final @Nullable ResultDTO automaticResult;
@@ -49,18 +58,6 @@ public class ProgrammingSubmissionWithResults {
 
     public Optional<ResultDTO> getAutomaticResult() {
         return Optional.ofNullable(automaticResult);
-    }
-
-    public Optional<ResultDTO> getLatestResult() {
-        return submission.getLatestResult();
-    }
-
-    public String getCommitHash() {
-        return this.submission.getCommitHash();
-    }
-
-    public Optional<String> getCommitHashForLatestResult() {
-        return this.getLatestResult().map(ignored -> this.getCommitHash());
     }
 
     public boolean isFirstRoundStarted() {
