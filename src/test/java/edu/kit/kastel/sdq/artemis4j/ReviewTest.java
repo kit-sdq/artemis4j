@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -40,11 +40,11 @@ class ReviewTest {
         ArtemisInstance artemis = new ArtemisInstance(ARTEMIS_URL);
         ArtemisConnection connection =
                 ArtemisConnection.connectWithUsernamePassword(artemis, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
-        Course course = connection.getCourseById(Integer.parseInt(COURSE_ID));
-        Exam exam = course.getExamById(Integer.parseInt(EXAM_ID));
-        ExamExerciseGroup exerciseGroup = exam.getExerciseGroupById(Integer.parseInt(EXERCISE_GROUP_ID));
+        Course course = connection.getCourseById(Long.parseLong(COURSE_ID));
+        Exam exam = course.getExamById(Long.parseLong(EXAM_ID));
+        ExamExerciseGroup exerciseGroup = exam.getExerciseGroupById(Long.parseLong(EXERCISE_GROUP_ID));
         ProgrammingExercise exercise =
-                exerciseGroup.getProgrammingExerciseById(Integer.parseInt(PROGRAMMING_EXERCISE_ID));
+                exerciseGroup.getProgrammingExerciseById(Long.parseLong(PROGRAMMING_EXERCISE_ID));
 
         GradingConfig config =
                 GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), exercise);
