@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.time.ZonedDateTime;
@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
@@ -79,6 +80,44 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return ProgrammingSubmissionDTO.fetchAll(this.getConnection().getClient(), this.getId(), 0, false).stream()
                 .map(dto -> new ProgrammingSubmissionWithResults(new ProgrammingSubmission(dto, this)))
                 .toList();
+    }
+
+    /**
+     * Fetches all participation for this exercise. Each Participation will include the feedback and the latest result.
+     * If you know the participation id, consider using {@link ProgrammingExercise#findParticipationById}. The same restrictions
+     * mentioned in the docs regarding construction of {@link ProgrammingSubmissionWithResults} apply here too.
+     *
+     * @return a list of all participation in this exercise
+     * @throws ArtemisNetworkException if it failed to make the request or the user does not have the appropriate permissions.
+     */
+    public List<Participation> fetchAllParticipation() throws ArtemisNetworkException {
+        return ParticipationDTO.fetchForExercise(this.getConnection().getClient(), this.getId(), true).stream()
+                .map(dto -> new Participation(dto, this.getConnection(), this))
+                .toList();
+    }
+
+    /**
+     * Finds the participation with the given id.
+     * <p>
+     * The returned participation will contain the lastest result with feedback,
+     * but note that not all results of the participation are included. You should not
+     * build a {@link ProgrammingSubmissionWithResults} from this.
+     *
+     * @param id the id of the participation
+     * @return the participation or empty if it failed to find it
+     * @throws ArtemisNetworkException if it failed to make the request
+     */
+    public Optional<Participation> findParticipationById(long id) throws ArtemisNetworkException {
+        return ParticipationDTO.getParticipationWithLatestResult(
+                        this.getConnection().getClient(), id)
+                .map(dto -> new Participation(dto, this.getConnection(), this));
+    }
+
+    public Participation startParticipation() throws ArtemisNetworkException {
+        return new Participation(
+                ParticipationDTO.startExercise(this.getConnection().getClient(), this.getId()),
+                this.getConnection(),
+                this);
     }
 
     public List<PackedAssessment> fetchMyAssessments() throws ArtemisNetworkException {

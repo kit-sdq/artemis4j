@@ -1,8 +1,7 @@
-/* Licensed under EPL-2.0 2023-2025. */
+/* Licensed under EPL-2.0 2023-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.junit.jupiter.api.Assertions.*;
 
 import java.io.IOException;
 import java.nio.file.Files;
@@ -11,10 +10,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
+import java.util.Set;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
@@ -60,10 +63,8 @@ class End2EndTest {
     void checkConfiguration() {
         Assertions.assertNotNull(INSTRUCTOR_USER);
         Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
-        Assertions.assertNotNull(STUDENT_USER);
         Assertions.assertNotNull(ARTEMIS_URL);
         Assertions.assertNotNull(COURSE_ID);
-        Assertions.assertNotNull(PROGRAMMING_EXERCISE_ID);
     }
 
     @BeforeEach
@@ -73,7 +74,7 @@ class End2EndTest {
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
 
         this.course = this.connection.getCourses().stream()
-                .filter(c -> c.getId() == Integer.parseInt(COURSE_ID))
+                .filter(c -> c.getId() == Long.parseLong(COURSE_ID))
                 .findFirst()
                 .orElseThrow();
         this.exercise = this.course.getProgrammingExercises().stream()
@@ -199,13 +200,34 @@ class End2EndTest {
     }
 
     @Test
+    void testFetchingLatestResultWithSubmission() throws ArtemisClientException {
+        var student = this.programmingSubmission.getSubmission().getStudent().orElseThrow();
+        var participation = this.programmingSubmission.getSubmission().getParticipation();
+        assertNotNull(participation);
+
+        Assumptions.assumeTrue(participation.hasResult(), "Expected student to have at least one result");
+        var submissionWithResults =
+                participation.getLatestSubmissionWithResult().orElse(null);
+        assertNotNull(submissionWithResults);
+
+        assertEquals(student.getLogin(), submissionWithResults.getParticipantIdentifier());
+
+        var latestResult = submissionWithResults.getLatestResult().orElseThrow();
+        assertNotNull(latestResult.feedbacks(), "Expected detailed feedback list on latest result");
+        assertFalse(latestResult.feedbacks().isEmpty());
+        assertTrue(
+                latestResult.feedbacks().stream().noneMatch(Objects::isNull),
+                "Feedback list must not contain null entries");
+    }
+
+    @Test
     void testCloningViaVCSToken() throws ArtemisClientException {
         var targetPath = Path.of("cloned_code");
 
         try (var clonedSubmission = this.assessment.getSubmission().cloneViaVCSTokenInto(targetPath, null)) {
             Assertions.assertTrue(Files.exists(targetPath));
         }
-        Assertions.assertFalse(Files.exists(targetPath));
+        assertFalse(Files.exists(targetPath));
     }
 
     @Test
@@ -487,8 +509,7 @@ class End2EndTest {
      */
     @Test
     void testPositiveFeedbackAllowedByDefault() throws ArtemisClientException {
-        var minimalGradingConfig = GradingConfig.readDTOFromString(
-                """
+        var minimalGradingConfig = GradingConfig.readDTOFromString("""
             {
                 "shortName": "E2E",
                 "ratingGroups": [],
@@ -497,5 +518,23 @@ class End2EndTest {
             """);
 
         assertTrue(minimalGradingConfig.positiveFeedbackAllowed());
+    }
+
+    @Test
+    void testCourseRoleForCurrentConnectedUser() throws ArtemisClientException {
+        Map<String, Set<CourseRole>> roles = Map.ofEntries(
+                Map.entry(INSTRUCTOR_USER, Set.of(CourseRole.INSTRUCTOR)), Map.entry(STUDENT_USER, Set.of()));
+
+        var connectedUser = this.connection.getAssessor().getLogin();
+
+        for (var entry : roles.entrySet()) {
+            assertEquals(entry.getValue(), this.course.getRoles(entry.getKey()));
+        }
+
+        if (!roles.containsKey(connectedUser)) {
+            assertFalse(this.course
+                    .getRoles(this.connection.getAssessor().getLogin())
+                    .isEmpty());
+        }
     }
 }

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2025. */
+/* Licensed under EPL-2.0 2025-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
@@ -70,7 +70,7 @@ class SubgroupTest {
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
 
         this.course = this.connection.getCourses().stream()
-                .filter(c -> c.getId() == Integer.parseInt(COURSE_ID))
+                .filter(c -> c.getId() == Long.parseLong(COURSE_ID))
                 .findFirst()
                 .orElseThrow();
         this.exercise = this.course.getProgrammingExercises().stream()
@@ -102,8 +102,7 @@ class SubgroupTest {
      */
     @Test
     void testSubgroupWithoutParent() {
-        var configString =
-                """
+        var configString = """
                         {
                             "shortName": "E2E",
                             "positiveFeedbackAllowed": true,
@@ -147,8 +146,7 @@ class SubgroupTest {
      */
     @Test
     void testNestedSubgroup() {
-        var configString =
-                """
+        var configString = """
                         {
                             "shortName": "E2E",
                             "positiveFeedbackAllowed": true,
