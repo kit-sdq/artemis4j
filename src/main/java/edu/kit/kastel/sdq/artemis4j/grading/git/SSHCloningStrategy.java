@@ -1,8 +1,9 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading.git;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.time.ZonedDateTime;
 import java.util.Optional;
 
 import javax.swing.*;
@@ -33,8 +34,16 @@ public class SSHCloningStrategy implements CloningStrategy {
 
     public SSHCloningStrategy(ArtemisConnection connection)
             throws ArtemisNetworkException, UnsupportedCloningStrategyException {
-        if (connection.getAssessor().getGitSSHKey().isEmpty()) {
+        var keys = connection.listAssessorPublicKeys();
+        if (keys.isEmpty()) {
             throw new UnsupportedCloningStrategyException("Cannot clone via SSH - no SSH key set");
+        }
+
+        boolean hasValidKey = keys.stream().anyMatch(key -> key.getExpirationDate()
+                .map(date -> ZonedDateTime.now().isBefore(date))
+                .orElse(true));
+        if (!hasValidKey) {
+            throw new UnsupportedCloningStrategyException("Cannot clone via SSH - all SSH keys are expired");
         }
 
         if (connection.getManagementInfo().sshCloneURLTemplate() == null) {
