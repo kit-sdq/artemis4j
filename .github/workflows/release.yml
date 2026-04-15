@@ -41,7 +41,7 @@ jobs:
         echo "# Commits since last release" > CHANGELOG.txt
         echo "$DIFF" | sed 's/^/* /' | sed '/Auto-Update Dependencies/{s/Updated\|Updating/\n\t* Updated/g}' | sed '/\[maven-release-plugin\]/d' | sed '/Merge branch/d' | sed '/Prepare for next development cycle/d' | sed -r '/.*\(#\w+\)$/d' >> CHANGELOG.txt
         
-    - uses: softprops/action-gh-release@v2
+    - uses: softprops/action-gh-release@v3
       with:
         body_path: CHANGELOG.txt
         generate_release_notes: true
