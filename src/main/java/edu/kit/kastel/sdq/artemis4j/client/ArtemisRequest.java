@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.HashMap;
@@ -8,6 +8,7 @@ import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import okhttp3.Request;
+import org.jspecify.annotations.Nullable;
 
 public class ArtemisRequest {
     private final String method;
@@ -61,8 +62,8 @@ public class ArtemisRequest {
         return this;
     }
 
-    public ArtemisRequest param(String key, Object value) {
-        this.requestParams.put(key, value);
+    public ArtemisRequest param(String key, @Nullable Object value) {
+        this.requestParams.put(key, value == null ? "" : value);
         return this;
     }
 

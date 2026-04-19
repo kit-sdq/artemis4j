@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import java.util.ArrayList;
@@ -41,7 +41,7 @@ class UtilitiesTest {
     @Test
     void toggleExams() throws ArtemisClientException {
         Assertions.assertNotNull(courseId);
-        int courseId = Integer.parseInt(this.courseId);
+        long courseId = Long.parseLong(this.courseId);
         Assertions.assertNotNull(examId);
         long examId = Long.parseLong(this.examId);
 
@@ -70,7 +70,7 @@ class UtilitiesTest {
     @Test
     void markMandatoryFailedAsFailed() throws ArtemisClientException {
         Assertions.assertNotNull(courseId);
-        int courseId = Integer.parseInt(this.courseId);
+        long courseId = Long.parseLong(this.courseId);
         Assertions.assertNotNull(examId);
         long examId = Long.parseLong(this.examId);
 
@@ -119,7 +119,7 @@ class UtilitiesTest {
         Assertions.assertNotNull(username);
         Assertions.assertNotNull(password);
         Assertions.assertNotNull(courseId);
-        int courseId = Integer.parseInt(this.courseId);
+        long courseId = Long.parseLong(this.courseId);
 
         var tutors = CourseDTO.fetchAllTutors(client, courseId);
         for (var tutor : tutors) {
