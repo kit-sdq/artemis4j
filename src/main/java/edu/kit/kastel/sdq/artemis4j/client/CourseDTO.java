@@ -92,24 +92,12 @@ public record CourseDTO(
 
     private record CourseForDashboardDTO(@JsonProperty CourseDTO course) {}
 
-    public static @Nullable CourseDTO createCourse(
-            ArtemisClient client,
-            CourseCreateDTO courseCreateDTO,
-            byte @Nullable [] courseIcon,
-            @Nullable String filename,
-            @Nullable String mediaType)
+    public static @Nullable CourseDTO createCourse(ArtemisClient client, CourseCreateDTO courseCreateDTO)
             throws ArtemisNetworkException {
         RequestBody courseBody = ArtemisClient.encodeJSON(courseCreateDTO);
         var multipartBuilder = new MultipartBody.Builder()
                 .setType(MultipartBody.FORM)
                 .addFormDataPart("course", "course.json", courseBody);
-
-        if (courseIcon != null && courseIcon.length > 0) {
-            var iconType = mediaType != null ? mediaType : "application/octet-stream";
-            var iconName = filename != null && !filename.isBlank() ? filename : "course-icon.bin";
-            multipartBuilder.addFormDataPart(
-                    "file", iconName, RequestBody.create(courseIcon, okhttp3.MediaType.get(iconType)));
-        }
 
         var request = new Request.Builder()
                 .url(client.getInstance().url(List.of("core", "admin", "courses"), null))

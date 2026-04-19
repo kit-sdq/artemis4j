@@ -15,7 +15,6 @@ import edu.kit.kastel.sdq.artemis4j.client.ManagementInfoDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserCreateDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserDTO;
 import edu.kit.kastel.sdq.artemis4j.client.UserSshPublicKeyDTO;
-import org.jspecify.annotations.Nullable;
 
 /**
  * Represents a connection to Artemis, holding the client and providing access
@@ -144,17 +143,12 @@ public final class ArtemisConnection {
     }
 
     /**
-     * Creates a course with an optional icon for the course.
+     * Creates a course.
      * <p>
      * Note that this requires admin permissions.
      */
-    public Course createCourse(
-            CourseCreateDTO courseCreateDTO,
-            byte @Nullable [] courseIcon,
-            @Nullable String filename,
-            @Nullable String mediaType)
-            throws ArtemisNetworkException {
-        CourseDTO created = CourseDTO.createCourse(this.client, courseCreateDTO, courseIcon, filename, mediaType);
+    public Course createCourse(CourseCreateDTO courseCreateDTO) throws ArtemisNetworkException {
+        CourseDTO created = CourseDTO.createCourse(this.client, courseCreateDTO);
         if (created == null) {
             throw new IllegalStateException("Failed to create course for " + courseCreateDTO);
         }

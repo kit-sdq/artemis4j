@@ -81,8 +81,7 @@ class AdminTest {
         String courseShortName = "a4j" + suffix;
         String courseTitle = "Artemis4J Test Course " + suffix;
 
-        this.course = this.adminConnection.createCourse(
-                CourseCreateDTO.minimal(courseTitle, courseShortName), null, null, null);
+        this.course = this.adminConnection.createCourse(CourseCreateDTO.minimal(courseTitle, courseShortName));
 
         assertTrue(this.course.getId() > 0L, "Expected a course id");
         assertEquals(courseTitle, this.course.getTitle());
@@ -92,7 +91,6 @@ class AdminTest {
 
         var advancedBuildConfig = new ProgrammingExerciseBuildConfigCreateDTO(
                 true,
-                null,
                 "version: 2\nplan:\n  project-key: PLACEHOLDER\n",
                 "#!/usr/bin/env bash\nset -e\necho 'running advanced build options'\n",
                 false,
@@ -101,7 +99,6 @@ class AdminTest {
                 "solution",
                 180,
                 "{\"memory\":512,\"cpuCount\":1}",
-                null,
                 true,
                 "main|release/.*");
 

@@ -9,7 +9,6 @@ import org.jspecify.annotations.Nullable;
  */
 public record ProgrammingExerciseBuildConfigCreateDTO(
         @JsonProperty @Nullable Boolean sequentialTestRuns,
-        @JsonProperty @Nullable String branch,
         @JsonProperty @Nullable String buildPlanConfiguration,
         @JsonProperty @Nullable String buildScript,
         @JsonProperty boolean checkoutSolutionRepository,
@@ -18,12 +17,11 @@ public record ProgrammingExerciseBuildConfigCreateDTO(
         @JsonProperty @Nullable String solutionCheckoutPath,
         @JsonProperty int timeoutSeconds,
         @JsonProperty @Nullable String dockerFlags,
-        @JsonProperty @Nullable String theiaImage,
         @JsonProperty boolean allowBranching,
         @JsonProperty @Nullable String branchRegex) {
 
     public static ProgrammingExerciseBuildConfigCreateDTO defaults() {
         return new ProgrammingExerciseBuildConfigCreateDTO(
-                false, null, null, null, false, null, null, null, 120, null, null, false, ".*");
+                null, null, null, false, null, null, null, 120, null, false, ".*");
     }
 }
