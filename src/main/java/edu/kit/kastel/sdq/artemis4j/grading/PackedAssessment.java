@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2025. */
+/* Licensed under EPL-2.0 2025-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.Optional;
