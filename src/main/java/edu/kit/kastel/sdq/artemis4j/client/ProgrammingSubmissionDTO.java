@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -14,10 +14,10 @@ import org.jspecify.annotations.Nullable;
 
 public record ProgrammingSubmissionDTO(
         @JsonProperty long id,
-        @JsonProperty ParticipationDTO participation,
+        @JsonProperty @Nullable ParticipationDTO participation,
         @JsonProperty String commitHash,
         @JsonProperty boolean buildFailed,
-        @JsonProperty @Nullable List<ResultDTO> results,
+        @JsonProperty @Nullable List<@Nullable ResultDTO> results,
         @JsonProperty ZonedDateTime submissionDate) {
     /**
      * Fetch all programming submissions for an exercise.
@@ -74,6 +74,32 @@ public record ProgrammingSubmissionDTO(
                 .execute(client);
     }
 
+    public static Optional<ProgrammingSubmissionDTO> getLatestSubmissionWithResult(
+            ArtemisClient client, long participationId) throws ArtemisNetworkException {
+        return ArtemisRequest.get()
+                .path(List.of(
+                        "programming",
+                        "programming-exercise-participations",
+                        participationId,
+                        "latest-result-with-feedbacks"))
+                .param("withSubmission", true)
+                .executeAndDecodeMaybe(client, ResultWithSubmissionDTO.class)
+                .flatMap(result -> {
+                    var submission = result.submission();
+                    if (submission == null) {
+                        return Optional.empty();
+                    }
+
+                    return Optional.of(new ProgrammingSubmissionDTO(
+                            submission.id(),
+                            submission.participation(),
+                            submission.commitHash(),
+                            submission.buildFailed(),
+                            List.of(result.toResultDTO()),
+                            submission.submissionDate()));
+                });
+    }
+
     public List<ResultDTO> nonAutomaticResults() {
         if (this.results == null) {
             return List.of();
@@ -82,5 +108,35 @@ public record ProgrammingSubmissionDTO(
         return this.results().stream()
                 .filter(r -> r != null && r.assessmentType() != AssessmentType.AUTOMATIC)
                 .toList();
+    }
+
+    private record ResultWithSubmissionDTO(
+            @JsonProperty long id,
+            @JsonProperty @Nullable ZonedDateTime completionDate,
+            @JsonProperty Boolean successful,
+            @JsonProperty double score,
+            @JsonProperty Boolean rated,
+            @JsonProperty List<FeedbackDTO> feedbacks,
+            @JsonProperty @Nullable UserDTO assessor,
+            @JsonProperty AssessmentType assessmentType,
+            @JsonProperty int testCaseCount,
+            @JsonProperty int passedTestCaseCount,
+            @JsonProperty int codeIssueCount,
+            @JsonProperty @Nullable ProgrammingSubmissionDTO submission) {
+
+        private ResultDTO toResultDTO() {
+            return new ResultDTO(
+                    id,
+                    completionDate,
+                    successful,
+                    score,
+                    rated,
+                    feedbacks,
+                    assessor,
+                    assessmentType,
+                    testCaseCount,
+                    passedTestCaseCount,
+                    codeIssueCount);
+        }
     }
 }

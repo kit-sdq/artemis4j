@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2023-2025. */
+/* Licensed under EPL-2.0 2023-2026. */
 package edu.kit.kastel.sdq.artemis4j;
 
 import java.util.List;
@@ -52,7 +52,7 @@ class TextTest {
                 this.artemisInstance, INSTRUCTOR_USER, INSTRUCTOR_PASSWORD);
 
         this.course = this.connection.getCourses().stream()
-                .filter(c -> c.getId() == Integer.parseInt(COURSE_ID))
+                .filter(c -> c.getId() == Long.parseLong(COURSE_ID))
                 .findFirst()
                 .orElseThrow();
         this.textExercise = this.course.getTextExercises().stream()
