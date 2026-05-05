@@ -9,6 +9,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
@@ -390,7 +391,9 @@ class SubgroupTest {
             feedbackTexts.add(feedbackDTO.detailText());
         }
 
-        assertEquals(
+        Collections.sort(feedbackTexts);
+
+        List<String> expectedFeedbackTexts = new ArrayList<>(
                 List.of(
                         // other feedback is 5 annotations in MergeSort and 5 in Client that should be merged
                         "[Funktionalität:Sichtbarkeit] Die Sichtbarkeit ist nicht korrekt\nExplanation: Other Feedback 0",
@@ -407,7 +410,9 @@ class SubgroupTest {
                         // feedbacks where only the last has a message:
                         "[Funktionalität:Unused Element] Das Element wird nicht verwendet",
                         "[Funktionalität:Unused Element] Das Element wird nicht verwendet",
-                        "[Funktionalität:Unused Element] Das Element wird nicht verwendet\nExplanation: Has used last annotation for message. Weitere Probleme in L12."),
-                feedbackTexts);
+                        "[Funktionalität:Unused Element] Das Element wird nicht verwendet\nExplanation: Has used last annotation for message. Weitere Probleme in L12."));
+        Collections.sort(expectedFeedbackTexts);
+
+        assertEquals(expectedFeedbackTexts, feedbackTexts);
     }
 }

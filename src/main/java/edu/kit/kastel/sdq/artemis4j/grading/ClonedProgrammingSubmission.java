@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.io.IOException;
@@ -109,6 +109,10 @@ public class ClonedProgrammingSubmission implements AutoCloseable {
     }
 
     private static void deleteDirectory(Path path) throws IOException {
+        if (!Files.exists(path)) {
+            return;
+        }
+
         try (var dirStream = Files.walk(path)) {
             var filesInDirectory = dirStream
                     .map(Path::toFile)
