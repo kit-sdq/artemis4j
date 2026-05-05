@@ -53,7 +53,7 @@ public class ArtemisClient {
 
         var payload = ArtemisClient.encodeJSON(new AuthenticationDTO(username, password));
         var request = new Request.Builder()
-                .url(artemis.url(List.of("core", "public", "authenticate"), null))
+                .url(artemis.url(List.of("core", "public", "authenticate"), null, false))
                 .post(payload)
                 .build();
 

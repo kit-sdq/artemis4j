@@ -22,6 +22,9 @@ public record CourseCreateDTO(
         @JsonProperty int maxRequestMoreFeedbackTimeDays,
         @JsonProperty int maxComplaintTextLimit,
         @JsonProperty int maxComplaintResponseTextLimit,
+        @JsonProperty boolean testCourse,
+        @JsonProperty @Nullable Integer accuracyOfScores,
+        @JsonProperty boolean restrictedAthenaModulesAccess,
         @JsonProperty @Nullable Boolean enrollmentEnabled,
         @JsonProperty boolean unenrollmentEnabled,
         @JsonProperty boolean learningPathsEnabled,
@@ -34,7 +37,7 @@ public record CourseCreateDTO(
      */
     public static CourseCreateDTO minimal(String title, String shortName) {
         return new CourseCreateDTO(
-                title, shortName, null, null, null, null, null, null, null, null, 7, 7, 2000, 2000, null, false, false,
-                false, null, null);
+                title, shortName, null, null, null, null, null, null, null, null, 7, 7, 2000, 2000, true, 1, false,
+                null, false, false, false, null, null);
     }
 }
