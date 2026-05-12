@@ -53,7 +53,7 @@
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
     <spotless.version>3.4.0</spotless.version>
-    <slf4j.version>2.0.17</slf4j.version>
+    <slf4j.version>2.0.18</slf4j.version>
     <autograder.version>0.8.4</autograder.version>
     <jgit.version>7.6.0.202603022253-r</jgit.version>
     <junit.version>6.1.0-RC1</junit.version>
