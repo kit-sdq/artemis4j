@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading.autograder;
 
 import java.io.IOException;
@@ -78,7 +78,7 @@ public final class AutograderRunner {
 
             var problems = autograder.checkFileFallible(
                     submission.getSubmissionSourcePath(),
-                    JavaVersion.JAVA_21,
+                    JavaVersion.latest(),
                     checkConfiguration,
                     statusConsumerWrapper,
                     failureConsumer);
