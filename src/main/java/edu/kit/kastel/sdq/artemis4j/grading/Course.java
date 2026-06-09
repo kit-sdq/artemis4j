@@ -35,8 +35,11 @@ public class Course extends ArtemisConnectionHolder {
 
         this.dto = dto;
         this.exercises = new LazyNetworkValue<>(() -> {
+            var user = this.getConnection().getAssessor();
+            var roles = this.getRoles(user.getLogin());
+
             // Students do not have permission to use the other endpoint, so they are handled here:
-            if (this.isStudent(this.getConnection().getAssessor())) {
+            if (Set.of(CourseRole.STUDENT).equals(roles)) {
                 List<Exercise> exercises = new ArrayList<>();
 
                 for (ExerciseDTO exerciseDTO :
@@ -52,6 +55,10 @@ public class Course extends ArtemisConnectionHolder {
                 }
 
                 return exercises;
+            }
+
+            if (roles.isEmpty()) {
+                return List.of();
             }
 
             List<Exercise> result =
