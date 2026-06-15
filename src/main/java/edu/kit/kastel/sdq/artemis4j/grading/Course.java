@@ -97,6 +97,10 @@ public class Course extends ArtemisConnectionHolder {
                 .orElse(Set.of());
     }
 
+    public Set<CourseRole> getRoles(UserIdentifier userIdentifier) throws ArtemisNetworkException {
+        return this.getRoles(userIdentifier.login());
+    }
+
     public Optional<User> findUserByLogin(String login) throws ArtemisNetworkException {
         var currentUser = this.getConnection().getAssessor();
         if (login.equals(currentUser.getLogin())) {
@@ -110,6 +114,10 @@ public class Course extends ArtemisConnectionHolder {
         }
 
         return Optional.empty();
+    }
+
+    public Optional<User> findUserByUserIdentifier(UserIdentifier userIdentifier) throws ArtemisNetworkException {
+        return this.findUserByLogin(userIdentifier.login());
     }
 
     /**

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
@@ -130,7 +130,7 @@ final class AnnotationMerger {
                 customMessage,
                 firstAnnotation.getCustomScore().orElse(null),
                 firstAnnotation.getSource(),
-                firstAnnotation.getCreatorId().orElse(null)));
+                firstAnnotation.getCreator().orElse(null)));
 
         return result;
     }

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.text.MessageFormat;
@@ -89,7 +89,7 @@ public class Assessment extends ArtemisConnectionHolder {
     private final GradingConfig config;
     private final CorrectionRound correctionRound;
     private final Locale studentLocale;
-    private final long assessorId;
+    private final UserIdentifier assessor;
 
     public Assessment(
             ResultDTO result,
@@ -126,7 +126,7 @@ public class Assessment extends ArtemisConnectionHolder {
             throw new IllegalArgumentException("Can't use a review config for a non-review round");
         }
 
-        this.assessorId = getConnection().getAssessor().getId();
+        this.assessor = this.getConnection().getAssessor().getUserIdentifier();
 
         // ensure that the feedbacks are fetched (some api endpoints do not return them)
         // and for long feedbacks, we need to fetch the detailed feedbacks
@@ -281,7 +281,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var source = this.correctionRound.toAnnotationSource();
-        var annotation = new Annotation(mistakeType, location, customMessage, null, source, this.assessorId);
+        var annotation = new Annotation(mistakeType, location, customMessage, null, source, this.assessor);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -325,7 +325,7 @@ public class Assessment extends ArtemisConnectionHolder {
         }
 
         var source = this.correctionRound.toAnnotationSource();
-        var annotation = new Annotation(mistakeType, location, customMessage, customScore, source, this.assessorId);
+        var annotation = new Annotation(mistakeType, location, customMessage, customScore, source, this.assessor);
         this.annotations.add(annotation);
         return annotation;
     }
@@ -348,7 +348,7 @@ public class Assessment extends ArtemisConnectionHolder {
                 explanation,
                 customScore,
                 AnnotationSource.AUTOGRADER,
-                this.assessorId,
+                this.assessor,
                 List.of(checkName, problemType),
                 annotationLimit);
         this.annotations.add(annotation);
@@ -377,7 +377,7 @@ public class Assessment extends ArtemisConnectionHolder {
             throw new ReviewException("Can only suppress annotations in review mode");
         }
 
-        annotation.suppress(this.assessorId);
+        annotation.suppress(this.assessor);
     }
 
     /**
