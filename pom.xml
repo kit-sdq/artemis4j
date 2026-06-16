@@ -52,7 +52,7 @@
     <maven.compiler.target>25</maven.compiler.target>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-    <spotless.version>3.6.0</spotless.version>
+    <spotless.version>3.7.0</spotless.version>
     <slf4j.version>2.0.18</slf4j.version>
     <autograder.version>0.8.5</autograder.version>
     <jgit.version>7.7.0.202606012155-r</jgit.version>
