@@ -101,6 +101,10 @@ public final class ArtemisConnection {
                 .toList();
     }
 
+    public Optional<User> findUserByUserIdentifier(UserIdentifier identifier) throws ArtemisNetworkException {
+        return this.findUserByLogin(identifier.login());
+    }
+
     /**
      * Finds a user based on their login name.
      *

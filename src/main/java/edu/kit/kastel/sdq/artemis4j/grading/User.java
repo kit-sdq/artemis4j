@@ -27,6 +27,10 @@ public class User {
         return this.dto.login();
     }
 
+    public UserIdentifier getUserIdentifier() {
+        return new UserIdentifier(this.getLogin());
+    }
+
     public @Nullable String getLangKey() {
         return this.dto.langKey();
     }

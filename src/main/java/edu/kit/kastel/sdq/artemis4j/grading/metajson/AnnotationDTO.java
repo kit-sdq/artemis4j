@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading.metajson;
 
 import java.util.List;
@@ -23,5 +23,13 @@ public record AnnotationDTO(
         @JsonProperty @Nullable AnnotationSource source,
         @JsonProperty @Nullable List<String> classifiers,
         @JsonProperty @Nullable Integer annotationLimit,
-        @JsonProperty @Nullable Long createdByUserId,
-        @JsonProperty @Nullable Long suppressedByUserId) {}
+
+        @Deprecated(forRemoval = true) @JsonProperty @Nullable
+        Long createdByUserId,
+
+        @JsonProperty @Nullable String createdByUserLogin,
+
+        @Deprecated(forRemoval = true) @JsonProperty @Nullable
+        Long suppressedByUserId,
+
+        @JsonProperty @Nullable String suppressedByUserLogin) {}

@@ -90,7 +90,8 @@ class ReviewTest {
         // Assessor tracking
         for (var annotation : annotations) {
             assertEquals(
-                    connection.getAssessor().getId(), annotation.getCreatorId().orElseThrow());
+                    connection.getAssessor().getUserIdentifier(),
+                    annotation.getCreator().orElseThrow());
         }
 
         assertEquals(-3.0, reviewAssessment.calculateTotalPointsOfAnnotations());
@@ -98,15 +99,15 @@ class ReviewTest {
         // Suppression
         reviewAssessment.suppressAnnotation(annotations.getFirst());
         assertEquals(
-                connection.getAssessor().getId(),
-                annotations.getFirst().getSuppressorId().orElseThrow());
+                connection.getAssessor().getUserIdentifier(),
+                annotations.getFirst().getSuppressor().orElseThrow());
         assertEquals(-1.0, reviewAssessment.calculateTotalPointsOfAnnotations());
         assertEquals(1, reviewAssessment.getAnnotations().size());
         assertEquals(2, reviewAssessment.getAnnotations(true).size());
 
         // Unsuppression
         reviewAssessment.unsuppressAnnotation(annotations.getFirst());
-        assertEquals(Optional.empty(), annotations.getFirst().getSuppressorId());
+        assertEquals(Optional.empty(), annotations.getFirst().getSuppressor());
         assertEquals(-3.0, reviewAssessment.calculateTotalPointsOfAnnotations());
         assertEquals(2, reviewAssessment.getAnnotations().size());
         assertEquals(2, reviewAssessment.getAnnotations(true).size());
@@ -123,9 +124,9 @@ class ReviewTest {
         annotations = reviewAssessment.getAnnotations(true);
         assertEquals(2, annotations.size());
         assertEquals(
-                connection.getAssessor().getId(),
-                annotations.getFirst().getSuppressorId().orElseThrow());
-        assertEquals(Optional.empty(), annotations.get(1).getSuppressorId());
+                connection.getAssessor().getUserIdentifier(),
+                annotations.getFirst().getSuppressor().orElseThrow());
+        assertEquals(Optional.empty(), annotations.get(1).getSuppressor());
         assertEquals(-1.0, reviewAssessment.calculateTotalPointsOfAnnotations());
     }
 

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.ArrayList;
@@ -28,8 +28,8 @@ public final class Annotation {
     private final MistakeType type;
     private final Location location;
     private final AnnotationSource source;
-    private final @Nullable Long createdByUserId; // null -> unknown creator
-    private @Nullable Long suppressedByUserId; // null -> not suppressed
+    private final @Nullable UserIdentifier createdByUser; // null -> unknown creator
+    private @Nullable UserIdentifier suppressedByUser; // null -> not suppressed
     private @Nullable String customMessage;
     private @Nullable Double customScore;
     // If not empty, this list contains classifiers that are used to group annotations.
@@ -56,8 +56,9 @@ public final class Annotation {
         this.customScore = dto.customPenaltyForJSON();
         this.classifiers = dto.classifiers() != null ? dto.classifiers() : List.of();
         this.annotationLimit = dto.annotationLimit();
-        this.createdByUserId = dto.createdByUserId();
-        this.suppressedByUserId = dto.suppressedByUserId();
+        this.createdByUser = dto.createdByUserLogin() == null ? null : new UserIdentifier(dto.createdByUserLogin());
+        this.suppressedByUser =
+                dto.suppressedByUserLogin() == null ? null : new UserIdentifier(dto.suppressedByUserLogin());
     }
 
     Annotation(
@@ -66,8 +67,8 @@ public final class Annotation {
             @Nullable String customMessage,
             @Nullable Double customScore,
             AnnotationSource source,
-            @Nullable Long createdByUserId) {
-        this(mistakeType, location, customMessage, customScore, source, createdByUserId, List.of(), null);
+            @Nullable UserIdentifier createdByUser) {
+        this(mistakeType, location, customMessage, customScore, source, createdByUser, List.of(), null);
     }
 
     Annotation(
@@ -76,7 +77,7 @@ public final class Annotation {
             @Nullable String customMessage,
             @Nullable Double customScore,
             AnnotationSource source,
-            @Nullable Long createdByUserId,
+            @Nullable UserIdentifier createdByUser,
             List<String> classifiers,
             @Nullable Integer annotationLimit) {
         // Validate custom penalty and message
@@ -91,8 +92,8 @@ public final class Annotation {
             throw new IllegalArgumentException("A custom penalty is not allowed for non-custom annotation types.");
         }
 
-        if (createdByUserId == null) {
-            log.warn("Creator user id is null, this annotation will not be associated with a user.");
+        if (createdByUser == null) {
+            log.warn("Creator user login is null, this annotation will not be associated with a user.");
         }
 
         this.uuid = generateUUID();
@@ -101,8 +102,8 @@ public final class Annotation {
         this.customMessage = customMessage;
         this.customScore = customScore;
         this.source = source;
-        this.createdByUserId = createdByUserId;
-        this.suppressedByUserId = null; // Not suppressed
+        this.createdByUser = createdByUser;
+        this.suppressedByUser = null; // Not suppressed
         this.classifiers = new ArrayList<>(classifiers);
         this.annotationLimit = annotationLimit;
     }
@@ -228,24 +229,24 @@ public final class Annotation {
         return source;
     }
 
-    public Optional<Long> getCreatorId() {
-        return Optional.ofNullable(createdByUserId);
+    public Optional<UserIdentifier> getCreator() {
+        return Optional.ofNullable(this.createdByUser);
     }
 
-    public void suppress(long userId) {
-        this.suppressedByUserId = userId;
+    public void suppress(UserIdentifier suppressedByUser) {
+        this.suppressedByUser = suppressedByUser;
     }
 
     public void unsuppress() {
-        this.suppressedByUserId = null;
+        this.suppressedByUser = null;
     }
 
     public boolean isSuppressed() {
-        return this.suppressedByUserId != null;
+        return this.suppressedByUser != null;
     }
 
-    public Optional<Long> getSuppressorId() {
-        return Optional.ofNullable(suppressedByUserId);
+    public Optional<UserIdentifier> getSuppressor() {
+        return Optional.ofNullable(this.suppressedByUser);
     }
 
     /**
@@ -263,8 +264,10 @@ public final class Annotation {
                 source,
                 classifiers,
                 annotationLimit,
-                createdByUserId,
-                suppressedByUserId);
+                null,
+                this.getCreator().map(UserIdentifier::login).orElse(null),
+                null,
+                this.getSuppressor().map(UserIdentifier::login).orElse(null));
     }
 
     @Override
