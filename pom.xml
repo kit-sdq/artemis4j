@@ -57,7 +57,7 @@
     <autograder.version>0.8.5</autograder.version>
     <jgit.version>7.7.1.202607240634-r</jgit.version>
     <junit.version>6.1.2</junit.version>
-    <archunit.version>1.4.2</archunit.version>
+    <archunit.version>1.5.0</archunit.version>
     <versions-maven-plugin.version>2.21.0</versions-maven-plugin.version>
   </properties>
 
