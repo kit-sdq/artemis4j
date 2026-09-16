@@ -60,18 +60,7 @@ public record TextSubmissionDTO(
                 .param("lock", true)
                 .param("correction-round", correctionRound)
                 .executeAndDecodeMaybe(client, InternalTextSubmissionWithoutAssessmentDTO.class)
-                .map(locked -> {
-                    var assessmentSubmission =
-                            locked.participation().submissions().getFirst();
-                    return new TextSubmissionDTO(
-                            locked.id(),
-                            locked.submitted(),
-                            locked.participation().toParticipationDTO(),
-                            assessmentSubmission.results(),
-                            locked.submissionDate(),
-                            locked.text(),
-                            assessmentSubmission.blocks());
-                });
+                .map(locked -> locked.participation().toTextSubmissionDTO());
     }
 
     public static TextSubmissionDTO openAssessment(ArtemisClient client, long submissionId, int correctionRound)
@@ -81,23 +70,28 @@ public record TextSubmissionDTO(
                 .param("correction-round", correctionRound)
                 .executeAndDecode(client, InternalTextParticipationDTO.class);
 
-        return participation.submissions().getFirst();
+        return participation.toTextSubmissionDTO();
     }
 
     private record InternalTextParticipationDTO(
             @JsonProperty long id,
             @JsonProperty @Nullable UserDTO student,
             @JsonProperty List<TextSubmissionDTO> submissions) {
-        private ParticipationDTO toParticipationDTO() {
-            return new ParticipationDTO(id, student, student == null ? null : student.login(), null, null, null, null);
+        private TextSubmissionDTO toTextSubmissionDTO() {
+            var submission = submissions.getFirst();
+            var participation = new ParticipationDTO(id, student, null, null, null, null, null);
+            return new TextSubmissionDTO(
+                    submission.id(),
+                    submission.submitted(),
+                    participation,
+                    submission.results(),
+                    submission.submissionDate(),
+                    submission.text(),
+                    submission.blocks());
         }
     }
 
     private record InternalTextSubmissionWithoutAssessmentDTO(
-            @JsonProperty long id,
-            @JsonProperty boolean submitted,
-            @JsonProperty @Nullable ZonedDateTime submissionDate,
-            @JsonProperty @Nullable String text,
             @JsonProperty InternalTextParticipationDTO participation) {}
 
     /**

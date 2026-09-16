@@ -43,7 +43,10 @@ public class Participation extends ArtemisConnectionHolder {
      * @return the identifier for the participant
      */
     public @Nullable String getParticipantIdentifier() {
-        return this.dto.participantIdentifier();
+        if (this.dto.participantIdentifier() != null) {
+            return this.dto.participantIdentifier();
+        }
+        return this.dto.student() == null ? null : this.dto.student().login();
     }
 
     /**

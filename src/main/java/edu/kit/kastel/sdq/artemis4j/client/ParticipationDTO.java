@@ -13,7 +13,7 @@ import org.jspecify.annotations.Nullable;
 public record ParticipationDTO(
         @JsonProperty long id,
         @JsonProperty @Nullable UserDTO student,
-        @JsonProperty String participantIdentifier,
+        @JsonProperty @Nullable String participantIdentifier,
         @JsonProperty @Nullable String userIndependentRepositoryUri,
         @JsonProperty @Nullable String repositoryUri,
         @JsonProperty @Nullable List<ResultDTO> results,
