@@ -6,18 +6,18 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 public record TextExerciseDTO(
         @JsonProperty long id,
         @JsonProperty String title,
-        @JsonProperty String shortName,
+        @JsonProperty @Nullable String shortName,
         @JsonProperty String exerciseType,
-        @JsonProperty String assessmentType,
+        @JsonProperty @Nullable String assessmentType,
         @JsonProperty double maxPoints,
         @JsonProperty double bonusPoints,
-        @JsonProperty ZonedDateTime dueDate,
-        @JsonProperty ZonedDateTime startDate,
-        @JsonProperty boolean automaticAssessmentEnabled)
+        @JsonProperty @Nullable ZonedDateTime dueDate,
+        @JsonProperty @Nullable ZonedDateTime startDate)
         implements ExerciseDTO {
 
     /**

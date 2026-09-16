@@ -11,14 +11,14 @@ import org.jspecify.annotations.Nullable;
 public record ProgrammingExerciseDTO(
         @JsonProperty long id,
         @JsonProperty String title,
-        @JsonProperty String shortName,
+        @JsonProperty @Nullable String shortName,
         @JsonProperty String testRepositoryUri,
         @JsonProperty @Nullable Boolean secondCorrectionEnabled,
         @JsonProperty String exerciseType,
         @JsonProperty String assessmentType,
         @JsonProperty double maxPoints,
-        @JsonProperty ZonedDateTime dueDate,
-        @JsonProperty ZonedDateTime startDate)
+        @JsonProperty @Nullable ZonedDateTime dueDate,
+        @JsonProperty @Nullable ZonedDateTime startDate)
         implements ExerciseDTO {
 
     public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, long courseId)

@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.time.ZonedDateTime;
@@ -10,6 +10,7 @@ import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.TextSubmissionDTO;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A text exercise in artemis.
@@ -43,7 +44,7 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
     }
 
     @Override
-    public String getShortName() {
+    public @Nullable String getShortName() {
         return this.dto.shortName();
     }
 
@@ -63,7 +64,7 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
      *
      * @return the assessment type, likely "manual" or "automatic"
      */
-    public String getAssessmentType() {
+    public @Nullable String getAssessmentType() {
         return this.dto.assessmentType();
     }
 
@@ -90,7 +91,7 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
      *
      * @return the due date
      */
-    public ZonedDateTime getDueDate() {
+    public @Nullable ZonedDateTime getDueDate() {
         return this.dto.dueDate();
     }
 
@@ -99,7 +100,7 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
      *
      * @return the start date
      */
-    public ZonedDateTime getStartDate() {
+    public @Nullable ZonedDateTime getStartDate() {
         return this.dto.startDate();
     }
 
@@ -151,7 +152,7 @@ public class TextExercise extends ArtemisConnectionHolder implements Exercise {
             throw new IllegalStateException("Locking returned %d results, expected 1"
                     .formatted(locked.results().size()));
         }
-        var result = locked.results().get(0);
+        var result = locked.results().getFirst();
 
         if (this.canAssess(result)) {
             return Optional.empty();

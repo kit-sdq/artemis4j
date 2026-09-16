@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -11,17 +11,16 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.grading.Exercise;
+import org.jspecify.annotations.Nullable;
 
 public record TextSubmissionDTO(
         @JsonProperty long id,
         @JsonProperty boolean submitted,
         @JsonProperty ParticipationDTO participation,
-        @JsonProperty String commitHash,
-        @JsonProperty boolean buildFailed,
-        @JsonProperty List<ResultDTO> results,
-        @JsonProperty ZonedDateTime submissionDate,
-        @JsonProperty String text,
-        @JsonProperty List<TextBlockDTO> blocks) {
+        @JsonProperty @Nullable List<ResultDTO> results,
+        @JsonProperty @Nullable ZonedDateTime submissionDate,
+        @JsonProperty @Nullable String text,
+        @JsonProperty @Nullable List<TextBlockDTO> blocks) {
     /**
      * Fetch all text submissions for an exercise.
      *
