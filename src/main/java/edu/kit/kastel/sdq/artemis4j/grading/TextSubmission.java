@@ -51,7 +51,7 @@ public class TextSubmission extends ArtemisConnectionHolder {
         return this.getParticipation().getId();
     }
 
-    public String getParticipantIdentifier() {
+    public @Nullable String getParticipantIdentifier() {
         return this.getParticipation().getParticipantIdentifier();
     }
 

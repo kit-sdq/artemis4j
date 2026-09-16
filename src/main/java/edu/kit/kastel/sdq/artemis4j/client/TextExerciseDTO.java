@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.artemis4j.client;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import org.jspecify.annotations.Nullable;
@@ -12,7 +13,7 @@ public record TextExerciseDTO(
         @JsonProperty long id,
         @JsonProperty String title,
         @JsonProperty @Nullable String shortName,
-        @JsonProperty String exerciseType,
+        @JsonProperty @JsonAlias("type") String exerciseType,
         @JsonProperty @Nullable String assessmentType,
         @JsonProperty double maxPoints,
         @JsonProperty double bonusPoints,

@@ -16,7 +16,7 @@ import org.jspecify.annotations.Nullable;
 public record TextSubmissionDTO(
         @JsonProperty long id,
         @JsonProperty boolean submitted,
-        @JsonProperty ParticipationDTO participation,
+        @JsonProperty @Nullable ParticipationDTO participation,
         @JsonProperty @Nullable List<ResultDTO> results,
         @JsonProperty @Nullable ZonedDateTime submissionDate,
         @JsonProperty @Nullable String text,
@@ -59,31 +59,46 @@ public record TextSubmissionDTO(
                 .path(List.of("text", "exercises", exerciseId, "text-submission-without-assessment"))
                 .param("lock", true)
                 .param("correction-round", correctionRound)
-                .executeAndDecodeMaybe(client, TextSubmissionDTO.class);
+                .executeAndDecodeMaybe(client, InternalTextSubmissionWithoutAssessmentDTO.class)
+                .map(locked -> {
+                    var assessmentSubmission =
+                            locked.participation().submissions().getFirst();
+                    return new TextSubmissionDTO(
+                            locked.id(),
+                            locked.submitted(),
+                            locked.participation().toParticipationDTO(),
+                            assessmentSubmission.results(),
+                            locked.submissionDate(),
+                            locked.text(),
+                            assessmentSubmission.blocks());
+                });
     }
 
     public static TextSubmissionDTO openAssessment(ArtemisClient client, long submissionId, int correctionRound)
             throws ArtemisNetworkException {
-        var res = ArtemisRequest.get()
+        var participation = ArtemisRequest.get()
                 .path(List.of("text", "text-submissions", submissionId, "for-assessment"))
                 .param("correction-round", correctionRound)
-                .executeAndDecode(client, InternalOpenAssessmentDTO.class);
+                .executeAndDecode(client, InternalTextParticipationDTO.class);
 
-        return res.submissions().get(0);
+        return participation.submissions().getFirst();
     }
 
-    // This is what artemis returns for the request, doesn't seem to map to any existing DTO.
-    // It is only used for the openAssessment method, therefore it is kept private for now.
-    private record InternalOpenAssessmentDTO(
-            @JsonProperty String type,
-            // this is the participationId
+    private record InternalTextParticipationDTO(
             @JsonProperty long id,
-            @JsonProperty TextExerciseDTO exercise,
-            @JsonProperty List<ResultDTO> results,
-            @JsonProperty List<TextSubmissionDTO> submissions,
-            @JsonProperty UserDTO student,
-            @JsonProperty String participantIdentifier,
-            @JsonProperty String participantName) {}
+            @JsonProperty @Nullable UserDTO student,
+            @JsonProperty List<TextSubmissionDTO> submissions) {
+        private ParticipationDTO toParticipationDTO() {
+            return new ParticipationDTO(id, student, student == null ? null : student.login(), null, null, null, null);
+        }
+    }
+
+    private record InternalTextSubmissionWithoutAssessmentDTO(
+            @JsonProperty long id,
+            @JsonProperty boolean submitted,
+            @JsonProperty @Nullable ZonedDateTime submissionDate,
+            @JsonProperty @Nullable String text,
+            @JsonProperty InternalTextParticipationDTO participation) {}
 
     /**
      * Cancel the assessment of the specified submission.

@@ -36,7 +36,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return this.dto.id();
     }
 
-    public String getTestRepositoryUrl() {
+    public @Nullable String getTestRepositoryUrl() {
         return this.dto.testRepositoryUri();
     }
 

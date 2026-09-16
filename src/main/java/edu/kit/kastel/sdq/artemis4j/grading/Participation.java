@@ -10,6 +10,7 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
+import org.jspecify.annotations.Nullable;
 
 /**
  * A participation is the student-specific instance of an exercise, and is created
@@ -41,7 +42,7 @@ public class Participation extends ArtemisConnectionHolder {
      *
      * @return the identifier for the participant
      */
-    public String getParticipantIdentifier() {
+    public @Nullable String getParticipantIdentifier() {
         return this.dto.participantIdentifier();
     }
 
@@ -53,7 +54,18 @@ public class Participation extends ArtemisConnectionHolder {
      * @return the list of results or an empty list
      */
     public List<ResultDTO> getResults() {
-        return this.dto.results() == null ? List.of() : this.dto.results();
+        if (this.dto.results() != null) {
+            return this.dto.results();
+        }
+        if (this.dto.submissions() == null) {
+            return List.of();
+        }
+
+        return this.dto.submissions().stream()
+                .filter(submission -> submission.results() != null)
+                .flatMap(submission -> submission.results().stream())
+                .filter(result -> result != null)
+                .toList();
     }
 
     /**
@@ -237,6 +249,6 @@ public class Participation extends ArtemisConnectionHolder {
 
     @Override
     public String toString() {
-        return this.getParticipantIdentifier();
+        return Optional.ofNullable(this.getParticipantIdentifier()).orElse("Participation " + this.getId());
     }
 }
