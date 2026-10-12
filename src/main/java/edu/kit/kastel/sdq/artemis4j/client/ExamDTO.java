@@ -6,29 +6,19 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 public record ExamDTO(
         @JsonProperty long id,
-        @JsonProperty String title,
+        @JsonProperty @Nullable String title,
         @JsonProperty int numberOfCorrectionRoundsInExam,
-        @JsonProperty ZonedDateTime startDate,
-        @JsonProperty ZonedDateTime endDate,
-        @JsonProperty List<ExerciseGroupDTO> exerciseGroups) {
+        @JsonProperty @Nullable ZonedDateTime startDate,
+        @JsonProperty @Nullable ZonedDateTime endDate,
+        @JsonProperty @Nullable List<ExerciseGroupDTO> exerciseGroups) {
 
-    /**
-     * This call does not populate exerciseGroups - they will be null! Use
-     * {@link #fetch(ArtemisClient client, long courseId, long examId)} to get the
-     * full exam.
-     */
     public static List<ExamDTO> fetchAll(ArtemisClient client, long courseId) throws ArtemisNetworkException {
         return List.of(ArtemisRequest.get()
                 .path(List.of("exam", "courses", courseId, "exams"))
                 .executeAndDecode(client, ExamDTO[].class));
-    }
-
-    public static ExamDTO fetch(ArtemisClient client, long courseId, long examId) throws ArtemisNetworkException {
-        return ArtemisRequest.get()
-                .path(List.of("exam", "courses", courseId, "exams", examId, "exam-for-assessment-dashboard"))
-                .executeAndDecode(client, ExamDTO.class);
     }
 }

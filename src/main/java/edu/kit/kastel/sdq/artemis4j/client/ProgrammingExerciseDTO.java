@@ -4,6 +4,7 @@ package edu.kit.kastel.sdq.artemis4j.client;
 import java.time.ZonedDateTime;
 import java.util.List;
 
+import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import org.jspecify.annotations.Nullable;
@@ -11,14 +12,14 @@ import org.jspecify.annotations.Nullable;
 public record ProgrammingExerciseDTO(
         @JsonProperty long id,
         @JsonProperty String title,
-        @JsonProperty String shortName,
-        @JsonProperty String testRepositoryUri,
+        @JsonProperty @Nullable String shortName,
+        @JsonProperty @Nullable String testRepositoryUri,
         @JsonProperty @Nullable Boolean secondCorrectionEnabled,
-        @JsonProperty String exerciseType,
-        @JsonProperty String assessmentType,
+        @JsonProperty @JsonAlias("type") String exerciseType,
+        @JsonProperty @Nullable String assessmentType,
         @JsonProperty double maxPoints,
-        @JsonProperty ZonedDateTime dueDate,
-        @JsonProperty ZonedDateTime startDate)
+        @JsonProperty @Nullable ZonedDateTime dueDate,
+        @JsonProperty @Nullable ZonedDateTime startDate)
         implements ExerciseDTO {
 
     public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, long courseId)

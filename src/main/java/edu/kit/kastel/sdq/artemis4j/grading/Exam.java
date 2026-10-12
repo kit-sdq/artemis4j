@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.Collections;
@@ -7,6 +7,7 @@ import java.util.List;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
+import org.jspecify.annotations.Nullable;
 
 public class Exam extends ArtemisConnectionHolder {
     private final ExamDTO examDto;
@@ -19,10 +20,11 @@ public class Exam extends ArtemisConnectionHolder {
         this.examDto = examDto;
         this.course = course;
         this.exerciseGroups = new LazyNetworkValue<>(() -> {
-            var fullExam = ExamDTO.fetch(this.getConnection().getClient(), this.course.getId(), this.examDto.id());
-            return fullExam.exerciseGroups().stream()
-                    .map(dto -> new ExamExerciseGroup(dto, this))
-                    .toList();
+            var groups = this.examDto.exerciseGroups();
+            if (groups == null) {
+                return List.of();
+            }
+            return groups.stream().map(dto -> new ExamExerciseGroup(dto, this)).toList();
         });
     }
 
@@ -34,7 +36,7 @@ public class Exam extends ArtemisConnectionHolder {
         return this.examDto.id();
     }
 
-    public String getTitle() {
+    public @Nullable String getTitle() {
         return this.examDto.title();
     }
 

@@ -14,6 +14,7 @@ import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.metajson.AnnotationMappingException;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
+import org.jspecify.annotations.Nullable;
 
 /**
  * An exercise, containing many submissions.
@@ -35,7 +36,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return this.dto.id();
     }
 
-    public String getTestRepositoryUrl() {
+    public @Nullable String getTestRepositoryUrl() {
         return this.dto.testRepositoryUri();
     }
 
@@ -43,11 +44,11 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return this.dto.maxPoints();
     }
 
-    public ZonedDateTime getStartDate() {
+    public @Nullable ZonedDateTime getStartDate() {
         return this.dto.startDate();
     }
 
-    public ZonedDateTime getDueDate() {
+    public @Nullable ZonedDateTime getDueDate() {
         return this.dto.dueDate();
     }
 
@@ -57,7 +58,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
     }
 
     @Override
-    public String getShortName() {
+    public @Nullable String getShortName() {
         return this.dto.shortName();
     }
 
@@ -248,7 +249,7 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         }
         var result = locked.results().getFirst();
 
-        if (!this.canAssess(result)) {
+        if (result == null || !this.canAssess(result)) {
             return Optional.empty();
         }
 

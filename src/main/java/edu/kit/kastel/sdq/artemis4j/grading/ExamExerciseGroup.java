@@ -1,9 +1,10 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.List;
 
 import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 
 public class ExamExerciseGroup extends ArtemisConnectionHolder {
     private final ExerciseGroupDTO dto;
@@ -15,7 +16,10 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
         super(exam);
         this.dto = dto;
         this.exam = exam;
-        this.exercises = dto.exercises().stream()
+        var exerciseDTOs = dto.exercises() == null ? List.of() : dto.exercises();
+        this.exercises = exerciseDTOs.stream()
+                .filter(ProgrammingExerciseDTO.class::isInstance)
+                .map(ProgrammingExerciseDTO.class::cast)
                 .map(exerciseDto -> new ProgrammingExercise(exerciseDto, exam.getCourse()))
                 .toList();
     }

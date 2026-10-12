@@ -1,12 +1,13 @@
-/* Licensed under EPL-2.0 2024. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.Nullable;
 
 public record ExerciseGroupDTO(
         @JsonProperty long id,
-        @JsonProperty String title,
-        @JsonProperty boolean isMandatory,
-        @JsonProperty List<ProgrammingExerciseDTO> exercises) {}
+        @JsonProperty @Nullable String title,
+        @JsonProperty @Nullable Boolean isMandatory,
+        @JsonProperty @Nullable List<ExerciseDTO> exercises) {}
