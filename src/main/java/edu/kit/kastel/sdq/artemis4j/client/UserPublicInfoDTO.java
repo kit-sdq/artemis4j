@@ -1,8 +1,8 @@
 /* Licensed under EPL-2.0 2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
-import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -60,8 +60,9 @@ public record UserPublicInfoDTO(
                 null,
                 true,
                 null,
-                new ArrayList<>(courseDTO.mapToGroupNames(this.getRoles())),
+                List.of(),
                 null,
-                null);
+                null,
+                List.of(new CourseAccessRightsDTO(courseDTO.id(), this.getRoles())));
     }
 }

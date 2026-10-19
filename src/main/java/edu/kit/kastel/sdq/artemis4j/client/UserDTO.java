@@ -5,6 +5,7 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
@@ -21,7 +22,8 @@ public record UserDTO(
         @JsonProperty @Nullable String langKey,
         @JsonProperty @Nullable List<String> groups,
         @JsonProperty @Nullable String vcsAccessToken,
-        @JsonProperty @Nullable ZonedDateTime vcsAccessTokenExpiryDate) {
+        @JsonProperty @Nullable ZonedDateTime vcsAccessTokenExpiryDate,
+        @JsonProperty List<CourseAccessRightsDTO> courseRoles) {
     public UserDTO {
         if (groups == null) {
             // when a user is not in any group, artemis returns null
@@ -29,6 +31,10 @@ public record UserDTO(
         } else {
             groups = List.copyOf(groups);
         }
+        // Artemis may supply a null value in case it is empty, we don't want the downstream
+        // users to deal with this, therefore the constructor converts the null back to the
+        // empty list.
+        courseRoles = courseRoles == null ? List.of() : List.copyOf(courseRoles);
     }
 
     @Override
@@ -37,7 +43,10 @@ public record UserDTO(
     }
 
     public Set<CourseRole> getRoles(CourseDTO courseDTO) {
-        return courseDTO.mapToCourseRoles(this.groups());
+        return this.courseRoles.stream()
+                .filter(access -> access.courseId() == courseDTO.id())
+                .flatMap(access -> access.roles().stream())
+                .collect(Collectors.toUnmodifiableSet());
     }
 
     public static UserDTO getAssessingUser(ArtemisClient client) throws ArtemisNetworkException {

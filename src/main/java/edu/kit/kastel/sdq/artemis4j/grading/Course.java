@@ -135,7 +135,10 @@ public class Course extends ArtemisConnectionHolder {
     public List<UserPublicInfoDTO> searchUser(String loginOrName, Collection<CourseRole> roles)
             throws ArtemisNetworkException {
         return CourseDTO.searchUsers(
-                this.getConnection().getClient(), this.getId(), loginOrName, this.dto.mapToGroupNames(roles));
+                this.getConnection().getClient(),
+                this.getId(),
+                loginOrName,
+                roles.stream().map(CourseRole::toString).toList());
     }
 
     public long getId() {

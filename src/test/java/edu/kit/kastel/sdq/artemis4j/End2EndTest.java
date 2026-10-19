@@ -529,7 +529,8 @@ class End2EndTest {
     @Test
     void testCourseRoleForCurrentConnectedUser() throws ArtemisClientException {
         Map<String, Set<CourseRole>> roles = Map.ofEntries(
-                Map.entry(INSTRUCTOR_USER, Set.of(CourseRole.INSTRUCTOR)), Map.entry(STUDENT_USER, Set.of()));
+                Map.entry(INSTRUCTOR_USER, Set.of(CourseRole.INSTRUCTOR)),
+                Map.entry(STUDENT_USER, Set.of(CourseRole.STUDENT)));
 
         var connectedUser = this.connection.getAssessor().getLogin();
 
