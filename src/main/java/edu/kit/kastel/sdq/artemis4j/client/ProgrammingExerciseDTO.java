@@ -22,18 +22,6 @@ public record ProgrammingExerciseDTO(
         @JsonProperty @Nullable ZonedDateTime startDate)
         implements ExerciseDTO {
 
-    public static List<ProgrammingExerciseDTO> fetchAll(ArtemisClient client, long courseId)
-            throws ArtemisNetworkException {
-        var exercises = ArtemisRequest.get()
-                .path(List.of("core", "courses", courseId, "with-exercises"))
-                .executeAndDecode(client, ExerciseWrapperDTO.class);
-        // Remove all non-programming exercises
-        return exercises.exercises().stream()
-                .filter(e -> e instanceof ProgrammingExerciseDTO)
-                .map(e -> (ProgrammingExerciseDTO) e)
-                .toList();
-    }
-
     public static ProgrammingExerciseDTO create(
             ArtemisClient client, ProgrammingExerciseCreateDTO exerciseCreateDTO, boolean emptyRepositories)
             throws ArtemisNetworkException {
@@ -50,20 +38,5 @@ public record ProgrammingExerciseDTO(
                 .path(List.of("programming", "programming-exercises", exerciseId))
                 .param("deleteBaseReposBuildPlans", deleteBaseReposBuildPlans)
                 .execute(client);
-    }
-
-    /**
-     * Artemis doesn't return the list of exercises directly, but only the list a
-     * specific course with the exercises attached. We don't care about the course
-     * here, so this wrapper class exists.
-     *
-     * @param exercises
-     */
-    private record ExerciseWrapperDTO(List<ExerciseDTO> exercises) {
-        private ExerciseWrapperDTO {
-            if (exercises == null) {
-                exercises = List.of();
-            }
-        }
     }
 }

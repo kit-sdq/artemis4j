@@ -23,7 +23,6 @@ class TextTest {
     // (Default Template: Package Name: edu.kit.informatik))
     private static final String INSTRUCTOR_USER = System.getenv("INSTRUCTOR_USER");
     private static final String INSTRUCTOR_PASSWORD = System.getenv("INSTRUCTOR_PASSWORD");
-    private static final String STUDENT_USER = System.getenv("STUDENT_USER");
     private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
     private static final String COURSE_ID = System.getenv("COURSE_ID");
     private static final String TEXT_EXERCISE_ID = System.getenv("TEXT_EXERCISE_ID");
@@ -39,7 +38,6 @@ class TextTest {
     void checkConfiguration() {
         Assertions.assertNotNull(INSTRUCTOR_USER);
         Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
-        Assertions.assertNotNull(STUDENT_USER);
         Assertions.assertNotNull(ARTEMIS_URL);
         Assertions.assertNotNull(COURSE_ID);
         Assertions.assertNotNull(TEXT_EXERCISE_ID);
@@ -62,9 +60,9 @@ class TextTest {
 
         var submissions = this.textExercise.fetchSubmissions(0, false);
         this.textSubmission = submissions.stream()
-                .filter(a -> a.getParticipantIdentifier().equals("user01"))
+                .filter(submission -> !submission.getText().isBlank())
                 .findFirst()
-                .orElseThrow();
+                .orElseThrow(() -> new AssertionError("No non-empty text submission available for assessment"));
 
         // ensure that the submission is locked
         this.assessment = this.textSubmission.openAssessment();

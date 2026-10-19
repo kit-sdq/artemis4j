@@ -38,43 +38,36 @@ public class Course extends ArtemisConnectionHolder {
             var user = this.getConnection().getAssessor();
             var roles = this.getRoles(user.getLogin());
 
-            // Students do not have permission to use the other endpoint, so they are handled here:
+            List<ExerciseDTO> exerciseDTOs;
+            // Students do not have permission to use the management endpoint, so use the exercises from the dashboard.
             if (Set.of(CourseRole.STUDENT).equals(roles)) {
-                List<Exercise> exercises = new ArrayList<>();
-
-                for (ExerciseDTO exerciseDTO :
-                        this.dto.exercises() == null ? new ArrayList<ExerciseDTO>() : this.dto.exercises()) {
-                    switch (exerciseDTO) {
-                        case ProgrammingExerciseDTO programmingExerciseDTO ->
-                            exercises.add(new ProgrammingExercise(programmingExerciseDTO, this));
-                        case TextExerciseDTO textExerciseDTO -> exercises.add(new TextExercise(textExerciseDTO, this));
-                        case UnknownExerciseDTO ignored -> {
-                            // well, it is unknown, so nothing to do here
-                        }
-                    }
-                }
-
-                return exercises;
-            }
-
-            if (roles.isEmpty()) {
+                exerciseDTOs = this.dto.exercises() == null ? List.of() : this.dto.exercises();
+            } else if (roles.isEmpty()) {
                 return List.of();
+            } else {
+                exerciseDTOs = ExerciseDTO.fetchAll(connection.getClient(), dto.id());
             }
 
-            List<Exercise> result =
-                    new ArrayList<>(ProgrammingExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
-                            .map(exerciseDTO -> new ProgrammingExercise(exerciseDTO, this))
-                            .toList());
-
-            result.addAll(TextExerciseDTO.fetchAll(connection.getClient(), dto.id()).stream()
-                    .map(exerciseDTO -> new TextExercise(exerciseDTO, this))
-                    .toList());
-
-            return result;
+            return this.createExercises(exerciseDTOs);
         });
         this.exams = new LazyNetworkValue<>(() -> ExamDTO.fetchAll(connection.getClient(), dto.id()).stream()
                 .map(examDTO -> new Exam(examDTO, this))
                 .toList());
+    }
+
+    private List<Exercise> createExercises(List<ExerciseDTO> exerciseDTOs) {
+        List<Exercise> result = new ArrayList<>();
+        for (ExerciseDTO exerciseDTO : exerciseDTOs) {
+            switch (exerciseDTO) {
+                case ProgrammingExerciseDTO programmingExerciseDTO ->
+                    result.add(new ProgrammingExercise(programmingExerciseDTO, this));
+                case TextExerciseDTO textExerciseDTO -> result.add(new TextExercise(textExerciseDTO, this));
+                case UnknownExerciseDTO ignored -> {
+                    // Unsupported exercise types are not exposed by the grading API.
+                }
+            }
+        }
+        return result;
     }
 
     /**
