@@ -27,6 +27,7 @@ import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
+import edu.kit.kastel.sdq.artemis4j.grading.Participation;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
 import edu.kit.kastel.sdq.artemis4j.grading.TestResult;
@@ -528,7 +529,8 @@ class End2EndTest {
     @Test
     void testCourseRoleForCurrentConnectedUser() throws ArtemisClientException {
         Map<String, Set<CourseRole>> roles = Map.ofEntries(
-                Map.entry(INSTRUCTOR_USER, Set.of(CourseRole.INSTRUCTOR)), Map.entry(STUDENT_USER, Set.of()));
+                Map.entry(INSTRUCTOR_USER, Set.of(CourseRole.INSTRUCTOR)),
+                Map.entry(STUDENT_USER, Set.of(CourseRole.STUDENT)));
 
         var connectedUser = this.connection.getAssessor().getLogin();
 
@@ -541,5 +543,12 @@ class End2EndTest {
                     .getRoles(this.connection.getAssessor().getLogin())
                     .isEmpty());
         }
+    }
+
+    @Test
+    void testFetchingParticipationForExercise() throws ArtemisClientException {
+        List<Participation> participations = this.exercise.fetchAllParticipation();
+
+        assertFalse(participations.isEmpty());
     }
 }

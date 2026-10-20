@@ -74,9 +74,15 @@ class UtilitiesTest {
         Assertions.assertNotNull(examId);
         long examId = Long.parseLong(this.examId);
 
-        var exam = ExamDTO.fetch(client, courseId, examId);
-        var exercises = exam.exerciseGroups().stream()
-                .flatMap(e -> e.exercises().stream())
+        var exams = ExamDTO.fetchAll(client, courseId);
+        var exam = exams.stream().filter(dto -> dto.id() == examId).findFirst().orElseThrow();
+
+        var exerciseGroups = exam.exerciseGroups() == null ? List.<ExerciseGroupDTO>of() : exam.exerciseGroups();
+        var exercises = exerciseGroups.stream()
+                .flatMap(group ->
+                        group.exercises() == null ? java.util.stream.Stream.empty() : group.exercises().stream())
+                .filter(ProgrammingExerciseDTO.class::isInstance)
+                .map(ProgrammingExerciseDTO.class::cast)
                 .toList();
         for (var exercise : exercises) {
             System.out.println("Exercise: " + exercise.title());

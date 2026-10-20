@@ -51,7 +51,7 @@ public class TextSubmission extends ArtemisConnectionHolder {
         return this.getParticipation().getId();
     }
 
-    public String getParticipantIdentifier() {
+    public @Nullable String getParticipantIdentifier() {
         return this.getParticipation().getParticipantIdentifier();
     }
 
@@ -67,14 +67,14 @@ public class TextSubmission extends ArtemisConnectionHolder {
     }
 
     public TextExercise getExercise() {
-        return exercise;
+        return this.exercise;
     }
 
     public int getCorrectionRound() {
         return this.correctionRound;
     }
 
-    public ZonedDateTime getSubmissionDate() {
+    public @Nullable ZonedDateTime getSubmissionDate() {
         return this.dto.submissionDate();
     }
 
@@ -88,13 +88,15 @@ public class TextSubmission extends ArtemisConnectionHolder {
     }
 
     public Optional<ResultDTO> getLatestResult() {
-        if (this.dto.results().isEmpty()) {
+        var results = this.dto.results();
+        if (results == null || results.isEmpty()) {
             return Optional.empty();
         } else {
-            return Optional.of(this.dto.results().get(this.dto.results().size() - 1));
+            return Optional.of(results.getLast());
         }
     }
 
+    @Nullable
     List<TextBlockDTO> getTextBlocks() {
         return this.dto.blocks();
     }
@@ -108,8 +110,6 @@ public class TextSubmission extends ArtemisConnectionHolder {
                 submissionWithResults.id(),
                 submissionWithResults.submitted(),
                 this.getParticipation().toDTO(),
-                submissionWithResults.commitHash(),
-                submissionWithResults.buildFailed(),
                 submissionWithResults.results(),
                 submissionWithResults.submissionDate(),
                 submissionWithResults.text(),

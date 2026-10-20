@@ -1,4 +1,4 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.client;
 
 import java.time.ZonedDateTime;
@@ -11,17 +11,16 @@ import java.util.Optional;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
 import edu.kit.kastel.sdq.artemis4j.grading.Exercise;
+import org.jspecify.annotations.Nullable;
 
 public record TextSubmissionDTO(
         @JsonProperty long id,
         @JsonProperty boolean submitted,
-        @JsonProperty ParticipationDTO participation,
-        @JsonProperty String commitHash,
-        @JsonProperty boolean buildFailed,
-        @JsonProperty List<ResultDTO> results,
-        @JsonProperty ZonedDateTime submissionDate,
-        @JsonProperty String text,
-        @JsonProperty List<TextBlockDTO> blocks) {
+        @JsonProperty @Nullable ParticipationDTO participation,
+        @JsonProperty @Nullable List<ResultDTO> results,
+        @JsonProperty @Nullable ZonedDateTime submissionDate,
+        @JsonProperty @Nullable String text,
+        @JsonProperty @Nullable List<TextBlockDTO> blocks) {
     /**
      * Fetch all text submissions for an exercise.
      *
@@ -60,31 +59,40 @@ public record TextSubmissionDTO(
                 .path(List.of("text", "exercises", exerciseId, "text-submission-without-assessment"))
                 .param("lock", true)
                 .param("correction-round", correctionRound)
-                .executeAndDecodeMaybe(client, TextSubmissionDTO.class);
+                .executeAndDecodeMaybe(client, InternalTextSubmissionWithoutAssessmentDTO.class)
+                .map(locked -> locked.participation().toTextSubmissionDTO());
     }
 
     public static TextSubmissionDTO openAssessment(ArtemisClient client, long submissionId, int correctionRound)
             throws ArtemisNetworkException {
-        var res = ArtemisRequest.get()
+        var participation = ArtemisRequest.get()
                 .path(List.of("text", "text-submissions", submissionId, "for-assessment"))
                 .param("correction-round", correctionRound)
-                .executeAndDecode(client, InternalOpenAssessmentDTO.class);
+                .executeAndDecode(client, InternalTextParticipationDTO.class);
 
-        return res.submissions().get(0);
+        return participation.toTextSubmissionDTO();
     }
 
-    // This is what artemis returns for the request, doesn't seem to map to any existing DTO.
-    // It is only used for the openAssessment method, therefore it is kept private for now.
-    private record InternalOpenAssessmentDTO(
-            @JsonProperty String type,
-            // this is the participationId
+    private record InternalTextParticipationDTO(
             @JsonProperty long id,
-            @JsonProperty TextExerciseDTO exercise,
-            @JsonProperty List<ResultDTO> results,
-            @JsonProperty List<TextSubmissionDTO> submissions,
-            @JsonProperty UserDTO student,
-            @JsonProperty String participantIdentifier,
-            @JsonProperty String participantName) {}
+            @JsonProperty @Nullable UserDTO student,
+            @JsonProperty List<TextSubmissionDTO> submissions) {
+        private TextSubmissionDTO toTextSubmissionDTO() {
+            var submission = submissions.getFirst();
+            var participation = new ParticipationDTO(id, student, null, null, null, null, null);
+            return new TextSubmissionDTO(
+                    submission.id(),
+                    submission.submitted(),
+                    participation,
+                    submission.results(),
+                    submission.submissionDate(),
+                    submission.text(),
+                    submission.blocks());
+        }
+    }
+
+    private record InternalTextSubmissionWithoutAssessmentDTO(
+            @JsonProperty InternalTextParticipationDTO participation) {}
 
     /**
      * Cancel the assessment of the specified submission.
