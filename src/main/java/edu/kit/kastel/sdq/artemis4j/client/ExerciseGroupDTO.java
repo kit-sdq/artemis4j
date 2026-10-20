@@ -10,4 +10,4 @@ public record ExerciseGroupDTO(
         @JsonProperty long id,
         @JsonProperty @Nullable String title,
         @JsonProperty @Nullable Boolean isMandatory,
-        @JsonProperty @Nullable List<ExerciseDTO> exercises) {}
+        @JsonProperty @Nullable List<ExamExerciseDTO> exercises) {}

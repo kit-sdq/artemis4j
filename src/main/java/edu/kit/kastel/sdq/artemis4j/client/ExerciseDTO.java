@@ -11,7 +11,6 @@ import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
         use = JsonTypeInfo.Id.NAME,
         include = JsonTypeInfo.As.EXISTING_PROPERTY,
         property = "type",
-        visible = true,
         defaultImpl = UnknownExerciseDTO.class)
 @JsonSubTypes({
     @JsonSubTypes.Type(value = ProgrammingExerciseDTO.class, name = "programming"),

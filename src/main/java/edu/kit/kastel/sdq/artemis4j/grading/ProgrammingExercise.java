@@ -4,10 +4,13 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import edu.kit.kastel.sdq.artemis4j.LazyNetworkValue;
 import edu.kit.kastel.sdq.artemis4j.client.AssessmentStatsDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ExamExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ParticipationDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ProgrammingSubmissionDTO;
@@ -21,6 +24,7 @@ import org.jspecify.annotations.Nullable;
  */
 public class ProgrammingExercise extends ArtemisConnectionHolder implements Exercise {
     private final ProgrammingExerciseDTO dto;
+    private final LazyNetworkValue<String> testRepositoryUrl;
 
     private final Course course;
 
@@ -29,6 +33,38 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
 
         this.dto = dto;
         this.course = course;
+        this.testRepositoryUrl = new LazyNetworkValue<>(() -> {
+            var repositoryUrl = this.dto.testRepositoryUri();
+            if (repositoryUrl == null) {
+                repositoryUrl = ProgrammingExerciseDTO.fetchWithTemplateAndSolutionParticipation(
+                                this.getConnection().getClient(), this.getId())
+                        .testRepositoryUri();
+            }
+            if (repositoryUrl == null) {
+                throw new ArtemisNetworkException(
+                        "Artemis did not return a test repository URL for programming exercise " + this.getId());
+            }
+            return repositoryUrl;
+        });
+    }
+
+    static ProgrammingExercise fromExamExerciseDTO(ExamExerciseDTO dto, Exam exam) {
+        return new ProgrammingExercise(
+                new ProgrammingExerciseDTO(
+                        dto.id(),
+                        Objects.requireNonNull(
+                                dto.title(), "Artemis did not return a title for programming exercise " + dto.id()),
+                        dto.shortName(),
+                        null,
+                        exam.hasSecondCorrectionRound(),
+                        dto.type(),
+                        dto.assessmentType() == null
+                                ? null
+                                : dto.assessmentType().name(),
+                        Objects.requireNonNullElse(dto.maxPoints(), 0.0),
+                        null,
+                        null),
+                exam.getCourse());
     }
 
     @Override
@@ -36,8 +72,15 @@ public class ProgrammingExercise extends ArtemisConnectionHolder implements Exer
         return this.dto.id();
     }
 
-    public @Nullable String getTestRepositoryUrl() {
-        return this.dto.testRepositoryUri();
+    /**
+     * Returns the test repository URL. For a reduced exam exercise, the first call fetches and caches the complete
+     * programming exercise.
+     *
+     * @return the test repository URL
+     * @throws ArtemisNetworkException if loading the complete programming exercise fails
+     */
+    public String getTestRepositoryUrl() throws ArtemisNetworkException {
+        return this.testRepositoryUrl.get();
     }
 
     public double getMaxPoints() {

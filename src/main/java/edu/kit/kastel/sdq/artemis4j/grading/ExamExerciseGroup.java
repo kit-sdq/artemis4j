@@ -3,8 +3,10 @@ package edu.kit.kastel.sdq.artemis4j.grading;
 
 import java.util.List;
 
+import edu.kit.kastel.sdq.artemis4j.client.ExamExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ExerciseGroupDTO;
-import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ExerciseType;
+import org.jspecify.annotations.Nullable;
 
 public class ExamExerciseGroup extends ArtemisConnectionHolder {
     private final ExerciseGroupDTO dto;
@@ -16,11 +18,10 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
         super(exam);
         this.dto = dto;
         this.exam = exam;
-        var exerciseDTOs = dto.exercises() == null ? List.of() : dto.exercises();
+        var exerciseDTOs = dto.exercises() == null ? List.<ExamExerciseDTO>of() : dto.exercises();
         this.exercises = exerciseDTOs.stream()
-                .filter(ProgrammingExerciseDTO.class::isInstance)
-                .map(ProgrammingExerciseDTO.class::cast)
-                .map(exerciseDto -> new ProgrammingExercise(exerciseDto, exam.getCourse()))
+                .filter(exercise -> exercise.type() == ExerciseType.PROGRAMMING)
+                .map(exerciseDto -> ProgrammingExercise.fromExamExerciseDTO(exerciseDto, exam))
                 .toList();
     }
 
@@ -32,7 +33,7 @@ public class ExamExerciseGroup extends ArtemisConnectionHolder {
         return this.dto.id();
     }
 
-    public String getTitle() {
+    public @Nullable String getTitle() {
         return this.dto.title();
     }
 
