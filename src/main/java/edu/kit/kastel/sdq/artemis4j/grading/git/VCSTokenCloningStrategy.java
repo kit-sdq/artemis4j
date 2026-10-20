@@ -1,6 +1,7 @@
-/* Licensed under EPL-2.0 2024-2025. */
+/* Licensed under EPL-2.0 2024-2026. */
 package edu.kit.kastel.sdq.artemis4j.grading.git;
 
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
@@ -32,7 +33,7 @@ public class VCSTokenCloningStrategy implements CloningStrategy {
         } else if (assessor.getGitToken().isPresent()) {
             if (assessor.getGitTokenExpiryDate()
                     .orElseThrow()
-                    .isBefore(ZonedDateTime.now().plusDays(2))) {
+                    .isBefore(ZonedDateTime.now(ZoneId.systemDefault()).plusDays(2))) {
                 token = generateNewToken(connection);
             } else {
                 token = assessor.getGitToken().orElseThrow();
@@ -60,7 +61,7 @@ public class VCSTokenCloningStrategy implements CloningStrategy {
         connection.getAssessor();
         // The max expiration date is (today + 1 year), see
         // https://github.com/ls1intum/Artemis/blob/921b1884fb1a3028512e61023f254f1365fec14b/src/main/java/de/tum/in/www1/artemis/web/rest/AccountResource.java#L175
-        var expiryDate = ZonedDateTime.now().plusMonths(6);
+        var expiryDate = ZonedDateTime.now(ZoneId.systemDefault()).plusMonths(6);
         UserDTO.createVCSToken(expiryDate, connection.getClient());
         var assessor = connection.refreshAssessor();
         return assessor.getGitToken().orElseThrow(() -> new IllegalStateException("No VCS token created"));

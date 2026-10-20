@@ -446,7 +446,7 @@ public class Assessment extends ArtemisConnectionHolder {
             if (Integer.parseInt(parts[1]) != this.correctionRound.toArtemis()) {
                 throw new IllegalArgumentException("Correction round does not match");
             }
-        } catch (NumberFormatException e) {
+        } catch (NumberFormatException _) {
             throw new IllegalArgumentException("Invalid header in exported annotations");
         }
 
