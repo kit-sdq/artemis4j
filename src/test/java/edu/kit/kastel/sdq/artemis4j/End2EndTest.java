@@ -18,15 +18,22 @@ import java.util.Set;
 
 import edu.kit.kastel.sdq.artemis4j.client.AnnotationSource;
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
+import edu.kit.kastel.sdq.artemis4j.client.ArtemisRequest;
 import edu.kit.kastel.sdq.artemis4j.client.CourseRole;
+import edu.kit.kastel.sdq.artemis4j.client.ExamDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ExerciseDTO;
+import edu.kit.kastel.sdq.artemis4j.client.ExerciseType;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackDTO;
 import edu.kit.kastel.sdq.artemis4j.client.FeedbackType;
+import edu.kit.kastel.sdq.artemis4j.client.ProgrammingExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.client.ResultDTO;
+import edu.kit.kastel.sdq.artemis4j.client.TextExerciseDTO;
 import edu.kit.kastel.sdq.artemis4j.grading.Annotation;
 import edu.kit.kastel.sdq.artemis4j.grading.ArtemisConnection;
 import edu.kit.kastel.sdq.artemis4j.grading.Assessment;
 import edu.kit.kastel.sdq.artemis4j.grading.CorrectionRound;
 import edu.kit.kastel.sdq.artemis4j.grading.Course;
+import edu.kit.kastel.sdq.artemis4j.grading.Exam;
 import edu.kit.kastel.sdq.artemis4j.grading.Participation;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingExercise;
 import edu.kit.kastel.sdq.artemis4j.grading.ProgrammingSubmissionWithResults;
@@ -35,6 +42,9 @@ import edu.kit.kastel.sdq.artemis4j.grading.location.Location;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.GradingConfig;
 import edu.kit.kastel.sdq.artemis4j.grading.penalty.MistakeType;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.io.TempDir;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.ValueSource;
 
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class End2EndTest {
@@ -52,6 +62,11 @@ class End2EndTest {
     private static final String ARTEMIS_URL = System.getenv("ARTEMIS_URL");
     private static final String COURSE_ID = System.getenv("COURSE_ID");
     private static final String PROGRAMMING_EXERCISE_ID = System.getenv("PROGRAMMING_EXERCISE_ID");
+    private static final String TEXT_EXERCISE_ID = System.getenv("TEXT_EXERCISE_ID");
+    // The exam fixture must have two correction rounds, as required by ExamTest.
+    private static final String EXAM_ID = System.getenv("EXAM_ID");
+    private static final String EXAM_EXERCISE_GROUP_ID = System.getenv("EXAM_EXERCISE_GROUP_ID");
+    private static final String EXAM_PROGRAMMING_EXERCISE_ID = System.getenv("EXAM_PROGRAMMING_EXERCISE_ID");
 
     private ArtemisInstance artemisInstance;
     private ArtemisConnection connection;
@@ -67,6 +82,10 @@ class End2EndTest {
         Assertions.assertNotNull(INSTRUCTOR_PASSWORD);
         Assertions.assertNotNull(ARTEMIS_URL);
         Assertions.assertNotNull(COURSE_ID);
+        Assertions.assertNotNull(TEXT_EXERCISE_ID);
+        Assertions.assertNotNull(EXAM_ID);
+        Assertions.assertNotNull(EXAM_EXERCISE_GROUP_ID);
+        Assertions.assertNotNull(EXAM_PROGRAMMING_EXERCISE_ID);
     }
 
     @BeforeEach
@@ -101,6 +120,97 @@ class End2EndTest {
         this.assessment.clearAnnotations();
 
         Assertions.assertTrue(this.assessment.getAnnotations().isEmpty());
+    }
+
+    @Test
+    void testFetchingCourseExerciseTypes() throws ArtemisClientException {
+        var exercises = ExerciseDTO.fetchAll(this.connection.getClient(), this.course.getId());
+        var programmingExercise = assertInstanceOf(
+                ProgrammingExerciseDTO.class,
+                exercises.stream()
+                        .filter(dto -> dto instanceof ProgrammingExerciseDTO programming
+                                && programming.id() == Long.parseLong(PROGRAMMING_EXERCISE_ID))
+                        .findFirst()
+                        .orElseThrow());
+        var textExercise = assertInstanceOf(
+                TextExerciseDTO.class,
+                exercises.stream()
+                        .filter(dto -> dto instanceof TextExerciseDTO text
+                                && text.id() == Long.parseLong(TEXT_EXERCISE_ID))
+                        .findFirst()
+                        .orElseThrow());
+
+        assertEquals(ExerciseType.PROGRAMMING, programmingExercise.exerciseType());
+        assertEquals(ExerciseType.TEXT, textExercise.exerciseType());
+    }
+
+    @ParameterizedTest
+    @ValueSource(booleans = {false, true})
+    void testFetchingExamExerciseGroups(boolean withDetails) throws ArtemisClientException {
+        Exam exam;
+        if (withDetails) {
+            var examDTO = ArtemisRequest.get()
+                    .path(List.of("exam", "courses", this.course.getId(), "exams", Long.parseLong(EXAM_ID)))
+                    .param("withExerciseGroups", true)
+                    .executeAndDecode(this.connection.getClient(), ExamDTO.class);
+            exam = new Exam(examDTO, this.course);
+        } else {
+            exam = this.course.getExamById(Long.parseLong(EXAM_ID));
+        }
+
+        var group = exam.getExerciseGroupById(Long.parseLong(EXAM_EXERCISE_GROUP_ID));
+        var examExercise = group.getProgrammingExerciseById(Long.parseLong(EXAM_PROGRAMMING_EXERCISE_ID));
+        var fullExercise = ProgrammingExerciseDTO.fetchWithTemplateAndSolutionParticipation(
+                this.connection.getClient(), examExercise.getId());
+
+        assertEquals(Long.parseLong(EXAM_ID), exam.getId());
+        assertSame(exam, group.getExam());
+        assertSame(this.course, examExercise.getCourse());
+        assertEquals(fullExercise.id(), examExercise.getId());
+        assertEquals(fullExercise.title(), examExercise.getTitle());
+        assertEquals(fullExercise.shortName(), examExercise.getShortName());
+        assertEquals(fullExercise.maxPoints(), examExercise.getMaxPoints());
+        assertTrue(exam.hasSecondCorrectionRound());
+        assertTrue(
+                examExercise.hasSecondCorrectionRound(),
+                "Reduced exam exercises must inherit the exam's correction rounds");
+    }
+
+    @Test
+    void testFetchingExamTestRepositoryUrl() throws ArtemisClientException {
+        var examExercise = this.fetchExamProgrammingExercise();
+        var fullExercise = ProgrammingExerciseDTO.fetchWithTemplateAndSolutionParticipation(
+                this.connection.getClient(), examExercise.getId());
+        var expectedRepositoryUrl = fullExercise.testRepositoryUri();
+
+        assertNotNull(expectedRepositoryUrl);
+        assertFalse(expectedRepositoryUrl.isBlank());
+        assertEquals(expectedRepositoryUrl, examExercise.getTestRepositoryUrl());
+    }
+
+    @Test
+    void testCloningExamSubmissionViaVCSToken(@TempDir Path temporaryDirectory) throws ArtemisClientException {
+        var examExercise = this.fetchExamProgrammingExercise();
+        var submission = examExercise.fetchAllSubmissions().stream()
+                .filter(candidate -> candidate.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
+                .findFirst()
+                .orElseThrow()
+                .getSubmission();
+        var targetPath = temporaryDirectory.resolve("exam");
+
+        // Cloning must resolve the test repository even though the exam response omits its URI.
+        try (var clonedSubmission = submission.cloneViaVCSTokenInto(targetPath, null)) {
+            assertTrue(Files.isDirectory(clonedSubmission.getTestsPath().resolve(".git")));
+            assertTrue(Files.isDirectory(clonedSubmission.getSubmissionPath().resolve(".git")));
+        }
+        assertFalse(Files.exists(targetPath));
+    }
+
+    private ProgrammingExercise fetchExamProgrammingExercise() throws ArtemisClientException {
+        return this.course
+                .getExamById(Long.parseLong(EXAM_ID))
+                .getExerciseGroupById(Long.parseLong(EXAM_EXERCISE_GROUP_ID))
+                .getProgrammingExerciseById(Long.parseLong(EXAM_PROGRAMMING_EXERCISE_ID));
     }
 
     @Test
