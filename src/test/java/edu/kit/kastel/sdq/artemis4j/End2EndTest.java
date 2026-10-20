@@ -135,8 +135,8 @@ class End2EndTest {
         var textExercise = assertInstanceOf(
                 TextExerciseDTO.class,
                 exercises.stream()
-                        .filter(dto -> dto instanceof TextExerciseDTO text
-                                && text.id() == Long.parseLong(TEXT_EXERCISE_ID))
+                        .filter(dto ->
+                                dto instanceof TextExerciseDTO text && text.id() == Long.parseLong(TEXT_EXERCISE_ID))
                         .findFirst()
                         .orElseThrow());
 
@@ -192,7 +192,8 @@ class End2EndTest {
     void testCloningExamSubmissionViaVCSToken(@TempDir Path temporaryDirectory) throws ArtemisClientException {
         var examExercise = this.fetchExamProgrammingExercise();
         var submission = examExercise.fetchAllSubmissions().stream()
-                .filter(candidate -> candidate.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
+                .filter(candidate ->
+                        candidate.getSubmission().getParticipantIdentifier().equals(STUDENT_USER))
                 .findFirst()
                 .orElseThrow()
                 .getSubmission();
