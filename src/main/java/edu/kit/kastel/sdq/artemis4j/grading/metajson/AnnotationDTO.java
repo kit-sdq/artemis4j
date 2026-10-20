@@ -24,12 +24,12 @@ public record AnnotationDTO(
         @JsonProperty @Nullable List<String> classifiers,
         @JsonProperty @Nullable Integer annotationLimit,
 
-        @Deprecated(forRemoval = true) @JsonProperty @Nullable
+        @Deprecated(forRemoval = true) @SuppressWarnings("java:S1133") @JsonProperty @Nullable
         Long createdByUserId,
 
         @JsonProperty @Nullable String createdByUserLogin,
 
-        @Deprecated(forRemoval = true) @JsonProperty @Nullable
+        @Deprecated(forRemoval = true) @SuppressWarnings("java:S1133") @JsonProperty @Nullable
         Long suppressedByUserId,
 
         @JsonProperty @Nullable String suppressedByUserLogin) {}

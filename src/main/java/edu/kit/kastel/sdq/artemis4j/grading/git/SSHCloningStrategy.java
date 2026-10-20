@@ -3,6 +3,7 @@ package edu.kit.kastel.sdq.artemis4j.grading.git;
 
 import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.time.ZoneId;
 import java.time.ZonedDateTime;
 import java.util.Optional;
 
@@ -40,7 +41,7 @@ public class SSHCloningStrategy implements CloningStrategy {
         }
 
         boolean hasValidKey = keys.stream().anyMatch(key -> key.getExpirationDate()
-                .map(date -> ZonedDateTime.now().isBefore(date))
+                .map(date -> ZonedDateTime.now(ZoneId.systemDefault()).isBefore(date))
                 .orElse(true));
         if (!hasValidKey) {
             throw new UnsupportedCloningStrategyException("Cannot clone via SSH - all SSH keys are expired");

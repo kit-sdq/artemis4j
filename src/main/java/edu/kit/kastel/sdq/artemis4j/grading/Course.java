@@ -62,7 +62,7 @@ public class Course extends ArtemisConnectionHolder {
                 case ProgrammingExerciseDTO programmingExerciseDTO ->
                     result.add(new ProgrammingExercise(programmingExerciseDTO, this));
                 case TextExerciseDTO textExerciseDTO -> result.add(new TextExercise(textExerciseDTO, this));
-                case UnknownExerciseDTO ignored -> {
+                case UnknownExerciseDTO _ -> {
                     // Unsupported exercise types are not exposed by the grading API.
                 }
             }

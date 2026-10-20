@@ -46,7 +46,7 @@ public final class ArtemisConnection {
     private List<CourseDTO> fetchCourses() throws ArtemisNetworkException {
         try {
             return CourseDTO.fetchAll(this.client);
-        } catch (ArtemisNetworkException exception) {
+        } catch (ArtemisNetworkException _) {
             // This call might fail if the user is a student, in that case build the courses from the dashboard
             // endpoint:
             return CourseDTO.fetchForDashboard(this.client);

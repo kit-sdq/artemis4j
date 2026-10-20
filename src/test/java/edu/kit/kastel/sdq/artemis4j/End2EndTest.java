@@ -226,7 +226,7 @@ class End2EndTest {
     void testCloningViaVCSToken() throws ArtemisClientException {
         var targetPath = Path.of("cloned_code");
 
-        try (var clonedSubmission = this.assessment.getSubmission().cloneViaVCSTokenInto(targetPath, null)) {
+        try (var _ = this.assessment.getSubmission().cloneViaVCSTokenInto(targetPath, null)) {
             Assertions.assertTrue(Files.exists(targetPath));
         }
         assertFalse(Files.exists(targetPath));
