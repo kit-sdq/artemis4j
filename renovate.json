@@ -8,11 +8,6 @@
       "description": "Automerge non-major updates",
       "matchUpdateTypes": ["minor", "patch"],
       "automerge": true
-    },
-    {
-      "description": "central-publishing-maven-plugin >= 0.11.0 breaks snapshot deployment",
-      "matchPackageNames": ["org.sonatype.central:central-publishing-maven-plugin"],
-      "allowedVersions": "<0.11.0"
     }
   ]
 }
