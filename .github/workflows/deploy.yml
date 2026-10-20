@@ -30,6 +30,7 @@ env:
 
 concurrency:
   group: artemis-test-system
+  queue: max
 
 jobs:
   pre_job:
