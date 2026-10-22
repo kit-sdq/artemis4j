@@ -36,6 +36,10 @@ public class Exam extends ArtemisConnectionHolder {
         return this.examDto.id();
     }
 
+    public boolean hasSecondCorrectionRound() {
+        return this.examDto.hasSecondCorrectionRound();
+    }
+
     public @Nullable String getTitle() {
         return this.examDto.title();
     }

@@ -2,6 +2,7 @@
 package edu.kit.kastel.sdq.artemis4j;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import java.io.IOException;
@@ -45,6 +46,7 @@ class ExamTest {
         ExamExerciseGroup exerciseGroup = exam.getExerciseGroupById(Long.parseLong(EXERCISE_GROUP_ID));
         ProgrammingExercise exercise =
                 exerciseGroup.getProgrammingExerciseById(Long.parseLong(PROGRAMMING_EXERCISE_ID));
+        assertFalse(exercise.getTestRepositoryUrl().isBlank());
 
         GradingConfig config =
                 GradingConfig.readFromString(Files.readString(Path.of("src/test/resources/config.json")), exercise);

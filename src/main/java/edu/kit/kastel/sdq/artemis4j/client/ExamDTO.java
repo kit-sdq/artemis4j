@@ -16,6 +16,10 @@ public record ExamDTO(
         @JsonProperty @Nullable ZonedDateTime endDate,
         @JsonProperty @Nullable List<ExerciseGroupDTO> exerciseGroups) {
 
+    public boolean hasSecondCorrectionRound() {
+        return this.numberOfCorrectionRoundsInExam > 1;
+    }
+
     public static List<ExamDTO> fetchAll(ArtemisClient client, long courseId) throws ArtemisNetworkException {
         return List.of(ArtemisRequest.get()
                 .path(List.of("exam", "courses", courseId, "exams"))

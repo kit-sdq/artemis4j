@@ -58,8 +58,11 @@ class UtilitiesTest {
                 StudentExamDTO.toggleToSubmitted(client, courseId, examId, studentExam.id());
                 toggleSucceeded++;
             } catch (ArtemisNetworkException e) {
-                log.error("Toggling failed for student {}", studentExam.user().login(), e);
-                toggleFailed.add(studentExam.user().login());
+                String student = studentExam.user() == null
+                        ? "student exam " + studentExam.id()
+                        : studentExam.user().login();
+                log.error("Toggling failed for student {}", student, e);
+                toggleFailed.add(student);
             }
         }
 
@@ -81,19 +84,18 @@ class UtilitiesTest {
         var exercises = exerciseGroups.stream()
                 .flatMap(group ->
                         group.exercises() == null ? java.util.stream.Stream.empty() : group.exercises().stream())
-                .filter(ProgrammingExerciseDTO.class::isInstance)
-                .map(ProgrammingExerciseDTO.class::cast)
+                .filter(exercise -> exercise.type() == ExerciseType.PROGRAMMING)
                 .toList();
         for (var exercise : exercises) {
             System.out.println("Exercise: " + exercise.title());
             markMandatoryFailedAsFailedForCorrectionRound(exercise, 0);
-            if (exercise.secondCorrectionEnabled() != null && exercise.secondCorrectionEnabled()) {
+            if (exam.hasSecondCorrectionRound()) {
                 markMandatoryFailedAsFailedForCorrectionRound(exercise, 1);
             }
         }
     }
 
-    private void markMandatoryFailedAsFailedForCorrectionRound(ProgrammingExerciseDTO exercise, int correctionRound)
+    private void markMandatoryFailedAsFailedForCorrectionRound(ExamExerciseDTO exercise, int correctionRound)
             throws ArtemisNetworkException {
         var submissions =
                 new ArrayList<>(ProgrammingSubmissionDTO.fetchAll(client, exercise.id(), correctionRound, false));

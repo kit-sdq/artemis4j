@@ -6,12 +6,13 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import edu.kit.kastel.sdq.artemis4j.ArtemisNetworkException;
+import org.jspecify.annotations.Nullable;
 
 public record StudentExamDTO(
         @JsonProperty long id,
         @JsonProperty boolean submitted,
         @JsonProperty boolean started,
-        @JsonProperty UserDTO user) {
+        @JsonProperty @Nullable UserDTO user) {
     public static List<StudentExamDTO> fetchAll(ArtemisClient client, long courseId, long examId)
             throws ArtemisNetworkException {
         return Arrays.asList(ArtemisRequest.get()
