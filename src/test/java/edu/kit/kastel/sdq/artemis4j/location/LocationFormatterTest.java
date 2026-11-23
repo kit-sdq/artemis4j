@@ -1,10 +1,9 @@
-/* Licensed under EPL-2.0 2025. */
+/* Licensed under EPL-2.0 2025-2026. */
 package edu.kit.kastel.sdq.artemis4j.location;
 
 import static org.junit.jupiter.api.Assertions.*;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -73,7 +72,7 @@ class LocationFormatterTest {
                         .addLocation(new Location("src/edu/kit/kastel/extras/BubbleSort.java", 0, 0)),
                 new LocationFormatter().addLocation(new Location("other/Example.java", 0, 0))));
 
-        Collections.sort(list);
+        list.sort(null);
 
         assertEquals(
                 List.of(
