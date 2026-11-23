@@ -9,7 +9,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.List;
 
 import edu.kit.kastel.sdq.artemis4j.client.ArtemisInstance;
@@ -391,7 +390,7 @@ class SubgroupTest {
             feedbackTexts.add(feedbackDTO.detailText());
         }
 
-        Collections.sort(feedbackTexts);
+        feedbackTexts.sort(null);
 
         List<String> expectedFeedbackTexts = new ArrayList<>(
                 List.of(
@@ -411,7 +410,7 @@ class SubgroupTest {
                         "[Funktionalität:Unused Element] Das Element wird nicht verwendet",
                         "[Funktionalität:Unused Element] Das Element wird nicht verwendet",
                         "[Funktionalität:Unused Element] Das Element wird nicht verwendet\nExplanation: Has used last annotation for message. Weitere Probleme in L12."));
-        Collections.sort(expectedFeedbackTexts);
+        expectedFeedbackTexts.sort(null);
 
         assertEquals(expectedFeedbackTexts, feedbackTexts);
     }
